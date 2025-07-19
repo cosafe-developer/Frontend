@@ -3,7 +3,7 @@ import axios from 'axios';
 const ADMIN_LOGIN_URL = import.meta.env.VITE_ADMIN_LOGIN_URL;
 const ADMIN_SESSION_URL = import.meta.env.VITE_ADMIN_SESSION_URL;
 
- const ApiLoginAdmin = async (email, password) => {
+const ApiLoginAdmin = async (email, password) => {
   try {
     const response = await axios.post(
       ADMIN_LOGIN_URL,
@@ -13,9 +13,9 @@ const ADMIN_SESSION_URL = import.meta.env.VITE_ADMIN_SESSION_URL;
     return response.data;
   } catch (error) {
     if (error.response && error.response.data) {
-      throw error.response.data; 
+      throw error.response.data;
     }
-    throw { mensaje: error.message || 'Error en login' }; 
+    throw { mensaje: error.message || 'Error en login' };
   }
 };
 

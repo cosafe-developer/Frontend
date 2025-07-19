@@ -1,19 +1,29 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { Toaster } from 'sonner'; 
-import AdminRoutes from './routes/AdminRoutes';
-import AgenteRoutes from './routes/AgenteRoutes';
-import EmpresaRoutes from './routes/EmpresaRoutes';
+// Import Dependencies
+import { RouterProvider } from "react-router";
+
+// Local Imports
+import { AuthProvider } from "app/contexts/auth/Provider";
+import { BreakpointProvider } from "app/contexts/breakpoint/Provider";
+import { LocaleProvider } from "app/contexts/locale/Provider";
+import { SidebarProvider } from "app/contexts/sidebar/Provider";
+import { ThemeProvider } from "app/contexts/theme/Provider";
+import router from "app/router/router";
+
+// ----------------------------------------------------------------------
 
 function App() {
   return (
-    <BrowserRouter>
-      <Toaster position="top-right" richColors />
-      <Routes>
-        <Route path="/admin/*" element={<AdminRoutes />} />
-        <Route path="/agente/*" element={<AgenteRoutes />} />
-        <Route path="/empresa/*" element={<EmpresaRoutes />} />
-      </Routes>
-    </BrowserRouter>
+    <AuthProvider>
+      <ThemeProvider>
+        <LocaleProvider>
+          <BreakpointProvider>
+            <SidebarProvider>
+              <RouterProvider router={router} />
+            </SidebarProvider>
+          </BreakpointProvider>
+        </LocaleProvider>
+      </ThemeProvider>
+    </AuthProvider>
   );
 }
 
