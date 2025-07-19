@@ -1,18 +1,15 @@
 // Dependencias
-import { EnvelopeIcon, LockClosedIcon } from "@heroicons/react/24/outline";
-import { yupResolver } from "@hookform/resolvers/yup";
 import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { EnvelopeIcon, LockClosedIcon } from "@heroicons/react/24/outline";
 
 // Locales
 import logoSrc from "assets/logo.png";
-import { Button, Card, Checkbox, Input, InputErrorMsg } from "components/ui";
-import { useAuthContext } from "app/contexts/auth/context";
-import { schema } from "./schema";
 import { Page } from "components/shared/Page";
+import { schema } from "./schema";
 import { useState } from "react";
-
-// username
-// password
+import { useAuthContext } from "app/contexts/auth/context";
+import { Button, Card, Checkbox, Input, InputErrorMsg } from "components/ui";
 
 export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
@@ -90,9 +87,9 @@ export default function Login() {
 
               <div className="mt-2">
                 <InputErrorMsg
-                  when={errorMessage && errorMessage?.message !== ""}
+                  when={errorMessage && errorMessage?.mensaje !== ""}
                 >
-                  {errorMessage?.message}
+                  {errorMessage?.mensaje}
                 </InputErrorMsg>
               </div>
 

@@ -12,19 +12,12 @@ import {
 } from "@tanstack/react-table";
 import clsx from "clsx";
 import { Fragment, useRef, useState } from "react";
-import {
-  ArrowPathIcon,
-  CheckBadgeIcon,
-  ClockIcon,
-  CurrencyDollarIcon,
-  PlusIcon,
-} from "@heroicons/react/20/solid";
 
 // Local Imports
 import { TableSortIcon } from "components/shared/table/TableSortIcon";
 import { ColumnFilter } from "components/shared/table/ColumnFilter";
 import { PaginationSection } from "components/shared/table/PaginationSection";
-import { Button, Card, Table, THead, TBody, Th, Tr, Td } from "components/ui";
+import { Card, Table, THead, TBody, Th, Tr, Td } from "components/ui";
 import {
   useBoxSize,
   useLockScrollbar,
@@ -45,7 +38,7 @@ import { getUserAgentBrowser } from "utils/dom/getUserAgentBrowser";
 
 const isSafari = getUserAgentBrowser() === "Safari";
 
-export default function OrdersDatatableV2() {
+export default function ListadoTabla() {
   const { cardSkin } = useThemeContext();
 
   const [autoResetPageIndex, skipAutoResetPageIndex] = useSkipper();
@@ -133,62 +126,7 @@ export default function OrdersDatatableV2() {
   useLockScrollbar(tableSettings.enableFullScreen);
 
   return (
-    <div className="transition-content grid grid-cols-1 grid-rows-[auto_auto_1fr] py-4">
-      {/* header */}
-      <div className="flex items-center justify-between space-x-4">
-        <div className="min-w-0">
-          <h2 className="truncate text-xl font-medium tracking-wide text-gray-800 dark:text-dark-50">
-            Listado de Requerimientos
-          </h2>
-        </div>
-        <Button
-          className="h-8 space-x-1.5 rounded-md px-3 text-xs "
-          color="primary"
-        >
-          <PlusIcon className="size-5" />
-          <span>Nuevo listado</span>
-        </Button>
-      </div>
-
-      {/* cards */}
-      <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4 lg:grid-cols-4 2xl:gap-6">
-        <div className="rounded-lg bg-gray-150 p-3 dark:bg-dark-700 2xl:p-4">
-          <div className="flex justify-between space-x-1">
-            <p className="text-xl font-semibold text-gray-800 dark:text-dark-100">
-              7
-            </p>
-            <CurrencyDollarIcon className="size-5 text-secondary" />
-          </div>
-          <p className="mt-1 text-xs-plus">Listados Activos</p>
-        </div>
-        <div className="rounded-lg bg-gray-150 p-3 dark:bg-dark-700 2xl:p-4">
-          <div className="flex justify-between space-x-1">
-            <p className="text-xl font-semibold text-gray-800 dark:text-dark-100">
-              14
-            </p>
-            <CheckBadgeIcon className="size-5 text-success" />
-          </div>
-          <p className="mt-1 text-xs-plus">Agentes Asignados</p>
-        </div>
-        <div className="rounded-lg bg-gray-150 p-3 dark:bg-dark-700 2xl:p-4">
-          <div className="flex justify-between space-x-1">
-            <p className="text-xl font-semibold text-gray-800 dark:text-dark-100">
-              7
-            </p>
-            <ArrowPathIcon className="size-5 text-primary-500" />
-          </div>
-          <p className="mt-1 text-xs-plus">Empresas con Listados Activos</p>
-        </div>
-        <div className="rounded-lg bg-gray-150 p-3 dark:bg-dark-700 2xl:p-4">
-          <div className="flex justify-between space-x-1">
-            <p className="text-xl font-semibold text-gray-800 dark:text-dark-100">
-              2
-            </p>
-            <ClockIcon className="size-5 text-warning" />
-          </div>
-          <p className="mt-1 text-xs-plus">Empresas Pendientes de Llenado</p>
-        </div>
-      </div>
+    <div className="transition-content grid grid-cols-1 grid-rows-[auto_auto_1fr] pb-4">
       {/* tabla */}
       <div
         className={clsx(

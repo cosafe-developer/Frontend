@@ -9,8 +9,6 @@ import { SidebarProvider } from "app/contexts/sidebar/Provider";
 import { ThemeProvider } from "app/contexts/theme/Provider";
 import router from "app/router/router";
 
-// ----------------------------------------------------------------------
-
 function App() {
   return (
     <AuthProvider>

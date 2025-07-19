@@ -1,7 +1,7 @@
-import { dashboards } from "./dashboards";
+import { admin } from "./admin";
 
 export const navigation = [
-    dashboards,
+  admin,
 ]
 
 export { baseNavigation } from './baseNavigation'

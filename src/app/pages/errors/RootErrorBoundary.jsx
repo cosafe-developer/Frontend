@@ -22,7 +22,7 @@ function RootErrorBoundary() {
     return <Component />;
   }
 
-  return <div>Something went wrong</div>;
+  return <div>Ha ocurrido un error</div>;
 }
 
 export default RootErrorBoundary;

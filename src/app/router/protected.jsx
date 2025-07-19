@@ -18,19 +18,31 @@ const protectedRoutes = {
       children: [
         {
           index: true,
-          element: <Navigate to="/secciones" />,
+          element: <Navigate to="/admin" />,
         },
         {
-          path: "secciones",
+          path: "admin",
           children: [
             {
               index: true,
-              element: <Navigate to="/secciones/listado" />,
+              element: <Navigate to="/admin/listado" />,
             },
             {
               path: "listado",
               lazy: async () => ({
-                Component: (await import("app/pages/secciones/listado")).default,
+                Component: (await import("app/pages/admin/listado")).default,
+              }),
+            },
+            {
+              path: "agentes",
+              lazy: async () => ({
+                Component: (await import("app/pages/admin/agentes")).default,
+              }),
+            },
+            {
+              path: "empresas",
+              lazy: async () => ({
+                Component: (await import("app/pages/admin/empresas")).default,
               }),
             },
           ],

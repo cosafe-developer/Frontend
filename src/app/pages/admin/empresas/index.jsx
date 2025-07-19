@@ -1,11 +1,10 @@
 import { Page } from "components/shared/Page";
-import OrdersDatatableV2 from "./orders-datatable-2";
 
-export default function Home() {
+export default function Empresas() {
   return (
-    <Page title="Listado de Requerimientos">
+    <Page title="Empresas">
       <div className="transition-content w-full px-(--margin-x) pt-5 lg:pt-6">
-        <OrdersDatatableV2 />
+        <p>Empresas</p>
       </div>
     </Page>
   );

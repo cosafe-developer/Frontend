@@ -3,9 +3,9 @@ import DashboardsIcon from 'assets/dualicons/dashboards.svg?react'
 
 export const baseNavigation = [
   {
-    id: 'secciones',
+    id: 'admin',
     type: NAV_TYPE_ITEM,
-    path: '/secciones',
+    path: '/admin',
     title: 'Secciones',
     Icon: DashboardsIcon,
   },
