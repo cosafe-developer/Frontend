@@ -1,9 +1,12 @@
 import PropTypes from "prop-types";
-import { useEffect, useReducer } from "react";
+import emailLogin from "api/auth/emailLogin";
+import checkSessionActive from "api/auth/checkSessionActive";
 
+import { useEffect, useReducer } from "react";
 import { setSession } from "utils/jwt";
 import { AuthContext } from "./context";
-import { ApiLoginAdmin, checkAdminSession } from "api/admin/login";
+import logoutSession from "api/auth/logoutSession";
+
 
 const initialState = {
   isAuthenticated: false,
@@ -75,8 +78,9 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     const init = async () => {
       try {
-        const session = await checkAdminSession();
-        if (session) {
+        const session = await checkSessionActive();
+
+        if (session?.ok) {
           dispatch({
             type: "INITIALIZE",
             payload: {
@@ -113,19 +117,26 @@ export function AuthProvider({ children }) {
     });
 
     try {
-      const { admin, mensaje } = await ApiLoginAdmin(email, password);
-      if (mensaje === "Login exitoso") {
-        dispatch({
-          type: "LOGIN_SUCCESS",
-          payload: {
-            admin,
-          },
-        });
-      } else {
+      const response = await emailLogin({
+        requestBody: {
+          email: email,
+          password: password
+        }
+      });
+
+      if (!response?.ok) {
         dispatch({
           type: "LOGIN_ERROR",
           payload: {
-            mensaje,
+            mensaje: response?.message,
+          },
+        });
+      } else {
+        const usuario = response?.data?.usuario || null
+        dispatch({
+          type: "LOGIN_SUCCESS",
+          payload: {
+            admin: usuario,
           },
         });
       }
@@ -140,6 +151,8 @@ export function AuthProvider({ children }) {
   };
 
   const logout = async () => {
+    await logoutSession()
+
     setSession(null);
     dispatch({ type: "LOGOUT" });
   };

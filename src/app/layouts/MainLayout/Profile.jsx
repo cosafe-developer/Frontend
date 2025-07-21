@@ -15,6 +15,8 @@ import { TbUser } from "react-icons/tb";
 
 // Local Imports
 import { Avatar, AvatarDot, Button } from "components/ui";
+import { useAuthContext } from "app/contexts/auth/context";
+import { useState } from "react";
 
 // ----------------------------------------------------------------------
 
@@ -38,6 +40,20 @@ const links = [
 ];
 
 export function Profile() {
+  const { logout } = useAuthContext();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    try {
+      await logout();
+    } catch (err) {
+      console.error("Error cerrando sesión:", err);
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
+
   return (
     <Popover className="relative">
       <PopoverButton
@@ -112,9 +128,13 @@ export function Profile() {
                   </Link>
                 ))}
                 <div className="px-4 pt-4">
-                  <Button className="w-full gap-2">
+                  <Button
+                    className="w-full gap-2"
+                    onClick={handleLogout}
+                    disabled={isLoggingOut}
+                  >
                     <ArrowLeftStartOnRectangleIcon className="size-4.5" />
-                    <span>Cerrar sesión</span>
+                    <span>{isLoggingOut ? "Cerrando sesión..." : "Cerrar sesión"}</span>
                   </Button>
                 </div>
               </div>

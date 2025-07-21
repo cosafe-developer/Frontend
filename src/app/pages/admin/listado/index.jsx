@@ -26,8 +26,8 @@ const Listado = () => {
   const [data, setData] = useState(null);
 
   useEffect(() => {
-    const fetchData = async ({ endpoint }) => {
-      console.log(endpoint);
+    const fetchData = async () => {
+      /*  console.log(endpoint); */
       // SIMULACIÓN DE FETCH
       await new Promise((resolve) => setTimeout(resolve, 2000));
       setData(dataMock);
