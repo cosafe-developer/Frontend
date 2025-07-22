@@ -1,4 +1,4 @@
-import { fetchWithOptionalToken } from "helpers/fetch";
+import { fetchWithoutCookies } from "helpers/fetch";
 /* import handleLogin from "helpers/handleLogin.helper";
  */
 /**
@@ -8,7 +8,7 @@ import { fetchWithOptionalToken } from "helpers/fetch";
 const emailLogin = async ({ requestBody }) => {
   try {
 
-    const resp = await fetchWithOptionalToken("login", requestBody, "POST");
+    const resp = await fetchWithoutCookies("login", requestBody, "POST");
     const body = await resp.json();
 
     /* if (body?.mensaje === "Login exitoso") {

@@ -1,12 +1,9 @@
-// src/api/empresas.js
-import axios from "axios";
+import { fetchWithCookies } from "helpers/fetch";
 import { checkAdminSession } from "../admin/login";
 
-const EMPRESAS_OBTENER = import.meta.env.VITE_EMPRESAS_OBTENER;
 
-async function obtenerEmpresas() {
+async function getEmpresas() {
   try {
-    // 1. Checa sesión del admin
     const session = await checkAdminSession();
 
     if (!session || !session.id) {
@@ -14,11 +11,11 @@ async function obtenerEmpresas() {
       return [];
     }
 
-    // 2. Usa el id en la petición
-    const { data } = await axios.get(
-      `${EMPRESAS_OBTENER}?adminId=${session.id}`,
-      { withCredentials: true }
-    );
+
+    const endpoint = `empresas?adminId=${session.id}`;
+
+    const resp = await fetchWithCookies(endpoint);
+    const data = await resp.json();
 
     return data;
   } catch (error) {
@@ -27,4 +24,5 @@ async function obtenerEmpresas() {
   }
 }
 
-export default obtenerEmpresas;
+export default getEmpresas;
+

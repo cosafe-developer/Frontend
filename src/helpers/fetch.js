@@ -5,12 +5,11 @@ const baseURL = env.API_URL;
 /**
  * Fetch sin token, solo usando cookies (sesiones)
  */
-const fetchWithoutToken = (endpoint, data, method = "GET") => {
+const fetchWithoutCookies = (endpoint, data, method = "GET") => {
   const url = `${baseURL}/${endpoint}`;
 
   const options = {
     method,
-    credentials: "include",
   };
 
   if (method !== "GET") {
@@ -23,7 +22,7 @@ const fetchWithoutToken = (endpoint, data, method = "GET") => {
   return fetch(url, options);
 };
 
-const fetchWithToken = (endpoint, data = {}, method = "GET") => {
+const fetchWithCookies = (endpoint, data = {}, method = "GET") => {
   const url = `${baseURL}/${endpoint}`;
 
   const options = {
@@ -32,23 +31,22 @@ const fetchWithToken = (endpoint, data = {}, method = "GET") => {
     headers: {},
   };
 
-  if (method !== "GET") {
-    options.headers["Content-Type"] = "application/json";
-
-    const safeData = data ?? {};
-    options.body = JSON.stringify(safeData);
+  if (method !== "GET" && method !== "DELETE") {
+    if (data instanceof FormData) {
+      options.body = data;
+    } else {
+      options.headers["Content-Type"] = "application/json";
+      options.body = JSON.stringify(data ?? {});
+    }
   }
 
   return fetch(url, options);
 };
 
 
-const fetchWithOptionalToken = (endpoint, data, method = "GET") => {
-  return fetchWithToken(endpoint, data, method);
-};
+
 
 export {
-  fetchWithoutToken,
-  fetchWithToken,
-  fetchWithOptionalToken,
+  fetchWithoutCookies,
+  fetchWithCookies,
 };
