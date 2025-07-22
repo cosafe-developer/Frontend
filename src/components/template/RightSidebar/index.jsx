@@ -9,27 +9,27 @@ import {
 
 // Local Imports
 import { Button, ScrollShadow } from "components/ui";
-import { useDisclosure } from "hooks";
 import { HeaderPreviewEmpresa } from "./previewEmpresa/HeaderPreviewEmpresa";
 import VerticalSliderIcon from "assets/dualicons/vertical-slider.svg?react";
 import { ListPreviewEmpresa } from "./previewEmpresa/ListPreviewEmpresa";
+import { useRightSidebarContext } from "app/contexts/sidebar-right/rightSidebar";
 
 // ----------------------------------------------------------------------
 
 export function RightSidebar() {
-  const [isOpen, { open, close }] = useDisclosure();
+  const { isOpen, openSidebar, closeSidebar } = useRightSidebarContext();
 
   return (
     <>
       <Button
-        onClick={open}
+        onClick={openSidebar}
         variant="flat"
         isIcon
         className="relative size-9 rounded-full"
       >
         <VerticalSliderIcon className="size-6" />
       </Button>
-      <RightSidebarContent isOpen={isOpen} close={close} />
+      <RightSidebarContent isOpen={isOpen} close={closeSidebar} />
     </>
   );
 }

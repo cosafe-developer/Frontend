@@ -12,15 +12,15 @@ import { ThemeContext } from "./context";
 const initialState = {
   ...defaultTheme,
   isDark: false,
-  setThemeMode: () => {},
-  setThemeLayout: () => {},
-  toggleMonochromeMode: () => {},
-  setLightColorScheme: () => {},
-  setDarkColorScheme: () => {},
-  setPrimaryColorScheme: () => {},
-  setNotificationPosition: () => {},
-  setNotificationExpand: () => {},
-  resetTheme: () => {},
+  setThemeMode: () => { },
+  setThemeLayout: () => { },
+  toggleMonochromeMode: () => { },
+  setLightColorScheme: () => { },
+  setDarkColorScheme: () => { },
+  setPrimaryColorScheme: () => { },
+  setNotificationPosition: () => { },
+  setNotificationExpand: () => { },
+  resetTheme: () => { },
 };
 
 const COLOR_SCHEME_QUERY = "(prefers-color-scheme: dark)";
