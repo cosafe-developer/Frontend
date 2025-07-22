@@ -44,20 +44,20 @@ const Badge = forwardRef((props, ref) => {
         "badge-base",
         !unstyled
           ? [
-              "badge",
-              mergedColor === "neutral"
-                ? [
-                    neutralVariants[variant],
-                    isGlow &&
-                      "shadow-lg shadow-gray-200/50 dark:shadow-dark-450/50",
-                  ]
-                : [
-                    setThisClass(mergedColor),
-                    variants[variant],
-                    isGlow &&
-                      "shadow-lg shadow-this/50 dark:shadow-this-light/50",
-                  ],
-            ]
+            "badge",
+            mergedColor === "neutral"
+              ? [
+                neutralVariants[variant],
+                isGlow &&
+                "shadow-lg shadow-gray-200/50 dark:shadow-dark-450/50",
+              ]
+              : [
+                setThisClass(mergedColor),
+                variants[variant],
+                isGlow &&
+                "shadow-lg shadow-this/50 dark:shadow-this-light/50",
+              ],
+          ]
           : color && color !== "neutral" && setThisClass(color),
         className,
       )}

@@ -1,5 +1,9 @@
 {
   "nav": {
+     "home": {
+      "sections": "Sections",
+      "requirementsList": "List of Requirements"
+    },
     "dashboards": {
       "dashboards": "Dashboards",
       "home": "Home"

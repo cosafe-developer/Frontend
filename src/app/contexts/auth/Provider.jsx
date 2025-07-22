@@ -47,6 +47,11 @@ const reducerHandlers = {
     };
   },
 
+  CLEAR_ERROR_MESSAGE: (state) => ({
+    ...state,
+    errorMessage: null,
+  }),
+
   LOGIN_ERROR: (state, action) => {
     const { errorMessage } = action.payload;
 
@@ -124,11 +129,12 @@ export function AuthProvider({ children }) {
         }
       });
 
+
       if (!response?.ok) {
         dispatch({
           type: "LOGIN_ERROR",
           payload: {
-            mensaje: response?.message,
+            errorMessage: response?.message || "Error desconocido",
           },
         });
       } else {
@@ -157,6 +163,11 @@ export function AuthProvider({ children }) {
     dispatch({ type: "LOGOUT" });
   };
 
+  const clearErrorMessage = () => {
+    dispatch({ type: "CLEAR_ERROR_MESSAGE" });
+  };
+
+
   if (!children) {
     return null;
   }
@@ -167,6 +178,7 @@ export function AuthProvider({ children }) {
         ...state,
         login,
         logout,
+        clearErrorMessage,
       }}
     >
       {children}

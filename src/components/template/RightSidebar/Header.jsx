@@ -1,6 +1,6 @@
 // Import Dependencies
 import PropTypes from "prop-types";
-import dayjs from "dayjs";                  
+import dayjs from "dayjs";
 import { CalendarIcon, XMarkIcon } from "@heroicons/react/24/outline";
 
 // Local Imports

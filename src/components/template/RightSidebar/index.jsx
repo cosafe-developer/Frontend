@@ -10,8 +10,8 @@ import {
 // Local Imports
 import { Button, ScrollShadow } from "components/ui";
 import { useDisclosure } from "hooks";
+import { HeaderPreviewEmpresas } from "./HeaderPreviewEmpresas";
 import VerticalSliderIcon from "assets/dualicons/vertical-slider.svg?react";
-import { Header } from "./Header";
 
 // ----------------------------------------------------------------------
 
@@ -56,14 +56,16 @@ function RightSidebarContent({ isOpen, close }) {
           leave="ease-in transform-gpu transition-transform duration-200"
           leaveFrom="translate-x-0"
           leaveTo="translate-x-full"
-          className="fixed inset-y-0 right-0 z-61 flex w-screen transform-gpu flex-col bg-white transition-transform duration-200 dark:bg-dark-750 sm:inset-y-2 sm:mx-2 sm:w-80 sm:rounded-xl"
+          className="fixed inset-y-0 right-0 z-61 flex w-screen transform-gpu flex-col bg-white transition-transform duration-200 dark:bg-[#1c1d21] sm:inset-y-2 sm:mx-2 sm:w-[43rem] sm:rounded-xl"
         >
-          <Header close={close} />
+          <HeaderPreviewEmpresas close={close} />
           <ScrollShadow
             size={4}
             className="hide-scrollbar overflow-y-auto overscroll-contain pb-5"
           >
-            <div className="px-4 italic">Start magic form here</div>
+            <div className="px-4 italic">
+
+            </div>
           </ScrollShadow>
         </TransitionChild>
       </Dialog>

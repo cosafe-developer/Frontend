@@ -11,6 +11,7 @@ export const admin = {
   type: NAV_TYPE_ROOT,
   path: '/admin',
   title: 'Secciones',
+  transKey: 'nav.admin.sections',
   Icon: DashboardsIcon,
   childs: [
     {
@@ -18,6 +19,7 @@ export const admin = {
       path: path(ROOT_ADMIN, '/listado'),
       type: NAV_TYPE_ITEM,
       title: 'Listado de listado',
+      transKey: 'nav.admin.listado',
       Icon: HomeIcon,
     },
     {
@@ -25,6 +27,7 @@ export const admin = {
       path: path(ROOT_ADMIN, '/agentes'),
       type: NAV_TYPE_ITEM,
       title: 'Agentes',
+      transKey: 'nav.admin.agentes',
       Icon: HomeIcon,
     },
     {
@@ -32,6 +35,7 @@ export const admin = {
       path: path(ROOT_ADMIN, '/empresas'),
       type: NAV_TYPE_ITEM,
       title: 'Empresas',
+      transKey: 'nav.admin.empresas',
       Icon: HomeIcon,
     },
   ]

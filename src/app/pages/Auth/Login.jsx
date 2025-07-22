@@ -7,13 +7,15 @@ import { EnvelopeIcon, LockClosedIcon } from "@heroicons/react/24/outline";
 import logoSrc from "assets/logo.png";
 import { Page } from "components/shared/Page";
 import { schema } from "./schema";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuthContext } from "app/contexts/auth/context";
 import { Button, Card, Checkbox, Input, InputErrorMsg } from "components/ui";
 
 export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
-  const { login, errorMessage } = useAuthContext();
+  const { login, errorMessage, clearErrorMessage } = useAuthContext();
+
+
   const {
     register,
     handleSubmit,
@@ -25,6 +27,12 @@ export default function Login() {
       password: "",
     },
   });
+
+  useEffect(() => {
+    if ((errors?.email?.message || errors?.password?.message) && errorMessage) {
+      clearErrorMessage();
+    }
+  }, [errors?.email?.message, errors?.password?.message, errorMessage, clearErrorMessage]);
 
   const onSubmit = async (data) => {
     setIsLoading(true);
@@ -39,6 +47,7 @@ export default function Login() {
       setIsLoading(false);
     }
   };
+
 
   return (
     <Page title="Login">
@@ -86,10 +95,12 @@ export default function Login() {
               </div>
 
               <div className="mt-2">
-                <InputErrorMsg
-                  when={errorMessage && errorMessage?.mensaje !== ""}
-                >
-                  {errorMessage?.mensaje}
+                <InputErrorMsg when={
+                  errorMessage && errorMessage !== "" &&
+                  !errors?.email?.message &&
+                  !errors?.password?.message
+                }>
+                  {errorMessage}
                 </InputErrorMsg>
               </div>
 
