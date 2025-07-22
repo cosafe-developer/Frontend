@@ -40,8 +40,8 @@ export const defaultTheme = {
   },
 
   // Language settings  
-  defaultLang: "en",
-  fallbackLang: "en",
+  defaultLang: "es",
+  fallbackLang: "es",
 
   // Notification settings  
   notification: {

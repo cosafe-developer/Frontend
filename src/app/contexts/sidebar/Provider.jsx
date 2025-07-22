@@ -8,7 +8,7 @@ import { SidebarContext } from "./context";
 
 const initialState = {
   isExpanded: true,
-  setIsExpanded: () => {},
+  setIsExpanded: () => { },
 };
 
 export function SidebarProvider({ children }) {
