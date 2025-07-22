@@ -7,8 +7,7 @@ import { Avatar, Badge, Button } from "components/ui";
 
 // ----------------------------------------------------------------------
 
-export function HeaderPreviewEmpresas({ close }) {
-
+export function HeaderPreviewEmpresa({ close }) {
 
   return (
     <div className="px-4 py-2">
@@ -29,7 +28,7 @@ export function HeaderPreviewEmpresas({ close }) {
           <div className="flex space-x-3">
             <h2>Creado por: </h2>
             <Badge
-              className="rounded-full capitalize px-4 text-lg py-2"
+              className="rounded-full capitalize px-4 text-sm py-2"
               color="success"
               variant="soft"
             >
@@ -83,6 +82,6 @@ export function HeaderPreviewEmpresas({ close }) {
   );
 }
 
-HeaderPreviewEmpresas.propTypes = {
+HeaderPreviewEmpresa.propTypes = {
   close: PropTypes.func,
 };
