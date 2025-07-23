@@ -9,26 +9,27 @@ import {
 
 // Local Imports
 import { Button, ScrollShadow } from "components/ui";
-import { useDisclosure } from "hooks";
-import { HeaderPreviewEmpresas } from "./previewEmpresa/HeaderPreviewEmpresas";
+import { HeaderPreviewEmpresa } from "./previewEmpresa/HeaderPreviewEmpresa";
 import VerticalSliderIcon from "assets/dualicons/vertical-slider.svg?react";
+import { ListPreviewEmpresa } from "./previewEmpresa/ListPreviewEmpresa";
+import { useRightSidebarContext } from "app/contexts/sidebar-right/rightSidebar";
 
 // ----------------------------------------------------------------------
 
 export function RightSidebar() {
-  const [isOpen, { open, close }] = useDisclosure();
+  const { isOpen, openSidebar, closeSidebar } = useRightSidebarContext();
 
   return (
     <>
       <Button
-        onClick={open}
+        onClick={openSidebar}
         variant="flat"
         isIcon
         className="relative size-9 rounded-full"
       >
         <VerticalSliderIcon className="size-6" />
       </Button>
-      <RightSidebarContent isOpen={isOpen} close={close} />
+      <RightSidebarContent isOpen={isOpen} close={closeSidebar} />
     </>
   );
 }
@@ -56,15 +57,15 @@ function RightSidebarContent({ isOpen, close }) {
           leave="ease-in transform-gpu transition-transform duration-200"
           leaveFrom="translate-x-0"
           leaveTo="translate-x-full"
-          className="fixed inset-y-0 right-0 z-61 flex w-screen transform-gpu flex-col bg-white transition-transform duration-200 dark:bg-[#1c1d21] sm:inset-y-2 sm:mx-2 sm:w-[43rem] sm:rounded-xl"
+          className="fixed inset-y-0 right-0 z-61 flex w-screen transform-gpu flex-col bg-white transition-transform duration-200 dark:bg-[#1c1d21] sm:inset-y-2 sm:mx-2 sm:w-[38rem] sm:rounded-xl"
         >
-          <HeaderPreviewEmpresas close={close} />
+          <HeaderPreviewEmpresa close={close} />
           <ScrollShadow
             size={4}
             className="hide-scrollbar overflow-y-auto overscroll-contain pb-5"
           >
-            <div className="px-4 italic">
-
+            <div className="px-4  mt-5">
+              <ListPreviewEmpresa />
             </div>
           </ScrollShadow>
         </TransitionChild>

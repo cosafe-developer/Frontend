@@ -1,4 +1,4 @@
-import { fetchWithToken } from "helpers/fetch";
+import { fetchWithCookies } from "helpers/fetch";
 /* import handleLogin from "helpers/handleLogin.helper";
  */
 /**
@@ -7,8 +7,9 @@ import { fetchWithToken } from "helpers/fetch";
  */
 const checkSessionActive = async () => {
   try {
-    const resp = await fetchWithToken("session");
+    const resp = await fetchWithCookies("session");
     const body = await resp.json();
+
     return body;
   } catch (error) {
     console.error("Error al verificar sesión:", error);

@@ -19,6 +19,7 @@ import PropTypes from "prop-types";
 // Local Imports
 // import { ConfirmModal } from "components/shared/ConfirmModal";
 import { Button } from "components/ui";
+import { useRightSidebarContext } from "app/contexts/sidebar-right/rightSidebar";
 
 // ----------------------------------------------------------------------
 
@@ -33,6 +34,8 @@ import { Button } from "components/ui";
 // };
 
 export function RowActions() {
+  const { openSidebar } = useRightSidebarContext();
+
   // const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   // const [deleteSuccess, setDeleteSuccess] = useState(false);
   // const [deleteError, setDeleteError] = useState(false);
@@ -70,11 +73,11 @@ export function RowActions() {
             <MenuItem>
               <button
                 className="flex h-9 w-full items-center space-x-3 px-3 tracking-wide outline-hidden transition-colors cursor-pointer hover:opacity-45"
+                onClick={openSidebar}
               >
                 <EyeIcon className="size-4.5 stroke-1" />
                 <span>Ver</span>
               </button>
-
             </MenuItem>
             <MenuItem>
               <button

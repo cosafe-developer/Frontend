@@ -30,19 +30,19 @@ const protectedRoutes = {
             {
               path: "listado",
               lazy: async () => ({
-                Component: (await import("app/pages/admin/listado")).default,
+                Component: (await import("app/pages/admin/listado/Listado")).default,
               }),
             },
             {
               path: "agentes",
               lazy: async () => ({
-                Component: (await import("app/pages/admin/agentes")).default,
+                Component: (await import("app/pages/admin/agentes/Agentes")).default,
               }),
             },
             {
               path: "empresas",
               lazy: async () => ({
-                Component: (await import("app/pages/admin/empresas")).default,
+                Component: (await import("app/pages/admin/empresas/Empresas")).default,
               }),
             },
           ],

@@ -7,7 +7,11 @@ import { BreakpointProvider } from "app/contexts/breakpoint/Provider";
 import { LocaleProvider } from "app/contexts/locale/Provider";
 import { SidebarProvider } from "app/contexts/sidebar/Provider";
 import { ThemeProvider } from "app/contexts/theme/Provider";
+import { RightSidebarProvider } from "app/contexts/sidebar-right/rightSidebar";
 import router from "app/router/router";
+
+
+
 
 function App() {
   return (
@@ -16,7 +20,9 @@ function App() {
         <LocaleProvider>
           <BreakpointProvider>
             <SidebarProvider>
-              <RouterProvider router={router} />
+              <RightSidebarProvider>
+                <RouterProvider router={router} />
+              </RightSidebarProvider>
             </SidebarProvider>
           </BreakpointProvider>
         </LocaleProvider>

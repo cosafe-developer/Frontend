@@ -196,7 +196,7 @@ export function Notifications() {
                   ))}
                 </TabList>
                 {(notifications.length > 0 && activeTab === 0) ||
-                filteredNotifications.length > 0 ? (
+                  filteredNotifications.length > 0 ? (
                   <TabPanels as={Fragment}>
                     <TabPanel className="custom-scrollbar grow space-y-4 overflow-y-auto overflow-x-hidden p-4 outline-hidden">
                       {notifications.map((item) => (
@@ -228,16 +228,16 @@ export function Notifications() {
               </TabGroup>
               {((notifications.length > 0 && activeTab === 0) ||
                 filteredNotifications.length > 0) && (
-                <div className="shrink-0 overflow-hidden rounded-b-lg bg-gray-100 dark:bg-dark-800">
-                  <Button
-                    // variant="flat"
-                    className="w-full rounded-t-none"
-                    onClick={clearNotifications}
-                  >
-                    <span>Archive all notifications</span>
-                  </Button>
-                </div>
-              )}
+                  <div className="shrink-0 overflow-hidden rounded-b-lg bg-gray-100 dark:bg-dark-800">
+                    <Button
+                      // variant="flat"
+                      className="w-full rounded-t-none"
+                      onClick={clearNotifications}
+                    >
+                      <span>Archive all notifications</span>
+                    </Button>
+                  </div>
+                )}
             </div>
           )}
         </PopoverPanel>

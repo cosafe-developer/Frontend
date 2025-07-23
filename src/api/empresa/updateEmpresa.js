@@ -2,10 +2,10 @@ import { fetchWithCookies } from "helpers/fetch";
 
 
 
-async function getEmpresa(id) {
+async function updateEmpresa(id, body) {
   try {
     const endpoint = `empresa/${id}`;
-    const resp = await fetchWithCookies(endpoint);
+    const resp = await fetchWithCookies(endpoint, null, "PUT");
 
     const data = await resp.json();
 
@@ -16,4 +16,4 @@ async function getEmpresa(id) {
   }
 }
 
-export default getEmpresa;
+export default updateEmpresa;

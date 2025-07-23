@@ -1,4 +1,4 @@
-import { fetchWithToken } from "helpers/fetch";
+import { fetchWithCookies } from "helpers/fetch";
 /* import handleLogin from "helpers/handleLogin.helper";
  */
 /**
@@ -7,7 +7,7 @@ import { fetchWithToken } from "helpers/fetch";
  */
 const logoutSession = async () => {
   try {
-    const resp = await fetchWithToken("logout", null, "POST");
+    const resp = await fetchWithCookies("logout", null, "POST");
     const body = await resp.json();
 
     return body;
