@@ -7,7 +7,7 @@ import { Avatar, Badge, Button } from "components/ui";
 
 // ----------------------------------------------------------------------
 
-export function HeaderPreviewEmpresa({ close }) {
+export function HeaderAdministrarEmpresa({ close }) {
 
   return (
     <div className="px-4 py-2">
@@ -67,9 +67,9 @@ export function HeaderPreviewEmpresa({ close }) {
           </div>
 
           <div className="mt-10">
-            <h2>Fecha de Entrega:</h2>
+            <h2>RFC:</h2>
             <div className="mt-1">
-              <p className="font-normal text-lg  text-error">01 Mar 2025</p>
+              <p className="font-normal text-lg  text-error">COEB010716C52</p>
             </div>
           </div>
 
@@ -82,6 +82,6 @@ export function HeaderPreviewEmpresa({ close }) {
   );
 }
 
-HeaderPreviewEmpresa.propTypes = {
+HeaderAdministrarEmpresa.propTypes = {
   close: PropTypes.func,
 };

@@ -59,7 +59,7 @@ function RightSidebarContent({ isOpen, close, SideBarHeader, SideBarBody, sideBa
               size={4}
               className="hide-scrollbar overflow-y-auto overscroll-contain pb-5"
             >
-              <div className="px-4 mt-5">
+              <div >
                 <SideBarBody
                   close={close}
                   data={sideBarData}

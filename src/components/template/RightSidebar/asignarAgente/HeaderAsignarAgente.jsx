@@ -1,84 +1,87 @@
 // Import Dependencies
 import PropTypes from "prop-types";
-import { XMarkIcon } from "@heroicons/react/24/outline";
+import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { useEffect, useRef } from "react";
+import invariant from "tiny-invariant";
 
 // Local Imports
-import { Avatar, Badge, Button } from "components/ui";
+import { Button, Input } from "components/ui";
+import { useFuse } from "hooks";
+import { ContentAsignarAgente } from "./ContentAsignarAgente";
 
 // ----------------------------------------------------------------------
 
+const AGENTES = [
+  { name: "Carlos Alberto Mendoza López" },
+  { name: "Lucía Ramírez Gómez" },
+  { name: "José Fernández Martínez Ortega" },
+  { name: "Andrea Torres" },
+  { name: "Pedro Luis Sánchez Rivera" },
+  { name: "Valeria Morales Jiménez" },
+  { name: "Luis García López Ramírez" },
+  { name: "Fernanda López Díaz" },
+  { name: "Javier Castro Hernández" },
+  { name: "Sofía Herrera Martínez González" },
+  { name: "Carlos Alberto Mendoza López" },
+  { name: "Lucía Ramírez Gómez" },
+  { name: "José Fernández Martínez Ortega" },
+  { name: "Andrea Torres" },
+  { name: "Pedro Luis Sánchez Rivera" },
+  { name: "Valeria Morales Jiménez" },
+  { name: "Luis García López Ramírez" },
+  { name: "Fernanda López Díaz" },
+  { name: "Javier Castro Hernández" },
+  { name: "Sofía Herrera Martínez González" },
+];
+
 export function HeaderAsignarAgente({ close }) {
+  const searchRef = useRef(null);
+
+  const { result, query, setQuery } = useFuse(AGENTES, {
+    keys: ["name"],
+    threshold: 0.2,
+    matchAllOnEmptyQuery: true,
+  });
+
+  useEffect(() => {
+    invariant(searchRef.current, "searchRef is not assigned");
+    searchRef.current.focus();
+  }, []);
 
   return (
     <div className="px-4 py-2">
-      <div className="flex items-center justify-end ">
+      <div className="flex items-center justify-end">
         <Button
           onClick={close}
           variant="flat"
           isIcon
-          className="size-8 rounded-full"
+          className="size-10 rounded-full"
         >
-          <XMarkIcon className="size-6" />
+          <XMarkIcon className="size-8" />
         </Button>
       </div>
 
+      <div className="px-3 text-lg font-semibold w-full">
+        <h2 className="text-white font-normal text-xl">Asignar agente</h2>
+        <p className="mt-2 text-base font-light">Listado de Agentes</p>
 
-      <div className="flex justify-between items-start mt-10">
-        <div className="px-3 text-lg font-semibold ">
-          <div className="flex space-x-3">
-            <h2>Creado por: </h2>
-            <Badge
-              className="rounded-full capitalize px-4 text-sm py-2"
-              color="success"
-              variant="soft"
-            >
-              Administrador
-            </Badge>
-          </div>
-
-          <div >
-            <div className="flex items-center space-x-5 mt-16">
-              <Avatar
-                size={18}
-                classNames={{
-                  display: "mask is-squircle rounded-none text-2xl",
-                }}
-              >
-                OX
-              </Avatar>
-
-              <div className="flex flex-col space-y-1 ">
-                <p className="font-normal text-xl text-white">Oxxo</p>
-                <p className="font-light text-primary-400">Datos Generales</p>
-                <p className="font-light text-green-400">• Completado 08.03.25</p>
-              </div>
-            </div>
-          </div>
-
-        </div>
-
-        <div className="px-3 text-lg font-semibold flex flex-col items-end text-right">
-          <div>
-            <h2>Fecha de Inicio:</h2>
-            <div className="mt-1">
-              <p className="font-normal text-lg">01 Mar 2025</p>
-              <p className="font-light text-base text-[#7d808d]">04:09 PM</p>
-            </div>
-          </div>
-
-          <div className="mt-10">
-            <h2>Fecha de Entrega:</h2>
-            <div className="mt-1">
-              <p className="font-normal text-lg  text-error">01 Mar 2025</p>
-            </div>
-          </div>
-
+        <div className="items-center mt-14 w-full font-normal">
+          <Input
+            ref={searchRef}
+            placeholder="Buscar agente"
+            value={query}
+            data-search-item
+            onChange={(event) => setQuery(event.target.value)}
+            classNames={{ root: "flex-1" }}
+            prefix={<MagnifyingGlassIcon className="size-5" />}
+          />
         </div>
       </div>
 
-
+      <div className="text-lg mt-10">
+        <ContentAsignarAgente data={result} close={close} />
+      </div>
     </div>
-
   );
 }
 

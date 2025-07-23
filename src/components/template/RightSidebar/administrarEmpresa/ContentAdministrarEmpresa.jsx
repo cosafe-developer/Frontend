@@ -5,60 +5,43 @@ import { truncateText } from "helpers/truncateText.helper";
 
 // ----------------------------------------------------------------------
 
-const cols = ["CHECKLIST", "PROGRESO"];
+const cols = ["ESTUDIOS", "PROGRESO"];
 
 const data = [
   {
-    verification_name: "Checklist de Requerimientos",
+    certificado: "Checklist de Requerimientos",
+    fecha: "05.05.2025",
     progress: "100%",
   },
   {
-    verification_name: "Checklist tipo de Riesgo",
+    certificado: "Checklist tipo de Riesgo",
+    fecha: "06.05.2025",
     progress: "100%",
   },
   {
-    verification_name: "Checklist por Daño Estructural",
+    certificado: "Checklist por Daño Estructural",
+    fecha: "07.05.2025",
     progress: "75%",
   },
   {
-    verification_name: "Checklist de Riesgos por Deficiencia en las Instalaciones",
+    institucion: "Santander",
+    certificado: "Checklist de Riesgos por Deficiencia en las Instalaciones",
+    fecha: "08.05.2025",
     progress: "45%",
   },
   {
-    verification_name: "Checklist de Riesgos por Acabados en el Inmueble",
+    certificado: "Checklist de Riesgos por Acabados en el Inmueble",
+    fecha: "09.05.2025",
     progress: "25%",
   },
   {
-    verification_name: "Checklist de Agente Perturbador de Tipo Socio-Organizativo",
-    progress: "100%",
-  },
-  {
-    verification_name: "Checklist de Requerimientos",
-    progress: "100%",
-  },
-  {
-    verification_name: "Checklist tipo de Riesgo",
-    progress: "100%",
-  },
-  {
-    verification_name: "Checklist por Daño Estructural",
-    progress: "75%",
-  },
-  {
-    verification_name: "Checklist de Riesgos por Deficiencia en las Instalaciones",
-    progress: "45%",
-  },
-  {
-    verification_name: "Checklist de Riesgos por Acabados en el Inmueble",
-    progress: "25%",
-  },
-  {
-    verification_name: "Checklist de Agente Perturbador de Tipo Socio-Organizativo",
+    certificado: "Checklist de Agente Perturbador de Tipo Socio-Organizativo",
+    fecha: "10.05.2025",
     progress: "100%",
   },
 ];
 
-export function ContentPreviewEmpresa({ close }) {
+export function ContentAdministrarEmpresa({ close }) {
   return (
     <div className="min-w-full mt-5 px-4">
 
@@ -90,12 +73,17 @@ export function ContentPreviewEmpresa({ close }) {
                 textColorClass = "text-[#9b0708]";
               }
 
+              const fullText = `${tr.certificado} - ${tr.fecha}`;
+
               return (
                 <Tr
                   key={index}
                   className="border-y border-transparent border-b-gray-200 dark:border-b-dark-500"
                 >
-                  <Td>{truncateText(tr.verification_name, 60)}</Td>
+                  <Td title={fullText} className="truncate max-w-[400px] cursor-pointer">
+                    {truncateText(tr.certificado, 40)} -{" "}
+                    <span className="text-[#60a5fa]">{tr.fecha}</span>
+                  </Td>
                   <Td className={`font-semibold ${textColorClass}`}>
                     {tr.progress}
                   </Td>
