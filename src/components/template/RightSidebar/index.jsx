@@ -12,7 +12,7 @@ import { Button, ScrollShadow } from "components/ui";
 import { HeaderPreviewEmpresa } from "./previewEmpresa/HeaderPreviewEmpresa";
 import VerticalSliderIcon from "assets/dualicons/vertical-slider.svg?react";
 import { ListPreviewEmpresa } from "./previewEmpresa/ListPreviewEmpresa";
-import { useRightSidebarContext } from "app/contexts/sidebar-right/rightSidebar";
+import { useRightSidebarContext } from "app/contexts/sidebar-right/context";
 
 // ----------------------------------------------------------------------
 

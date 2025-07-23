@@ -19,7 +19,8 @@ import PropTypes from "prop-types";
 // Local Imports
 // import { ConfirmModal } from "components/shared/ConfirmModal";
 import { Button } from "components/ui";
-import { useRightSidebarContext } from "app/contexts/sidebar-right/rightSidebar";
+import { useRightSidebarContext } from "app/contexts/sidebar-right/context";
+
 
 // ----------------------------------------------------------------------
 
