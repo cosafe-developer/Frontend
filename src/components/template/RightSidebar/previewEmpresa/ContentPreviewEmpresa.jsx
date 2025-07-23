@@ -1,6 +1,6 @@
 
 // Local Imports
-import { Table, THead, TBody, Th, Tr, Td } from "components/ui";
+import { Table, THead, TBody, Th, Tr, Td, Button } from "components/ui";
 
 // ----------------------------------------------------------------------
 
@@ -33,7 +33,7 @@ const data = [
   },
 ];
 
-export function ListPreviewEmpresa() {
+export function ContentPreviewEmpresa({ close }) {
   return (
     <div className="hide-scrollbar min-w-full overflow-x-auto">
       <Table className="w-full text-left rtl:text-right">
@@ -76,6 +76,24 @@ export function ListPreviewEmpresa() {
           })}
         </TBody>
       </Table>
+
+      <div className="mt-14 flex justify-end space-x-3">
+        <Button
+          onClick={close}
+          color="neutral"
+          className="h-10 text-base font-light"
+        >
+          Cancelar
+        </Button>
+
+        <Button
+          color="primary"
+          className="h-10 text-base font-light"
+        >
+          Ver
+        </Button>
+      </div>
+
     </div>
   );
 }

@@ -20,6 +20,10 @@ import PropTypes from "prop-types";
 // import { ConfirmModal } from "components/shared/ConfirmModal";
 import { Button } from "components/ui";
 import { useRightSidebarContext } from "app/contexts/sidebar-right/context";
+/* import { HeaderPreviewEmpresa } from "components/template/RightSidebar/previewEmpresa/HeaderPreviewEmpresa";
+import { ContentPreviewEmpresa } from "components/template/RightSidebar/previewEmpresa/ContentPreviewEmpresa"; */
+import { HeaderAsignarAgente } from "components/template/RightSidebar/asignarAgente/HeaderAsignarAgente";
+import { ContentAsignarAgente } from "components/template/RightSidebar/asignarAgente/ContentAsignarAgente";
 
 
 // ----------------------------------------------------------------------
@@ -74,7 +78,12 @@ export function RowActions() {
             <MenuItem>
               <button
                 className="flex h-9 w-full items-center space-x-3 px-3 tracking-wide outline-hidden transition-colors cursor-pointer hover:opacity-45"
-                onClick={openSidebar}
+                onClick={() => {
+                  openSidebar({
+                    header: HeaderAsignarAgente,
+                    body: ContentAsignarAgente,
+                  })
+                }}
               >
                 <EyeIcon className="size-4.5 stroke-1" />
                 <span>Ver</span>

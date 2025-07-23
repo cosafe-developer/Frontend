@@ -8,33 +8,22 @@ import {
 } from "@headlessui/react";
 
 // Local Imports
-import { Button, ScrollShadow } from "components/ui";
-import { HeaderPreviewEmpresa } from "./previewEmpresa/HeaderPreviewEmpresa";
-import VerticalSliderIcon from "assets/dualicons/vertical-slider.svg?react";
-import { ListPreviewEmpresa } from "./previewEmpresa/ListPreviewEmpresa";
+import { ScrollShadow } from "components/ui";
 import { useRightSidebarContext } from "app/contexts/sidebar-right/context";
 
 // ----------------------------------------------------------------------
 
 export function RightSidebar() {
-  const { isOpen, openSidebar, closeSidebar } = useRightSidebarContext();
+  const { isOpen, closeSidebar, header, body, data } = useRightSidebarContext();
 
   return (
     <>
-      <Button
-        onClick={openSidebar}
-        variant="flat"
-        isIcon
-        className="relative size-9 rounded-full"
-      >
-        <VerticalSliderIcon className="size-6" />
-      </Button>
-      <RightSidebarContent isOpen={isOpen} close={closeSidebar} />
+      <RightSidebarContent isOpen={isOpen} close={closeSidebar} SideBarHeader={header} SideBarBody={body} sideBarData={data} />
     </>
   );
 }
 
-function RightSidebarContent({ isOpen, close }) {
+function RightSidebarContent({ isOpen, close, SideBarHeader, SideBarBody, sideBarData }) {
   return (
     <Transition show={isOpen}>
       <Dialog open={true} onClose={close} static autoFocus>
@@ -47,7 +36,7 @@ function RightSidebarContent({ isOpen, close }) {
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
           className="fixed inset-0 z-60 bg-gray-900/50 backdrop-blur-sm transition-opacity dark:bg-black/40"
-        ></TransitionChild>
+        />
 
         <TransitionChild
           as={DialogPanel}
@@ -59,15 +48,25 @@ function RightSidebarContent({ isOpen, close }) {
           leaveTo="translate-x-full"
           className="fixed inset-y-0 right-0 z-61 flex w-screen transform-gpu flex-col bg-white transition-transform duration-200 dark:bg-[#1c1d21] sm:inset-y-2 sm:mx-2 sm:w-[38rem] sm:rounded-xl"
         >
-          <HeaderPreviewEmpresa close={close} />
-          <ScrollShadow
-            size={4}
-            className="hide-scrollbar overflow-y-auto overscroll-contain pb-5"
-          >
-            <div className="px-4  mt-5">
-              <ListPreviewEmpresa />
-            </div>
-          </ScrollShadow>
+          {SideBarHeader &&
+            <SideBarHeader
+              close={close}
+            />
+          }
+
+          {SideBarBody && (
+            <ScrollShadow
+              size={4}
+              className="hide-scrollbar overflow-y-auto overscroll-contain pb-5"
+            >
+              <div className="px-4 mt-5">
+                <SideBarBody
+                  close={close}
+                  data={sideBarData}
+                />
+              </div>
+            </ScrollShadow>
+          )}
         </TransitionChild>
       </Dialog>
     </Transition>
