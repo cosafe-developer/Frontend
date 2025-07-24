@@ -2,7 +2,10 @@ import PropTypes from "prop-types";
 import { Table, TBody, Tr, Td, Button } from "components/ui";
 import { truncateText } from "helpers/truncateText.helper";
 
-export function ContentAsignarAgente({ data = [], close }) {
+export function ContentAsignarAgente({ close, data = [], agentesAsignados, setAgentesAsignados }) {
+
+
+
   return (
     <div className="min-w-full">
 
@@ -20,7 +23,12 @@ export function ContentAsignarAgente({ data = [], close }) {
                 <Td className="text-center">
                   <Button
                     variant="outlined"
-                    onClick={close}
+                    onClick={() => {
+                      if (!agentesAsignados.find((a) => a.name === item.name)) {
+                        setAgentesAsignados([...agentesAsignados, item]);
+                      }
+                      close();
+                    }}
                     color="neutral"
                     className="h-10 text-base font-light mx-auto rounded-2xl"
                   >
@@ -54,4 +62,5 @@ export function ContentAsignarAgente({ data = [], close }) {
 ContentAsignarAgente.propTypes = {
   data: PropTypes.array,
   close: PropTypes.func,
+  setAgentesAsignados: PropTypes.func,
 };

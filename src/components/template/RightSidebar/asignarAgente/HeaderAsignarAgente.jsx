@@ -8,10 +8,11 @@ import invariant from "tiny-invariant";
 import { Button, Input } from "components/ui";
 import { useFuse } from "hooks";
 import { ContentAsignarAgente } from "./ContentAsignarAgente";
+import { useRightSidebarContext } from "app/contexts/sidebar-right/context";
 
 // ----------------------------------------------------------------------
 
-const AGENTES = [
+const agentesData = [
   { name: "Carlos Alberto Mendoza López" },
   { name: "Lucía Ramírez Gómez" },
   { name: "José Fernández Martínez Ortega" },
@@ -36,8 +37,10 @@ const AGENTES = [
 
 export function HeaderAsignarAgente({ close }) {
   const searchRef = useRef(null);
+  const { data } = useRightSidebarContext();
+  const { agentesAsignados, setAgentesAsignados } = data || {};
 
-  const { result, query, setQuery } = useFuse(AGENTES, {
+  const { /* result,  */query, setQuery } = useFuse(agentesData, {
     keys: ["name"],
     threshold: 0.2,
     matchAllOnEmptyQuery: true,
@@ -79,7 +82,12 @@ export function HeaderAsignarAgente({ close }) {
       </div>
 
       <div className="text-lg mt-10">
-        <ContentAsignarAgente data={result} close={close} />
+        <ContentAsignarAgente
+          close={close}
+          data={agentesData}
+          agentesAsignados={agentesAsignados}
+          setAgentesAsignados={setAgentesAsignados}
+        />
       </div>
     </div>
   );

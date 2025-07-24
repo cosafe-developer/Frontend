@@ -20,7 +20,9 @@ import PropTypes from "prop-types";
 // import { ConfirmModal } from "components/shared/ConfirmModal";
 import { Button } from "components/ui";
 import { useRightSidebarContext } from "app/contexts/sidebar-right/context";
-import { ContentAlertaAdministrador } from "components/template/RightSidebar/alertaAdministrador/ContentAlertaAdministrador";
+import { ContentPreviewEmpresa } from "components/template/RightSidebar/previewEmpresa/ContentPreviewEmpresa";
+import { HeaderPreviewEmpresa } from "components/template/RightSidebar/previewEmpresa/HeaderPreviewEmpresa";
+
 
 
 
@@ -79,7 +81,8 @@ export function RowActions() {
                 className="flex h-9 w-full items-center space-x-3 px-3 tracking-wide outline-hidden transition-colors cursor-pointer hover:opacity-45"
                 onClick={() => {
                   openSidebar({
-                    body: ContentAlertaAdministrador
+                    header: HeaderPreviewEmpresa,
+                    body: ContentPreviewEmpresa
                   })
                 }}
               >

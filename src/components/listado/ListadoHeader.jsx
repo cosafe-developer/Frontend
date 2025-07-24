@@ -6,6 +6,7 @@ const ListadoHeader = ({
   textoBoton = "Texto Botón",
   onClick = () => alert("ingresa tu onClick Function"),
 }) => {
+
   return (
     <div className="flex items-center justify-between space-x-4" >
       <div className="min-w-0">

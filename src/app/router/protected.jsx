@@ -34,6 +34,24 @@ const protectedRoutes = {
               }),
             },
             {
+              path: "listado/completo",
+              lazy: async () => ({
+                Component: (await import("app/pages/admin/listado/ListadoCompleto")).default,
+              }),
+            },
+            {
+              path: "listado/crear",
+              lazy: async () => ({
+                Component: (await import("app/pages/admin/listado/CrearListado")).default,
+              }),
+            },
+            {
+              path: "listado/llenar",
+              lazy: async () => ({
+                Component: (await import("app/pages/admin/listado/LlenarListado")).default,
+              }),
+            },
+            {
               path: "agentes",
               lazy: async () => ({
                 Component: (await import("app/pages/admin/agentes/Agentes")).default,

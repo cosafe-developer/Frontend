@@ -18,7 +18,7 @@ export const admin = {
       id: 'admin.listado',
       path: path(ROOT_ADMIN, '/listado'),
       type: NAV_TYPE_ITEM,
-      title: 'Listado de listado',
+      title: 'Listado de Requerimientos',
       transKey: 'nav.admin.listado',
       Icon: HomeIcon,
     },

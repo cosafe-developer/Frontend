@@ -72,11 +72,8 @@ export function HeaderPreviewEmpresa({ close }) {
               <p className="font-normal text-lg  text-error">01 Mar 2025</p>
             </div>
           </div>
-
         </div>
       </div>
-
-
     </div>
 
   );

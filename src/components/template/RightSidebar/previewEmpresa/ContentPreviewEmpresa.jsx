@@ -1,68 +1,40 @@
-
-// Local Imports
+import { useState } from "react";
+import { Navigate } from "react-router";
 import { Table, THead, TBody, Th, Tr, Td, Button } from "components/ui";
 import { truncateText } from "helpers/truncateText.helper";
-
-// ----------------------------------------------------------------------
 
 const cols = ["CHECKLIST", "PROGRESO"];
 
 const data = [
-  {
-    verification_name: "Checklist de Requerimientos",
-    progress: "100%",
-  },
-  {
-    verification_name: "Checklist tipo de Riesgo",
-    progress: "100%",
-  },
-  {
-    verification_name: "Checklist por Daño Estructural",
-    progress: "75%",
-  },
-  {
-    verification_name: "Checklist de Riesgos por Deficiencia en las Instalaciones",
-    progress: "45%",
-  },
-  {
-    verification_name: "Checklist de Riesgos por Acabados en el Inmueble",
-    progress: "25%",
-  },
-  {
-    verification_name: "Checklist de Agente Perturbador de Tipo Socio-Organizativo",
-    progress: "100%",
-  },
-  {
-    verification_name: "Checklist de Requerimientos",
-    progress: "100%",
-  },
-  {
-    verification_name: "Checklist tipo de Riesgo",
-    progress: "100%",
-  },
-  {
-    verification_name: "Checklist por Daño Estructural",
-    progress: "75%",
-  },
-  {
-    verification_name: "Checklist de Riesgos por Deficiencia en las Instalaciones",
-    progress: "45%",
-  },
-  {
-    verification_name: "Checklist de Riesgos por Acabados en el Inmueble",
-    progress: "25%",
-  },
-  {
-    verification_name: "Checklist de Agente Perturbador de Tipo Socio-Organizativo",
-    progress: "100%",
-  },
+  { verification_name: "Checklist de Requerimientos", progress: "100%" },
+  { verification_name: "Checklist tipo de Riesgo", progress: "100%" },
+  { verification_name: "Checklist por Daño Estructural", progress: "75%" },
+  { verification_name: "Checklist de Riesgos por Deficiencia en las Instalaciones", progress: "45%" },
+  { verification_name: "Checklist de Riesgos por Acabados en el Inmueble", progress: "25%" },
+  { verification_name: "Checklist de Agente Perturbador de Tipo Socio-Organizativo", progress: "100%" },
+  { verification_name: "Checklist de Requerimientos", progress: "100%" },
+  { verification_name: "Checklist tipo de Riesgo", progress: "100%" },
+  { verification_name: "Checklist por Daño Estructural", progress: "75%" },
+  { verification_name: "Checklist de Riesgos por Deficiencia en las Instalaciones", progress: "45%" },
+  { verification_name: "Checklist de Riesgos por Acabados en el Inmueble", progress: "25%" },
+  { verification_name: "Checklist de Agente Perturbador de Tipo Socio-Organizativo", progress: "100%" },
 ];
 
 export function ContentPreviewEmpresa({ close }) {
+  const [redirect, setRedirect] = useState(false);
+
+  const handlePreviewEmpresa = () => {
+    setRedirect(true);
+  };
+
+  if (redirect) {
+    close();
+    return <Navigate to="/admin/listado/completo" />;
+  }
+
   return (
     <div className="min-w-full mt-5 px-4">
-
-      <div className="hide-scrollbar max-h-[500px] overflow-y-auto ">
+      <div className="hide-scrollbar max-h-[500px] overflow-y-auto">
         <Table className="w-full text-left rtl:text-right">
           <THead>
             <Tr className="border-y border-transparent border-b-gray-200 dark:border-b-dark-500">
@@ -80,15 +52,12 @@ export function ContentPreviewEmpresa({ close }) {
           <TBody>
             {data.map((tr, index) => {
               const progressValue = parseInt(tr.progress);
-              let textColorClass = "";
-
-              if (progressValue >= 50) {
-                textColorClass = "text-success";
-              } else if (progressValue > 25) {
-                textColorClass = "text-warning";
-              } else {
-                textColorClass = "text-[#9b0708]";
-              }
+              const textColorClass =
+                progressValue >= 50
+                  ? "text-success"
+                  : progressValue > 25
+                    ? "text-warning"
+                    : "text-[#9b0708]";
 
               return (
                 <Tr
@@ -116,6 +85,7 @@ export function ContentPreviewEmpresa({ close }) {
         </Button>
 
         <Button
+          onClick={handlePreviewEmpresa}
           color="primary"
           className="h-10 text-base font-light"
         >

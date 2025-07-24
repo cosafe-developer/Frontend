@@ -2,9 +2,11 @@
   "nav": {
     "admin": {
     "sections": "Secciones",
-    "listado": "Listado de listado",
+    "listado": "Listado de Requerimientos",
     "agentes": "Agentes",
-    "empresas": "Empresas"
+    "empresas": "Empresas",
+    "llenar-listado": "Llenar Listado",
+    "crear-listado": "Crear nuevo listado"
     },
     "dashboards": {
       "dashboards": "Tableros",

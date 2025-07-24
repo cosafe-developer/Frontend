@@ -19,14 +19,14 @@ import {
   NAV_TYPE_DIVIDER,
   NAV_TYPE_ITEM,
 } from "constants/app.constant";
+import { HomeIcon } from "@heroicons/react/24/outline";
 
 // ----------------------------------------------------------------------
 
 export function Menu({ nav, pathname }) {
   const initialActivePath = useMemo(() => {
     return nav.find((item) => isRouteActive(item.path, pathname))?.path;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [nav, pathname]);
 
   const { ref, recalculate } = useDataScrollOverflow();
   const [expanded, setExpanded] = useState(initialActivePath || "");
@@ -38,7 +38,7 @@ export function Menu({ nav, pathname }) {
       isRouteActive(item.path, pathname),
     )?.path;
 
-    if (activePath && expanded !== activePath) {     
+    if (activePath && expanded !== activePath) {
       setExpanded(activePath);
     }
   }, [nav, pathname]);
@@ -47,6 +47,35 @@ export function Menu({ nav, pathname }) {
     const activeItem = ref?.current.querySelector("[data-menu-active=true]");
     activeItem?.scrollIntoView({ block: "center" });
   }, []);
+
+  const extendedNav = useMemo(() => {
+    const clonedNav = [...nav];
+
+    if (pathname.includes("/admin/listado/completo")) {
+      clonedNav.push({
+        id: "admin.llenar-listado",
+        path: "/admin/listado/completo",
+        type: NAV_TYPE_ITEM,
+        title: "Llenar Listado",
+        transKey: "nav.admin.llenar-listado",
+        Icon: HomeIcon,
+      });
+    }
+
+    if (pathname.includes("/admin/listado/crear")) {
+      clonedNav.push({
+        id: "admin.crear-listado",
+        path: "/admin/listado/crear",
+        type: NAV_TYPE_ITEM,
+        title: "Crear nuevo Listado",
+        transKey: "nav.admin.crear-listado",
+        Icon: HomeIcon,
+      });
+    }
+
+    return clonedNav;
+  }, [nav, pathname]);
+
 
   return (
     <Accordion
@@ -60,18 +89,50 @@ export function Menu({ nav, pathname }) {
         style={{ "--scroll-shadow-size": "32px" }}
       >
         <div className="flex h-full flex-1 flex-col px-4">
-          {nav.map((item) => {
-            switch (item.type) {
-              case NAV_TYPE_COLLAPSE:
-                return <CollapsibleItem key={item.path} data={item} />;
-              case NAV_TYPE_ITEM:
-                return <MenuItem key={item.path} data={item} />;
-              case NAV_TYPE_DIVIDER:
-                return <Divider key={item.id} />;
-              default:
-                return null;
-            }
-          })}
+          {(() => {
+            const itemsWithDivider = [];
+
+            const lastItemIndex = extendedNav
+              .map((item, idx) => (item.type === NAV_TYPE_ITEM ? idx : null))
+              .filter((idx) => idx !== null)
+              .pop();
+
+            extendedNav.forEach((item, idx) => {
+              if (
+                pathname.includes("/admin/listado/completo") &&
+                idx === lastItemIndex
+              ) {
+                itemsWithDivider.push(<Divider key="custom-divider" />);
+              }
+
+              if (
+                pathname.includes("/admin/listado/crear") &&
+                idx === lastItemIndex
+              ) {
+                itemsWithDivider.push(<Divider key="custom-divider" />);
+              }
+
+              switch (item.type) {
+                case NAV_TYPE_COLLAPSE:
+                  itemsWithDivider.push(
+                    <CollapsibleItem key={item.path} data={item} />
+                  );
+                  break;
+                case NAV_TYPE_ITEM:
+                  itemsWithDivider.push(
+                    <MenuItem key={item.path} data={item} />
+                  );
+                  break;
+                case NAV_TYPE_DIVIDER:
+                  itemsWithDivider.push(<Divider key={item.id} />);
+                  break;
+                default:
+                  break;
+              }
+            });
+
+            return itemsWithDivider;
+          })()}
         </div>
       </SimpleBar>
     </Accordion>
@@ -80,4 +141,5 @@ export function Menu({ nav, pathname }) {
 
 Menu.propTypes = {
   nav: PropTypes.array,
+  pathname: PropTypes.string,
 };

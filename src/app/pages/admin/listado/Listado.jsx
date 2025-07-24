@@ -4,6 +4,7 @@ import ListadoCards from "components/listado/ListadoCards";
 import ListadoTabla from "./table";
 import ListadoHeader from "components/listado/ListadoHeader";
 import LoadingContent from "components/template/LoadingContent";
+import { Navigate } from "react-router";
 
 // import OrdersDatatableV2 from "./orders-datatable-2";
 
@@ -24,6 +25,7 @@ const Listado = () => {
   const endPointListado = "/admin/get/listado/";
   const [isFetching, setIsFetching] = useState(true);
   const [data, setData] = useState(null);
+  const [redirect, setRedirect] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -43,6 +45,10 @@ const Listado = () => {
     return <LoadingContent />
   }
 
+  if (redirect) {
+    return <Navigate to="/admin/listado/crear" replace />;
+  }
+
   return (
     <Page title="Listado de Requerimientos">
       <div className="transition-content w-full px-(--margin-x) pt-5 lg:pt-6">
@@ -50,6 +56,7 @@ const Listado = () => {
           <ListadoHeader
             titulo={data?.header?.titulo}
             textoBoton={data?.header?.textoBoton}
+            onClick={() => setRedirect(true)}
           />
           <ListadoCards stats={data?.stats} />
         </div>
