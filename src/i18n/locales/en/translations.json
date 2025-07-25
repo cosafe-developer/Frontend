@@ -1,0 +1,17 @@
+{
+  "nav": {
+     "home": {
+      "sections": "Sections",
+      "requirementsList": "List of Requirements"
+    },
+    "dashboards": {
+      "dashboards": "Dashboards",
+      "home": "Home"
+    },
+    "settings": {
+      "settings": "Settings",
+      "general": "General",
+      "appearance": "Appearance"
+    }
+  }
+}
