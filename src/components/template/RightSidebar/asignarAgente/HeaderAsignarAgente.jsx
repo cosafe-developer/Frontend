@@ -1,7 +1,7 @@
 // Import Dependencies
 import PropTypes from "prop-types";
 import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import invariant from "tiny-invariant";
 
 // Local Imports
@@ -38,13 +38,14 @@ const agentesData = [
 export function HeaderAsignarAgente({ close }) {
   const searchRef = useRef(null);
   const { data } = useRightSidebarContext();
-  const { agentesAsignados, setAgentesAsignados } = data || {};
-
-  const { /* result,  */query, setQuery } = useFuse(agentesData, {
+  const [query, setQuery] = useState("");
+  const { result } = useFuse(agentesData, {
     keys: ["name"],
     threshold: 0.2,
     matchAllOnEmptyQuery: true,
   });
+
+  const { agentesAsignados, setAgentesAsignados } = data || {};
 
   useEffect(() => {
     invariant(searchRef.current, "searchRef is not assigned");
@@ -84,7 +85,7 @@ export function HeaderAsignarAgente({ close }) {
       <div className="text-lg mt-10">
         <ContentAsignarAgente
           close={close}
-          data={agentesData}
+          data={result}
           agentesAsignados={agentesAsignados}
           setAgentesAsignados={setAgentesAsignados}
         />

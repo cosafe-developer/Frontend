@@ -4,8 +4,6 @@ import { truncateText } from "helpers/truncateText.helper";
 
 export function ContentAsignarAgente({ close, data = [], agentesAsignados, setAgentesAsignados }) {
 
-
-
   return (
     <div className="min-w-full">
 
@@ -18,14 +16,17 @@ export function ContentAsignarAgente({ close, data = [], agentesAsignados, setAg
                 className={`border-y border-transparent border-b-gray-200 dark:border-b-dark-500 ${index === 0 ? "border-t-gray-200 dark:border-t-dark-500" : ""
                   }`}
               >
-                <Td>{truncateText(item?.item?.name || item.name, 50)}</Td>
+                <Td className="w-full max-w-0 truncate pr-4">
+                  {truncateText(item?.item?.name || item.name, 50)}
+                </Td>
 
-                <Td className="text-center">
+                <Td className="w-[120px] text-center align-middle">
                   <Button
                     variant="outlined"
                     onClick={() => {
-                      if (!agentesAsignados.find((a) => a.name === item.name)) {
-                        setAgentesAsignados([...agentesAsignados, item]);
+                      const nombre = item?.item?.name || item.name;
+                      if (!agentesAsignados.find((agente) => agente.name === nombre)) {
+                        setAgentesAsignados([...agentesAsignados, { name: nombre }]);
                       }
                       close();
                     }}
@@ -36,6 +37,7 @@ export function ContentAsignarAgente({ close, data = [], agentesAsignados, setAg
                   </Button>
                 </Td>
               </Tr>
+
             ))}
           </TBody>
         </Table>

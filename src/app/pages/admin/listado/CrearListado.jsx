@@ -1,6 +1,6 @@
 import { useForm, Controller } from "react-hook-form";
 import { Page } from "components/shared/Page";
-import { Card, Button, Badge } from "components/ui";
+import { Card, Button, Badge, Circlebar } from "components/ui";
 import { Listbox } from "components/shared/form/Listbox";
 import { FiFilePlus } from "react-icons/fi";
 import { DatePicker } from "components/shared/form/Datepicker";
@@ -8,6 +8,7 @@ import { IoPersonOutline } from "react-icons/io5";
 import { useRightSidebarContext } from "app/contexts/sidebar-right/context";
 import { HeaderAsignarAgente } from "components/template/RightSidebar/asignarAgente/HeaderAsignarAgente";
 import { useState } from "react";
+import { getColorProgress } from "helpers/getColorProgress.helper";
 
 
 const empresas = [
@@ -41,7 +42,6 @@ const CrearListado = () => {
   const onSubmit = (data) => {
     console.log("Formulario enviado:", data);
   };
-
 
   return (
     <Page title="Listado de Requerimientos">
@@ -125,48 +125,49 @@ const CrearListado = () => {
 
                 <div>
                   <h2 className="mb-4">Asignar Agentes</h2>
-                  <Button
-                    onClick={() => {
-                      openSidebar({
-                        header: HeaderAsignarAgente,
-                        data: {
-                          agentesAsignados,
-                          setAgentesAsignados,
-                        },
-                      });
-                    }}
-                    variant="outlined"
-                    className="flex items-center gap-1 font-light"
-                  >
-                    <IoPersonOutline size={16} />
-                    Nuevo
-                  </Button>
-
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    {agentesAsignados.map((agente) => (
-                      <div key={agente.name} className="flex items-center gap-1">
-                        <Badge
-                          className="rounded-full capitalize px-4 text-sm py-2"
-                          color="success"
-                          variant="soft"
-                        >
-                          {agente.name}
-                        </Badge>
-                        <button
-                          onClick={() =>
-                            setAgentesAsignados((prev) =>
-                              prev.filter((a) => a.name !== agente.name)
-                            )
-                          }
-                          className="text-xs text-red-400 hover:text-red-600"
-                        >
-                          ✕
-                        </button>
-                      </div>
-                    ))}
+                  <div className="flex items-center gap-4 flex-wrap">
+                    <Button
+                      onClick={() => {
+                        openSidebar({
+                          header: HeaderAsignarAgente,
+                          data: {
+                            agentesAsignados,
+                            setAgentesAsignados,
+                          },
+                        });
+                      }}
+                      variant="outlined"
+                      className="flex items-center gap-1 font-light min-w-[120px] justify-center"
+                    >
+                      <IoPersonOutline size={16} />
+                      Nuevo
+                    </Button>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                      {agentesAsignados.map((agente) => (
+                        <div key={agente.name} className="flex items-center">
+                          <Badge
+                            className="rounded-full capitalize px-4 text-sm py-3 border border-gray-500/60 w-full flex justify-between items-center"
+                            color="success"
+                            variant="soft"
+                          >
+                            {agente.name}
+                            <button
+                              onClick={() =>
+                                setAgentesAsignados((prev) =>
+                                  prev.filter((a) => a.name !== agente.name)
+                                )
+                              }
+                              className="text-xs text-red-400 hover:text-red-600 hover:cursor-pointer pl-2"
+                            >
+                              ✕
+                            </button>
+                          </Badge>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-
                 </div>
+
 
                 <div className="flex justify-end space-x-5">
                   <Button type="submit">
@@ -181,9 +182,28 @@ const CrearListado = () => {
                     Guardar
                   </Button>
                 </div>
-
-
               </form>
+            </Card>
+
+            <Card className="flex flex-col p-5 space-y-6 mt-10 mb-[3rem]">
+              <div className="flex items-center space-x-2">
+                <Circlebar
+                  size={13}
+                  strokeWidth={9}
+                  value={100}
+                  color={getColorProgress(100)}
+                >
+                  <div className="text-tiny-plus font-semibold text-gray-800 dark:text-dark-100">
+                    {100}%
+                  </div>
+                </Circlebar>
+                <div className="space-y-1">
+                  <h2 className="text-white">Oxxo</h2>
+                  <p>Datos Generales | <span className="font-light text-green-400">• Completado 08.03.25</span></p>
+                </div>
+
+              </div>
+
             </Card>
           </div>
         </div>
