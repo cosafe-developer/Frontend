@@ -20,17 +20,16 @@ import { fuzzyFilter } from "utils/react-table/fuzzyFilter";
 import { useSkipper } from "utils/react-table/useSkipper";
 import { Toolbar } from "./Toolbar";
 import { columns } from "./columns";
-import { ordersList } from "./data";
+import { usersList } from "./data";
 import { PaginationSection } from "components/shared/table/PaginationSection";
 import { SelectedRowsActions } from "./SelectedRowsActions";
 import { ListView } from "./ListView";
 
 
-
 // ----------------------------------------------------------------------
 
-export default function ListadoTabla() {
-  const [users, setUsers] = useState([...ordersList]);
+export default function EmpresasTabla() {
+  const [users, setUsers] = useState([...usersList]);
 
   const [tableSettings, setTableSettings] = useState({
     enableFullScreen: false,
@@ -76,6 +75,7 @@ export default function ListadoTabla() {
     },
     meta: {
       updateData: (rowIndex, columnId, value) => {
+        // Skip page index reset until after next rerender
         skipAutoResetPageIndex();
         setUsers((old) =>
           old.map((row, index) => {
@@ -135,7 +135,7 @@ export default function ListadoTabla() {
   const WrapComponent = viewType === "list" ? Card : Box;
 
   return (
-    <Page title="Listado de Requerimientos">
+    <Page title="Empresas">
       <div className="transition-content w-full pb-[3rem]">
         <div
           className={clsx(

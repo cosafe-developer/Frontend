@@ -92,7 +92,7 @@ function Item({ row, table }) {
           component: "button",
           src: row.original.avatar,
           name: row.original.name,
-          initialColor: "auto",
+          initialColor: "neutral",
           indicator: (
             <Transition
               as={AvatarDot}
@@ -177,7 +177,7 @@ function Actions({ row, table }) {
       <div className="flex justify-center gap-1 py-2">
         <Button className="h-7 space-x-1.5 rounded-full px-3 text-xs">
           <UserIcon className="size-4" />
-          <span>Proflie</span>
+          <span>Profile</span>
         </Button>
         <Button isIcon className="size-7 rounded-full">
           <EnvelopeIcon className="size-4" />
@@ -206,7 +206,7 @@ function Actions({ row, table }) {
                   )}
                 >
                   <EyeIcon className="size-4.5 stroke-1" />
-                  <span>View</span>
+                  <span>Ver</span>
                 </button>
               )}
             </MenuItem>
@@ -220,7 +220,7 @@ function Actions({ row, table }) {
                   )}
                 >
                   <PencilIcon className="size-4.5 stroke-1" />
-                  <span>Edit</span>
+                  <span>Editar</span>
                 </button>
               )}
             </MenuItem>
@@ -234,7 +234,7 @@ function Actions({ row, table }) {
                   )}
                 >
                   <TrashIcon className="size-4.5 stroke-1" />
-                  <span>Delete</span>
+                  <span>Borrar</span>
                 </button>
               )}
             </MenuItem>

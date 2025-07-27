@@ -8,12 +8,12 @@ import {
 } from "@headlessui/react";
 import {
   EllipsisHorizontalIcon,
-  EnvelopeIcon,
   EyeIcon,
   PencilIcon,
   TrashIcon,
-  UserIcon,
+  ClipboardIcon
 } from "@heroicons/react/24/outline";
+import { FiBell } from "react-icons/fi";  // Feather Icons: bell y copy
 import clsx from "clsx";
 import { useCallback, useState } from "react";
 import PropTypes from "prop-types";
@@ -21,6 +21,10 @@ import PropTypes from "prop-types";
 // Local Imports
 import { ConfirmModal } from "components/shared/ConfirmModal";
 import { Button } from "components/ui";
+import { useRightSidebarContext } from "app/contexts/sidebar-right/context";
+import { HeaderAdministrarAgente } from "components/template/RightSidebar/administrarAgente/HeaderAdministrarAgente";
+import { ContentAdministrarAgente } from "components/template/RightSidebar/administrarAgente/ContentAdministrarAgente";
+import { useNavigate } from "react-router";
 
 // ----------------------------------------------------------------------
 
@@ -39,6 +43,8 @@ export function RowActions({ row, table }) {
   const [confirmDeleteLoading, setConfirmDeleteLoading] = useState(false);
   const [deleteSuccess, setDeleteSuccess] = useState(false);
   const [deleteError, setDeleteError] = useState(false);
+  const { openSidebar } = useRightSidebarContext();
+  const navigate = useNavigate();
 
   const closeModal = () => {
     setDeleteModalOpen(false);
@@ -66,10 +72,10 @@ export function RowActions({ row, table }) {
     <>
       <div className="flex justify-center">
         <Button variant="flat" isIcon className="size-7 rounded-full">
-          <UserIcon className="size-4.5" />
+          <FiBell className="size-4.5" />
         </Button>
         <Button variant="flat" isIcon className="size-7 rounded-full">
-          <EnvelopeIcon className="size-4.5" />
+          <ClipboardIcon className="size-4.5" />
         </Button>
         <Menu as="div" className="relative inline-block text-left">
           <MenuButton
@@ -93,10 +99,16 @@ export function RowActions({ row, table }) {
             <MenuItem>
               {({ focus }) => (
                 <button
+                  onClick={() => {
+                    openSidebar({
+                      header: HeaderAdministrarAgente,
+                      body: ContentAdministrarAgente
+                    })
+                  }}
                   className={clsx(
-                    "flex h-9 w-full items-center space-x-3 px-3 tracking-wide outline-hidden transition-colors ",
+                    "flex h-9 w-full items-center  hover:cursor-pointer space-x-3 px-3 tracking-wide outline-hidden transition-colors ",
                     focus &&
-                      "bg-gray-100 text-gray-800 dark:bg-dark-600 dark:text-dark-100",
+                    "bg-gray-100 text-gray-800 dark:bg-dark-600 dark:text-dark-100",
                   )}
                 >
                   <EyeIcon className="size-4.5 stroke-1" />
@@ -107,10 +119,11 @@ export function RowActions({ row, table }) {
             <MenuItem>
               {({ focus }) => (
                 <button
+                  onClick={() => navigate(`/admin/agentes/editar/`)}
                   className={clsx(
-                    "flex h-9 w-full items-center space-x-3 px-3 tracking-wide outline-hidden transition-colors ",
+                    "flex h-9 w-full hover:cursor-pointer items-center space-x-3 px-3 tracking-wide outline-hidden transition-colors ",
                     focus &&
-                      "bg-gray-100 text-gray-800 dark:bg-dark-600 dark:text-dark-100",
+                    "bg-gray-100 text-gray-800 dark:bg-dark-600 dark:text-dark-100",
                   )}
                 >
                   <PencilIcon className="size-4.5 stroke-1" />
@@ -123,7 +136,7 @@ export function RowActions({ row, table }) {
                 <button
                   onClick={openModal}
                   className={clsx(
-                    "this:error flex h-9 w-full items-center space-x-3 px-3 tracking-wide text-this outline-hidden transition-colors dark:text-this-light ",
+                    "this:error flex h-9  hover:cursor-pointer w-full items-center space-x-3 px-3 tracking-wide text-this outline-hidden transition-colors dark:text-this-light ",
                     focus && "bg-this/10 dark:bg-this-light/10",
                   )}
                 >

@@ -24,7 +24,6 @@ import { usersList } from "./data";
 import { PaginationSection } from "components/shared/table/PaginationSection";
 import { SelectedRowsActions } from "./SelectedRowsActions";
 import { ListView } from "./ListView";
-import { GridView } from "./GridView";
 
 
 // ----------------------------------------------------------------------
@@ -63,7 +62,7 @@ export default function AgentesTabla() {
     columns: columns,
     initialState: {
       pagination: {
-        pageSize: 20,
+        pageSize: 10,
       },
     },
     state: {
@@ -136,7 +135,7 @@ export default function AgentesTabla() {
   const WrapComponent = viewType === "list" ? Card : Box;
 
   return (
-    <Page title="Users Datatable">
+    <Page title="Agentes">
       <div className="transition-content w-full pb-5">
         <div
           className={clsx(
@@ -163,8 +162,6 @@ export default function AgentesTabla() {
               {viewType === "list" && (
                 <ListView table={table} flexRender={flexRender} rows={rows} />
               )}
-
-              {viewType === "grid" && <GridView table={table} rows={rows} />}
 
               {table.getCoreRowModel().rows.length && (
                 <div

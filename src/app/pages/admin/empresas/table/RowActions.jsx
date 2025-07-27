@@ -24,8 +24,8 @@ import { Button } from "components/ui";
 import { useRightSidebarContext } from "app/contexts/sidebar-right/context";
 
 import { useNavigate } from "react-router";
-import { HeaderPreviewEmpresa } from "components/template/RightSidebar/previewEmpresa/HeaderPreviewEmpresa";
-import { ContentPreviewEmpresa } from "components/template/RightSidebar/previewEmpresa/ContentPreviewEmpresa";
+import { HeaderAdministrarEmpresa } from "components/template/RightSidebar/administrarEmpresa/HeaderAdministrarEmpresa";
+import { ContentAdministrarEmpresa } from "components/template/RightSidebar/administrarEmpresa/ContentAdministrarEmpresa";
 
 // ----------------------------------------------------------------------
 
@@ -102,8 +102,8 @@ export function RowActions({ row, table }) {
                 <button
                   onClick={() => {
                     openSidebar({
-                      header: HeaderPreviewEmpresa,
-                      body: ContentPreviewEmpresa
+                      header: HeaderAdministrarEmpresa,
+                      body: ContentAdministrarEmpresa
                     })
                   }}
                   className={clsx(
@@ -120,7 +120,7 @@ export function RowActions({ row, table }) {
             <MenuItem>
               {({ focus }) => (
                 <button
-                  onClick={() => navigate(`/admin/listado/llenar`)}
+                  onClick={() => navigate(`/admin/empresas/editar/`)}
                   className={clsx(
                     "flex h-9 w-full hover:cursor-pointer items-center space-x-3 px-3 tracking-wide outline-hidden transition-colors ",
                     focus &&

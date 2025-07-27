@@ -5,9 +5,9 @@ import { CheckIcon } from "@heroicons/react/20/solid";
 import PropTypes from "prop-types";
 
 // Local Imports
-import { Avatar, Badge, Swap, SwapOff, SwapOn } from "components/ui";
+import { Avatar,/*  Badge, */ Swap, SwapOff, SwapOn } from "components/ui";
 import { StyledSwitch } from "components/shared/form/StyledSwitch";
-import { rolesOptions } from "./data";
+
 import { Highlight } from "components/shared/Highlight";
 import { ensureString } from "utils/ensureString";
 
@@ -51,17 +51,6 @@ export function NameCell({ row, getValue, column, table }) {
   );
 }
 
-export function RoleCell({ getValue }) {
-  const val = getValue();
-  const option = rolesOptions.find((item) => item.value === val);
-
-  return (
-    <Badge color={option.color} variant="outlined">
-      {option.label}
-    </Badge>
-  );
-}
-
 export function StatusCell({
   getValue,
   row: { index },
@@ -97,9 +86,9 @@ NameCell.propTypes = {
   table: PropTypes.object,
 };
 
-RoleCell.propTypes = {
+/* RoleCell.propTypes = {
   getValue: PropTypes.func,
-};
+}; */
 
 StatusCell.propTypes = {
   getValue: PropTypes.func,
