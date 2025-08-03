@@ -62,6 +62,17 @@ export function Menu({ nav, pathname }) {
       });
     }
 
+    if (pathname.includes("/admin/listado/llenar")) {
+      clonedNav.push({
+        id: "admin.llenar-listado",
+        path: "/admin/listado/llenar",
+        type: NAV_TYPE_ITEM,
+        title: "Llenar Listado",
+        transKey: "nav.admin.llenar-listado",
+        Icon: HomeIcon,
+      });
+    }
+
     if (pathname.includes("/admin/listado/crear")) {
       clonedNav.push({
         id: "admin.crear-listado",
@@ -121,6 +132,13 @@ export function Menu({ nav, pathname }) {
             extendedNav.forEach((item, idx) => {
               if (
                 pathname.includes("/admin/listado/completo") &&
+                idx === lastItemIndex
+              ) {
+                itemsWithDivider.push(<Divider key="custom-divider" />);
+              }
+
+              if (
+                pathname.includes("/admin/listado/llenar") &&
                 idx === lastItemIndex
               ) {
                 itemsWithDivider.push(<Divider key="custom-divider" />);
