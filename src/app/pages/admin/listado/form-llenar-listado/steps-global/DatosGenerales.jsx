@@ -1,10 +1,10 @@
-import EmpresaStep1 from "../empresa/EmpresaStep1";
-import EmpresaStep2 from "../empresa/EmpresaStep2";
-import EmpresaStep3 from "../empresa/EmpresaStep3";
+import EmpresaStep1 from "../steps-datos-empresa/EmpresaStep1";
+import EmpresaStep2 from "../steps-datos-empresa/EmpresaStep2";
+import EmpresaStep3 from "../steps-datos-empresa/EmpresaStep3";
 
 // ----------------------------------------------------------------------
 
-export function General({
+export function DatosGenerales({
   // setCurrentStep,
   currentEmpresaStep,
   // currentEStudioStep,

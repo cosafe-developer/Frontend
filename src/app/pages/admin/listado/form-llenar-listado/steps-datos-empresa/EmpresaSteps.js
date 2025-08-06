@@ -4,7 +4,7 @@ import EmpresaStep3 from "./EmpresaStep3";
 
 export const empresaSteps = [
   {
-    key: "informacion_de_la_empresa",
+    key: "informacion_empresa",
     component: EmpresaStep1,
     label: "Información de la Empresa",
   },

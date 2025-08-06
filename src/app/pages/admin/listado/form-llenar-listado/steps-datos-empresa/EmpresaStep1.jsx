@@ -1,67 +1,39 @@
-// Import Dependencies
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 
 // Local Imports
-import { Button, Input } from "components/ui";
+import { Button, Input, Upload } from "components/ui";
 import { useLlenarListadoFormContext } from "../LlenarListadoFormContext";
-import { generalSchema } from "../schema";
-// import { useNavigate } from "react-router";
-
-import { Upload } from "components/ui";
+import { infoEmpresaSchema } from "../schema";
 import { CloudArrowUpIcon } from "@heroicons/react/24/solid";
-import { useRef, useState } from "react";
 import { FileItemSquare } from "components/shared/form/FileItemSquare";
 
-// ----------------------------------------------------------------------
-
-const EmpresaStep1 = ({
-  // setCurrentStep,
-  // currentEmpresaStep,
-  // currentEStudioStep,
-  // setCurrentEStudioStep,
-  setCurrentEmpresaStep
-}) => {
+const EmpresaStep1 = ({ setCurrentEmpresaStep }) => {
   const llenarListadoFormCtx = useLlenarListadoFormContext();
-  // const navigate = useNavigate();
-  const [file, setFile] = useState(null);
-  const uploadRef = useRef();
 
-  const handleRemove = (e) => {
-    e.stopPropagation();
-    uploadRef.current.value = "";
-    setFile(null);
-  };
-
+  // control del formulario
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors },
   } = useForm({
-    resolver: yupResolver(generalSchema),
-    defaultValues: llenarListadoFormCtx.state.formData.general,
+    resolver: yupResolver(infoEmpresaSchema),
+    defaultValues: llenarListadoFormCtx.state.formData.informacion_empresa,
   });
 
   const onSubmit = (data) => {
     llenarListadoFormCtx.dispatch({
       type: "SET_FORM_DATA",
       payload: {
-        general: {
-          logotipo: file,
-          nombre: data.nombre,
-          rfc: data.rfc,
-          email: data.email,
-          domicilio: data.domicilio,
-          domicilio_fisico: data.domicilio_fisico,
-        }
+        informacion_empresa: data,
       },
     });
+    llenarListadoFormCtx.dispatch({
+      type: "SET_STEP_STATUS",
+      payload: { informacion_empresa: { isDone: true } },
+    });
     setCurrentEmpresaStep(1);
-    // llenarListadoFormCtx.dispatch({
-    //   type: "SET_STEP_STATUS",
-    //   payload: { general: { isDone: true } },
-    // });
-    // setCurrentStep(1);
   };
 
   return (
@@ -72,35 +44,41 @@ const EmpresaStep1 = ({
     >
       <div className="grow space-y-4">
         <div className="flex flex-col gap-y-1.5">
-          <label
-            className="input-label"
-          >
-            <span className="input-label">Logotipo Oficial</span>
+          <label className="input-label">
+            <span>Logotipo Oficial</span>
             <span className="ml-2 text-error">*</span>
           </label>
-          <Upload
-            onChange={setFile}
-            ref={uploadRef}
-            accept="image/*"
-          >
-            {({ ...props }) =>
-              file ? (
-                <FileItemSquare
-                  handleRemove={handleRemove}
-                  file={file}
-                  {...props}
-                />
-              ) : (
-                <Button
-                  unstyled
-                  className="size-20 shrink-0 space-x-2 rounded-lg border-2 border-current p-0 text-gray-300 hover:text-primary-600 dark:text-dark-450 dark:hover:text-primary-500 "
-                  {...props}
-                >
-                  <CloudArrowUpIcon className="size-12 stroke-2" />
-                </Button>
-              )
-            }
-          </Upload>
+          <Controller
+            name="logotipo"
+            control={control}
+            render={({ field: { value, onChange } }) => (
+              <Upload
+                onChange={onChange}
+                accept="image/*"
+              >
+                {({ ...props }) =>
+                  value ? (
+                    <FileItemSquare
+                      handleRemove={() => onChange(null)}
+                      file={value}
+                      {...props}
+                    />
+                  ) : (
+                    <Button
+                      unstyled
+                      className="size-20 shrink-0 space-x-2 rounded-lg border-2 border-current p-0 text-gray-300 hover:text-primary-600 dark:text-dark-450 dark:hover:text-primary-500 "
+                      {...props}
+                    >
+                      <CloudArrowUpIcon className="size-12 stroke-2" />
+                    </Button>
+                  )
+                }
+              </Upload>
+            )}
+          />
+          {errors.logotipo && (
+            <span className="input-text-error mt-1 text-xs text-error dark:text-error-lighter">{errors.logotipo.message}</span>
+          )}
         </div>
         <Input
           {...register("nombre")}
@@ -147,13 +125,13 @@ const EmpresaStep1 = ({
           placeholder="Ingresar Domicilio..."
         />
       </div>
-      <div className="mt-4 flex justify-end space-x-3 ">
+      <div className="mt-4 flex justify-end space-x-3 pb-4">
         <Button type="submit" className="min-w-[7rem]" color="primary">
           Siguiente
         </Button>
       </div>
     </form>
   );
-}
+};
 
 export default EmpresaStep1;

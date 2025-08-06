@@ -4,13 +4,13 @@ import PropTypes from "prop-types";
 
 // Local Imports
 import { LlenarListadoFormContextProvider } from "./LlenarListadoFormContext";
-import { Delta } from "components/shared/form/TextEditor";
+// import { Delta } from "components/shared/form/TextEditor";
 
 // ----------------------------------------------------------------------
 
 const initialState = {
   formData: {
-    general: {
+    informacion_empresa: {
       logotipo: null,
       nombre: "",
       rfc: "",
@@ -18,32 +18,41 @@ const initialState = {
       domicilio: "",
       domicilio_fisico: "",
     },
+    informacion_de_la_direccion: {
+      constancia_fiscal: null,
+      actividades_empresa: "",
+      giro_empresarial: "",
+      responsable_inmueble: "",
+      cargo_responsable_inmueble: "",
+      nombre_representante: "",
+      cargo_representante: "",
+      firma_representante: null,
+      ine_representante: null,
+      domicilio_fisico: "",
+      domicilio_notificaciones: "",
+      superficie_terreno: "",
+      poblacion_fija: "",
+      colindancias_inmueble: "",
+      areas_inmueble: "",
+    },
+    informacion_de_riesgo: {},
+    // --------------------------------------
     estudio: {},
-    description: {
-      short_description: "",
-      description: new Delta(),
-      meta_title: "",
-      meta_description: "",
-      meta_keywords: [],
-    },
-    images: {
-      cover: null,
-      gallery: [],
-    },
   },
   stepStatus: {
-    general: {
+    datos_generales: {
       isDone: false,
     },
-    description: {
+    informacion_empresa: {
       isDone: false,
     },
-    images: {
+    informacion_de_la_direccion: {
       isDone: false,
     },
-    finish: {
+    informacion_de_riesgo: {
       isDone: false,
     },
+    // ------------------------ 
     estudio: {
       isDone: false,
     },
