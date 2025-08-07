@@ -5,7 +5,7 @@ import EmpresaStep3 from "../steps-datos-empresa/EmpresaStep3";
 // ----------------------------------------------------------------------
 
 export function DatosGenerales({
-  // setCurrentStep,
+  setCurrentStep,
   currentEmpresaStep,
   // currentEStudioStep,
   // setCurrentEStudioStep,
@@ -17,7 +17,7 @@ export function DatosGenerales({
     case 1:
       return <EmpresaStep2 setCurrentEmpresaStep={setCurrentEmpresaStep} />;
     case 2:
-      return <EmpresaStep3 setCurrentEmpresaStep={setCurrentEmpresaStep} />;
+      return <EmpresaStep3 setCurrentEmpresaStep={setCurrentEmpresaStep} setCurrentStep={setCurrentStep} />;
     default:
       return null;
   }
