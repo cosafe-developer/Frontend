@@ -2,7 +2,7 @@ import { fetchWithCookies } from "helpers/fetch";
 
 
 
-async function getEmpresa(id) {
+async function getEmpresaById(id) {
   try {
     const endpoint = `empresa/${id}`;
     const resp = await fetchWithCookies(endpoint);
@@ -16,4 +16,4 @@ async function getEmpresa(id) {
   }
 }
 
-export default getEmpresa;
+export default getEmpresaById;

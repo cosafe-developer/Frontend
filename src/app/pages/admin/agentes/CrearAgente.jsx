@@ -43,8 +43,8 @@ const CrearAgente = () => {
       email: "",
       telefono: "",
       cargo: "",
-      password: "",
-      confirmPassword: "",
+      contraseña: "",
+      confirmarContraseña: "",
       empresa: "",
       estudio: "",
     },
@@ -184,7 +184,7 @@ const CrearAgente = () => {
                       label="Contraseña *"
                       placeholder="htrejos245CV"
                       type="password"
-                      error={errors?.password?.message}
+                      error={errors?.contraseña?.message}
                       {...field}
                     />
                   )}
@@ -203,7 +203,7 @@ const CrearAgente = () => {
                       placeholder="htrejos245CV"
                       label="Confirmar Contraseña *"
                       type="password"
-                      error={errors?.confirmPassword?.message}
+                      error={errors?.confirmarContraseña?.message}
                       {...field}
                     />
                   )}

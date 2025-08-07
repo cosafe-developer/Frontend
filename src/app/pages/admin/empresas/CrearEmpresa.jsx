@@ -1,29 +1,12 @@
 import { useForm, Controller } from "react-hook-form";
 import { Page } from "components/shared/Page";
 import { Card, Button, Input } from "components/ui";
-import { Listbox } from "components/shared/form/Listbox";
-import { DatePicker } from "components/shared/form/Datepicker";
-
 import { useState } from "react";
 
 import { Dropzone } from "./upload/DropZoneEmpresa";
 import { useNavigate } from "react-router";
 
-const empresas = [
-  { id: "1", label: "Empresa A" },
-  { id: "2", label: "Empresa B" },
-];
 
-const estudios = [
-  { id: "1", label: "Estudio X" },
-  { id: "2", label: "Estudio Y" },
-];
-
-const generos = [
-  { id: "masculino", label: "Masculino" },
-  { id: "femenino", label: "Femenino" },
-  { id: "otro", label: "Otro" },
-];
 
 const CrearEmpresa = () => {
   const [uploadedFiles, setUploadedFiles] = useState([]);
@@ -36,17 +19,12 @@ const CrearEmpresa = () => {
     watch,
   } = useForm({
     defaultValues: {
-      nombres: "",
-      apellidos: "",
-      genero: "",
-      fechaEntrada: null,
+      nombreEmpresa: "",
+      rfc: "",
       email: "",
       telefono: "",
-      cargo: "",
-      password: "",
-      confirmPassword: "",
-      empresa: "",
-      estudio: "",
+      contraseña: "",
+      confirmarContraseña: "",
     },
   });
 
@@ -55,83 +33,53 @@ const CrearEmpresa = () => {
   };
 
   return (
-    <Page title="Crear Nuevo Agente">
+    <Page title="Crear Nueva Empresa">
       <div className="transition-content w-full px-(--margin-x) pt-5 lg:pt-6">
-        <h1 className="text-white text-2xl">Crear Agente</h1>
+        <h1 className="text-white text-2xl">Crear Empresa</h1>
 
         <div className="mt-8 flex gap-8 mb-[4rem]">
           <div className="w-full">
             <Card className="flex flex-col p-5 space-y-6">
               <div>
-                <h2 className="text-xl text-white">Información de Agente</h2>
-                <p className="mt-2 text-[16px]">Por favor proporcione la información personal para crear su perfil</p>
+                <h2 className="text-xl text-white">Datos Generales</h2>
+                <p className="mt-2 text-[16px]">
+                  Por favor proporcione la información de la empresa para crear su perfil
+                </p>
               </div>
 
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                 <Dropzone files={uploadedFiles} setFiles={setUploadedFiles} />
 
+                <Controller
+                  name="nombreEmpresa"
+                  control={control}
+                  rules={{ required: "Nombre Empresa Requerido" }}
+                  render={({ field }) => (
+                    <Input
+                      placeholder="Escribir Nombre Comercial de la Empresa..."
+                      label="Nombre Comercial, Denominación o Razón Social *"
+                      error={errors?.nombreEmpresa?.message}
+                      {...field}
+                    />
+                  )}
+                />
+
+                <Controller
+                  name="rfc"
+                  control={control}
+                  rules={{ required: "Nombre Empresa Requerido" }}
+                  render={({ field }) => (
+                    <Input
+                      placeholder="Escribir Nombre Comercial de la Empresa..."
+                      label="Nombre Comercial, Denominación o Razón Social *"
+                      error={errors?.rfc?.message}
+                      {...field}
+                    />
+                  )}
+                />
+
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Controller
-                    name="nombres"
-                    control={control}
-                    rules={{ required: "Nombre(s) requerido" }}
-                    render={({ field }) => (
-                      <Input
-                        placeholder="Hernan"
-                        label="Nombre(s) *"
-                        error={errors?.nombres?.message}
-                        {...field}
-                      />
-                    )}
-                  />
-
-                  <Controller
-                    name="apellidos"
-                    control={control}
-                    rules={{ required: "Apellido(s) requerido" }}
-                    render={({ field }) => (
-                      <Input
-                        placeholder="Trejo Gonzales"
-                        label="Apellido(s) *"
-                        error={errors?.apellidos?.message}
-                        {...field}
-                      />
-                    )}
-                  />
-
-                  <Controller
-                    name="genero"
-                    control={control}
-                    rules={{ required: "Seleccione un género" }}
-                    render={({ field }) => (
-                      <Listbox
-                        label="Género *"
-                        placeholder="Seleccione género..."
-                        data={generos}
-                        displayField="label"
-                        value={generos.find((g) => g.id === field.value) || null}
-                        onChange={(val) => field.onChange(val?.id)}
-                        error={errors?.genero?.message}
-                      />
-                    )}
-                  />
-
-                  <Controller
-                    name="fechaEntrada"
-                    control={control}
-                    rules={{ required: "Fecha de entrada a la empresa" }}
-                    render={({ field }) => (
-                      <div>
-                        <h2 className="mb-2">Fecha de Entrada a la empresa *</h2>
-                        <DatePicker
-                          {...field}
-                          placeholder="Eligir Fecha..."
-                          error={errors?.fechaEntrada?.message}
-                        />
-                      </div>
-                    )}
-                  />
-
                   <Controller
                     name="email"
                     control={control}
@@ -140,6 +88,7 @@ const CrearEmpresa = () => {
                         type="email"
                         placeholder="htrejo@cosafe.com"
                         label="Email"
+                        error={errors?.email?.message}
                         {...field}
                       />
                     )}
@@ -155,25 +104,13 @@ const CrearEmpresa = () => {
                         pattern="[0-9]*"
                         placeholder="Escribir Teléfono..."
                         label="Teléfono"
+                        error={errors?.telefono?.message}
                         {...field}
                       />
                     )}
                   />
                 </div>
 
-                <Controller
-                  name="cargo"
-                  control={control}
-                  rules={{ required: "Cargo requerido" }}
-                  render={({ field }) => (
-                    <Input
-                      placeholder="Agente PIPC"
-                      label="Cargo *"
-                      error={errors?.cargo?.message}
-                      {...field}
-                    />
-                  )}
-                />
 
                 <Controller
                   name="password"
@@ -208,43 +145,6 @@ const CrearEmpresa = () => {
                     />
                   )}
                 />
-
-                {/* Empresa y Estudio */}
-                <Controller
-                  name="empresa"
-                  control={control}
-                  rules={{ required: "Asigna una empresa" }}
-                  render={({ field }) => (
-                    <Listbox
-                      label="Empresa *"
-                      placeholder="Asigna una empresa..."
-                      data={empresas}
-                      displayField="label"
-                      value={empresas.find((e) => e.id === field.value) || null}
-                      onChange={(val) => field.onChange(val?.id)}
-                      error={errors?.empresa?.message}
-                    />
-                  )}
-                />
-
-                <Controller
-                  name="estudio"
-                  control={control}
-                  rules={{ required: "Asigna un estudio" }}
-                  render={({ field }) => (
-                    <Listbox
-                      label="Estudio *"
-                      placeholder="Asigna un estudio..."
-                      data={estudios}
-                      displayField="label"
-                      value={estudios.find((e) => e.id === field.value) || null}
-                      onChange={(val) => field.onChange(val?.id)}
-                      error={errors?.estudio?.message}
-                    />
-                  )}
-                />
-
-
 
                 <p className="text-warning text-sm italic">* Campos obligatorios</p>
 
