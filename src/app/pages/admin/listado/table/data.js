@@ -1,5 +1,18 @@
 import { ArrowPathIcon, CheckBadgeIcon, ClockIcon, TruckIcon, XCircleIcon } from "@heroicons/react/24/outline";
 
+export const statusOptions = [
+  {
+    value: "activo",
+    label: 'Activo',
+    color: 'success'
+  },
+  {
+    value: "inactivo",
+    label: 'Inactivo',
+    color: 'info'
+  }
+];
+
 export const orderStatusOptions = [
   {
     value: 'shipping',
@@ -59,6 +72,7 @@ export const ordersList = [
     creador: {
       rol: "Administrador",
     },
+    status: "activo",
     prioridad: "Urgente",
     progress: 77,
   },
@@ -79,6 +93,7 @@ export const ordersList = [
     creador: {
       rol: "Agente",
     },
+    status: "activo",
     prioridad: "Urgente",
     progress: 17,
   },
@@ -111,6 +126,7 @@ export const ordersList = [
     creador: {
       rol: "Empresa",
     },
+    status: "activo",
     prioridad: "Media",
     progress: 46,
   },
@@ -135,6 +151,7 @@ export const ordersList = [
     creador: {
       rol: "Empresa",
     },
+    status: "activo",
     prioridad: "Media",
     progress: 88,
   },
@@ -163,6 +180,7 @@ export const ordersList = [
     creador: {
       rol: "Empresa",
     },
+    status: "activo",
     prioridad: "Media",
     progress: 100,
   },
@@ -191,6 +209,7 @@ export const ordersList = [
     creador: {
       rol: "Empresa",
     },
+    status: "activo",
     prioridad: "Media",
     progress: 100,
   },
@@ -219,6 +238,7 @@ export const ordersList = [
     creador: {
       rol: "Empresa",
     },
+    status: "activo",
     prioridad: "Media",
     progress: 66,
   },
@@ -247,6 +267,7 @@ export const ordersList = [
     creador: {
       rol: "Empresa",
     },
+    status: "activo",
     prioridad: "Urgente",
     progress: 30,
   },
@@ -275,6 +296,7 @@ export const ordersList = [
     creador: {
       rol: "Empresa",
     },
+    status: "activo",
     prioridad: "Urgente",
     progress: 30,
   },
@@ -303,6 +325,7 @@ export const ordersList = [
     creador: {
       rol: "Empresa",
     },
+    status: "activo",
     prioridad: "Urgente",
     progress: 30,
   },
@@ -331,6 +354,7 @@ export const ordersList = [
     creador: {
       rol: "Administrador",
     },
+    status: "activo",
     prioridad: "Urgente",
     progress: 77,
   },
@@ -351,6 +375,7 @@ export const ordersList = [
     creador: {
       rol: "Agente",
     },
+    status: "inactivo",
     prioridad: "Urgente",
     progress: 17,
   },
@@ -383,6 +408,7 @@ export const ordersList = [
     creador: {
       rol: "Empresa",
     },
+    status: "inactivo",
     prioridad: "Media",
     progress: 46,
   },
@@ -407,6 +433,7 @@ export const ordersList = [
     creador: {
       rol: "Empresa",
     },
+    status: "inactivo",
     prioridad: "Media",
     progress: 88,
   },
@@ -435,6 +462,7 @@ export const ordersList = [
     creador: {
       rol: "Empresa",
     },
+    status: "inactivo",
     prioridad: "Media",
     progress: 100,
   },
@@ -463,6 +491,7 @@ export const ordersList = [
     creador: {
       rol: "Empresa",
     },
+    status: "inactivo",
     prioridad: "Media",
     progress: 100,
   },
@@ -491,6 +520,7 @@ export const ordersList = [
     creador: {
       rol: "Empresa",
     },
+    status: "inactivo",
     prioridad: "Media",
     progress: 66,
   },
@@ -519,6 +549,7 @@ export const ordersList = [
     creador: {
       rol: "Empresa",
     },
+    status: "inactivo",
     prioridad: "Urgente",
     progress: 30,
   },
@@ -547,6 +578,7 @@ export const ordersList = [
     creador: {
       rol: "Empresa",
     },
+    status: "inactivo",
     prioridad: "Urgente",
     progress: 30,
   },

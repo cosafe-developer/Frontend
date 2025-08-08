@@ -2,6 +2,8 @@
 // Local Imports
 import { Table, THead, TBody, Th, Tr, Td, Button } from "components/ui";
 import { truncateText } from "helpers/truncateText.helper";
+import { useState } from "react";
+import { Navigate } from "react-router";
 
 // ----------------------------------------------------------------------
 
@@ -48,6 +50,17 @@ const data = [
 
 
 export function ContentAdministrarAgente({ close }) {
+  const [redirect, setRedirect] = useState(false);
+
+  const handleAdministrarAgente = () => {
+    setRedirect(true);
+  };
+
+  if (redirect) {
+    close();
+    return <Navigate to="/admin/agentes/editar" />;
+  }
+
   return (
     <div className="min-w-full mt-5 px-4">
 
@@ -126,6 +139,7 @@ export function ContentAdministrarAgente({ close }) {
 
 
         <Button
+          onClick={handleAdministrarAgente}
           color="primary"
           className="h-10 text-base font-light"
         >

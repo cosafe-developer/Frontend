@@ -6,7 +6,9 @@
     "agentes": "Agentes",
     "empresas": "Empresas",
     "llenar-listado": "Llenar Listado",
-    "crear-listado": "Crear nuevo listado"
+    "crear-listado": "Crear nuevo listado",
+    "editar-agente": "Editar Agente",
+    "crear-agente": "Crear nuevo Agente"
     },
     "dashboards": {
       "dashboards": "Tableros",

@@ -58,9 +58,33 @@ const protectedRoutes = {
               }),
             },
             {
+              path: "agentes/crear",
+              lazy: async () => ({
+                Component: (await import("app/pages/admin/agentes/CrearAgente")).default,
+              }),
+            },
+            {
+              path: "agentes/editar",
+              lazy: async () => ({
+                Component: (await import("app/pages/admin/agentes/EditarAgente")).default,
+              }),
+            },
+            {
               path: "empresas",
               lazy: async () => ({
                 Component: (await import("app/pages/admin/empresas/Empresas")).default,
+              }),
+            },
+            {
+              path: "empresas/crear",
+              lazy: async () => ({
+                Component: (await import("app/pages/admin/empresas/CrearEmpresa")).default,
+              }),
+            },
+            {
+              path: "empresas/editar",
+              lazy: async () => ({
+                Component: (await import("app/pages/admin/empresas/EditarEmpresa")).default,
               }),
             },
           ],

@@ -8,7 +8,11 @@ import { Circlebar } from "components/ui";
 import { Avatar, Badge } from "components/ui";
 import { useLocaleContext } from "app/contexts/locale/context";
 import { ensureString } from "utils/ensureString";
-import { orderStatusOptions } from "./data";
+import { statusOptions } from "./data";
+import { getColorProgress } from "helpers/getColorProgress.helper";
+import { useState } from "react";
+import { toast } from "sonner";
+import { StyledSwitch } from "components/shared/form/StyledSwitch";
 
 // ----------------------------------------------------------------------
 
@@ -38,13 +42,6 @@ const getColorPrioridad = ({ prioridad }) => {
   }
 }
 
-function getColorProgress(val) {
-  if (val === 0) return "neutral";
-  if (val === 100) return "success";
-  if (val < 10) return "warning";
-  if (val < 50) return "info";
-  return "primary";
-}
 
 export function EmpresaCell({ row, getValue, column, table }) {
   const globalQuery = ensureString(table.getState().globalFilter);
@@ -232,14 +229,41 @@ export function ProfitCell({ getValue, row }) {
 
 export function OrderStatusCell({ getValue }) {
   const val = getValue();
-  const option = orderStatusOptions.find((item) => item.value === val);
+  const option = statusOptions.find((item) => item.value === val);
 
   return (
-    <Badge color={option.color} className="space-x-1.5 ">
-      {option.icon && <option.icon className="h-4 w-4" />}
+    <Badge color={option?.label === "Activo" ? "info" : "neutral"} className="space-x-1.5 ">
 
-      <span>{option.label}</span>
+      <span>{option?.label}</span>
     </Badge>
+  );
+}
+
+export function StatusCell({
+  getValue,
+  row: { index },
+  column: { id },
+  table,
+}) {
+  const val = getValue();
+  const [loading, setLoading] = useState(false);
+
+  const onChange = async (checked) => {
+    setLoading(true);
+    setTimeout(() => {
+      table.options.meta?.updateData(index, id, checked);
+      toast.success("User status updated");
+      setLoading(false);
+    }, 1000);
+  };
+
+  return (
+    <StyledSwitch
+      className="mx-auto"
+      checked={val}
+      onChange={onChange}
+      loading={loading}
+    />
   );
 }
 
@@ -294,4 +318,11 @@ CustomerCell.propTypes = {
   column: PropTypes.object,
   table: PropTypes.object,
   getValue: PropTypes.func,
+};
+
+StatusCell.propTypes = {
+  getValue: PropTypes.func,
+  row: PropTypes.object,
+  column: PropTypes.object,
+  table: PropTypes.object,
 };

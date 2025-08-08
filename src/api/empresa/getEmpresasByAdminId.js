@@ -2,7 +2,7 @@ import { fetchWithCookies } from "helpers/fetch";
 import { checkAdminSession } from "../admin/login";
 
 
-async function getEmpresas() {
+async function getEmpresasByAdminId() {
   try {
     const session = await checkAdminSession();
 
@@ -24,5 +24,5 @@ async function getEmpresas() {
   }
 }
 
-export default getEmpresas;
+export default getEmpresasByAdminId;
 

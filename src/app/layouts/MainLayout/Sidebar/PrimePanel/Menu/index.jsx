@@ -62,6 +62,17 @@ export function Menu({ nav, pathname }) {
       });
     }
 
+    if (pathname.includes("/admin/listado/llenar")) {
+      clonedNav.push({
+        id: "admin.llenar-listado",
+        path: "/admin/listado/llenar",
+        type: NAV_TYPE_ITEM,
+        title: "Llenar Listado",
+        transKey: "nav.admin.llenar-listado",
+        Icon: HomeIcon,
+      });
+    }
+
     if (pathname.includes("/admin/listado/crear")) {
       clonedNav.push({
         id: "admin.crear-listado",
@@ -73,6 +84,27 @@ export function Menu({ nav, pathname }) {
       });
     }
 
+    if (pathname.includes("/admin/agentes/editar")) {
+      clonedNav.push({
+        id: "admin.editar-agente",
+        path: "/admin/agentes/editar",
+        type: NAV_TYPE_ITEM,
+        title: "Editar  agente",
+        transKey: "nav.admin.editar-agente",
+        Icon: HomeIcon,
+      });
+    }
+
+    if (pathname.includes("/admin/agentes/crear")) {
+      clonedNav.push({
+        id: "admin.crear-agente",
+        path: "/admin/agentes/crear",
+        type: NAV_TYPE_ITEM,
+        title: "Crear nuevo agente",
+        transKey: "nav.admin.crear-agente",
+        Icon: HomeIcon,
+      });
+    }
     return clonedNav;
   }, [nav, pathname]);
 
@@ -106,7 +138,29 @@ export function Menu({ nav, pathname }) {
               }
 
               if (
+                pathname.includes("/admin/listado/llenar") &&
+                idx === lastItemIndex
+              ) {
+                itemsWithDivider.push(<Divider key="custom-divider" />);
+              }
+
+              if (
                 pathname.includes("/admin/listado/crear") &&
+                idx === lastItemIndex
+              ) {
+                itemsWithDivider.push(<Divider key="custom-divider" />);
+              }
+
+
+              if (
+                pathname.includes("/admin/agentes/editar") &&
+                idx === lastItemIndex
+              ) {
+                itemsWithDivider.push(<Divider key="custom-divider" />);
+              }
+
+              if (
+                pathname.includes("/admin/agentes/crear") &&
                 idx === lastItemIndex
               ) {
                 itemsWithDivider.push(<Divider key="custom-divider" />);

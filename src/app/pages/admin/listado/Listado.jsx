@@ -1,12 +1,11 @@
 import { useState, useEffect } from "react";
 import { Page } from "components/shared/Page";
-import ListadoCards from "components/listado/ListadoCards";
-import ListadoTabla from "./table";
-import ListadoHeader from "components/listado/ListadoHeader";
-import LoadingContent from "components/template/LoadingContent";
 import { Navigate } from "react-router";
 
-// import OrdersDatatableV2 from "./orders-datatable-2";
+import ListadoCards from "components/listado/ListadoCards";
+import ListadoHeader from "components/listado/ListadoHeader";
+import LoadingContent from "components/template/LoadingContent";
+import ListadoTabla from "./table";
 
 const dataMock = {
   header: {

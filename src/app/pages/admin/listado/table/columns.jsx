@@ -1,21 +1,8 @@
 // Import Dependencies
 import { createColumnHelper } from "@tanstack/react-table";
-
-// Local Imports
 import { RowActions } from "./RowActions";
-import {
-  SelectCell,
-  SelectHeader,
-} from "components/shared/table/SelectCheckbox";
-import {
-  EstudioCell,
-  EmpresaCell,
-  AgentesCell,
-  FechaDeInicioCell,
-  CreadorCell,
-  PrioridadCell,
-  ProgressCell,
-} from "./rows";
+import { AgentesCell, CreadorCell, EmpresaCell, EstudioCell, FechaDeInicioCell, OrderStatusCell, PrioridadCell, ProgressCell } from "../../listado/table/rows";
+import { SelectCell, SelectHeader } from "components/shared/table/SelectCheckbox";
 
 // ----------------------------------------------------------------------
 
@@ -33,6 +20,12 @@ export const columns = [
     label: "Empresa",
     header: "Empresa",
     cell: EmpresaCell,
+  }),
+  columnHelper.accessor((row) => row.status, {
+    id: "status",
+    header: "Estatus",
+    label: "Status",
+    cell: OrderStatusCell,
   }),
   columnHelper.accessor((row) => row.estudio, {
     id: "estudio",
@@ -78,3 +71,4 @@ export const columns = [
     cell: RowActions
   }),
 ]
+

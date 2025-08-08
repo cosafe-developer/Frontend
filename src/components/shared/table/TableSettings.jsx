@@ -18,69 +18,69 @@ export function TableSettings({ table }) {
             tableSettings,
             "enableFullScreen",
           ) && (
-            <Switch
-              label="Full Screen"
-              checked={tableSettings.enableFullScreen}
-              onChange={(e) =>
-                setTableSettings((state) => ({
-                  ...state,
-                  enableFullScreen: e.target.checked,
-                }))
-              }
-              className="h-4 w-8"
-            />
-          )}
+              <Switch
+                label="Full Screen"
+                checked={tableSettings.enableFullScreen}
+                onChange={(e) =>
+                  setTableSettings((state) => ({
+                    ...state,
+                    enableFullScreen: e.target.checked,
+                  }))
+                }
+                className="h-4 w-8"
+              />
+            )}
           {Object.prototype.hasOwnProperty.call(
             tableSettings,
             "enableRowDense",
           ) && (
-            <Switch
-              label="Row Dense"
-              checked={tableSettings.enableRowDense}
-              onChange={(e) =>
-                setTableSettings((state) => ({
-                  ...state,
-                  enableRowDense: e.target.checked,
-                }))
-              }
-              className="h-4 w-8"
-            />
-          )}
+              <Switch
+                label="Row Dense"
+                checked={tableSettings.enableRowDense}
+                onChange={(e) =>
+                  setTableSettings((state) => ({
+                    ...state,
+                    enableRowDense: e.target.checked,
+                  }))
+                }
+                className="h-4 w-8"
+              />
+            )}
           {Object.prototype.hasOwnProperty.call(
             tableSettings,
             "enableColumnFilters",
           ) && (
-            <Switch
-              label="Column Filters"
-              checked={tableSettings.enableColumnFilters}
-              onChange={(e) => {
-                setTableSettings((state) => ({
-                  ...state,
-                  enableColumnFilters: e.target.checked,
-                }));
+              <Switch
+                label="Column Filters"
+                checked={tableSettings.enableColumnFilters}
+                onChange={(e) => {
+                  setTableSettings((state) => ({
+                    ...state,
+                    enableColumnFilters: e.target.checked,
+                  }));
 
-                table.resetColumnFilters();
-              }}
-              className="h-4 w-8"
-            />
-          )}
+                  table.resetColumnFilters();
+                }}
+                className="h-4 w-8"
+              />
+            )}
           {Object.prototype.hasOwnProperty.call(
             tableSettings,
             "enableSorting",
           ) && (
-            <Switch
-              label="Sort"
-              checked={tableSettings.enableSorting}
-              onChange={(e) => {
-                setTableSettings((state) => ({
-                  ...state,
-                  enableSorting: e.target.checked,
-                }));
-                table.resetSorting();
-              }}
-              className="h-4 w-8"
-            />
-          )}
+              <Switch
+                label="Sort"
+                checked={tableSettings.enableSorting}
+                onChange={(e) => {
+                  setTableSettings((state) => ({
+                    ...state,
+                    enableSorting: e.target.checked,
+                  }));
+                  table.resetSorting();
+                }}
+                className="h-4 w-8"
+              />
+            )}
         </div>
       )}
 

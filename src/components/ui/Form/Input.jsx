@@ -21,6 +21,7 @@ const Input = forwardRef((props, ref) => {
     error,
     unstyled,
     disabled,
+    required,
     type = "text",
     rootProps,
     labelProps,
@@ -49,6 +50,11 @@ const Input = forwardRef((props, ref) => {
           <span className={clsx("input-label", classNames?.labelText)}>
             {label}
           </span>
+          {
+            required && (
+              <span className="ml-2 text-error">*</span>
+            )
+          }
         </label>
       )}
 

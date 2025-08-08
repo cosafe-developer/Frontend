@@ -7,11 +7,11 @@ import { Highlight } from "../Highlight";
 
 // ----------------------------------------------------------------------
 
-export function HighlightableCell({ getValue, table }) {
+export function HighlightableCell({ getValue, table, className = "" }) {
   const query = ensureString(table.getState()?.globalFilter);
 
   return (
-    <span>
+    <span className={className}>
       <Highlight query={query}>{getValue()}</Highlight>
     </span>
   );
@@ -20,4 +20,5 @@ export function HighlightableCell({ getValue, table }) {
 HighlightableCell.propTypes = {
   getValue: PropTypes.func,
   table: PropTypes.object,
+  className: PropTypes.string,
 };
