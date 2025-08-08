@@ -1,12 +1,16 @@
 // Import Dependencies
 import clsx from "clsx";
 import PropTypes from "prop-types";
+// import { useNavigate } from "react-router";
 
 // Local Imports
 import { Table, THead, TBody, Th, Tr, Td } from "components/ui";
 import { TableSortIcon } from "components/shared/table/TableSortIcon";
 import { useThemeContext } from "app/contexts/theme/context";
 import { getUserAgentBrowser } from "utils/dom/getUserAgentBrowser";
+import { useRightSidebarContext } from "app/contexts/sidebar-right/context";
+import { HeaderPreviewEmpresa } from "components/template/RightSidebar/previewEmpresa/HeaderPreviewEmpresa";
+import { ContentPreviewEmpresa } from "components/template/RightSidebar/previewEmpresa/ContentPreviewEmpresa";
 
 // ----------------------------------------------------------------------
 
@@ -15,6 +19,7 @@ const isSafari = getUserAgentBrowser() === "Safari";
 export function ListView({ table, rows, flexRender }) {
   const tableSettings = table.getState().tableSettings;
   const { cardSkin } = useThemeContext();
+  const { openSidebar } = useRightSidebarContext();
 
   return (
     <div className="table-wrapper min-w-full grow overflow-x-auto">
@@ -90,7 +95,8 @@ export function ListView({ table, rows, flexRender }) {
                       <Td
                         key={cell.id}
                         className={clsx(
-                          "relative",
+                          "relative hover:transition-all transition-all cursor-pointer",
+                          !cell.id.includes("actions") && "hover:opacity-50 hover:transition-all transition-all",
                           cardSkin === "shadow-sm"
                             ? "dark:bg-dark-700"
                             : "dark:bg-dark-900",
@@ -102,6 +108,14 @@ export function ListView({ table, rows, flexRender }) {
                           ],
                           cell.column.id === "status" && "px-3",
                         )}
+                        onClick={() => {
+                          if (!cell.id.includes("actions")) {
+                            openSidebar({
+                              header: HeaderPreviewEmpresa,
+                              body: ContentPreviewEmpresa
+                            });
+                          }
+                        }}
                       >
                         {cell.column.getIsPinned() && (
                           <div
