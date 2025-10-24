@@ -6,7 +6,7 @@ const EmpresasHeader = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="flex items-center justify-between space-x-4" >
+    <div className="flex items-center justify-between space-x-4  px-10" >
       <div className="min-w-0">
         <h2 className="truncate text-xl font-medium tracking-wide text-gray-800 dark:text-dark-50">
           Empresas

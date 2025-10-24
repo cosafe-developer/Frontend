@@ -11,11 +11,11 @@ import {
   EyeIcon,
   PencilIcon,
   TrashIcon,
-  ClipboardIcon
+  /*   ClipboardIcon */
 } from "@heroicons/react/24/outline";
-import { FiBell } from "react-icons/fi";  // Feather Icons: bell y copy
+/* import { FiBell } from "react-icons/fi";  */
 import clsx from "clsx";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import PropTypes from "prop-types";
 
 // Local Imports
@@ -44,8 +44,25 @@ export function RowActions({ row, table }) {
   const [confirmDeleteLoading, setConfirmDeleteLoading] = useState(false);
   const [deleteSuccess, setDeleteSuccess] = useState(false);
   const [deleteError, setDeleteError] = useState(false);
+  const [menuPosition, setMenuPosition] = useState("bottom");
   const { openSidebar } = useRightSidebarContext();
   const navigate = useNavigate();
+  const menuRef = useRef();
+
+
+  useEffect(() => {
+    if (row.index === 0) {
+      // primer row → siempre a la izquierda
+      setMenuPosition("left");
+    } else {
+      // otros rows → calcular arriba/abajo
+      const rect = menuRef.current?.getBoundingClientRect();
+      if (rect) {
+        const spaceBelow = window.innerHeight - rect.bottom;
+        setMenuPosition(spaceBelow < 600 ? "above" : "bottom");
+      }
+    }
+  }, [row.index]);
 
   const closeModal = () => {
     setDeleteModalOpen(false);
@@ -72,13 +89,13 @@ export function RowActions({ row, table }) {
   return (
     <>
       <div className="flex justify-center">
-        <Button variant="flat" isIcon className="size-7 rounded-full">
+        {/*  <Button variant="flat" isIcon className="size-7 rounded-full">
           <FiBell className="size-4.5" />
         </Button>
         <Button variant="flat" isIcon className="size-7 rounded-full">
           <ClipboardIcon className="size-4.5" />
-        </Button>
-        <Menu as="div" className="relative inline-block text-left">
+        </Button> */}
+        <Menu ref={menuRef} as="div" className="relative inline-block text-left">
           <MenuButton
             as={Button}
             variant="flat"
@@ -95,7 +112,12 @@ export function RowActions({ row, table }) {
             leave="transition ease-in"
             leaveFrom="opacity-100 translate-y-0"
             leaveTo="opacity-0 translate-y-2"
-            className="absolute z-100 mt-1.5 min-w-[10rem] rounded-lg border border-gray-300 bg-white py-1 shadow-lg shadow-gray-200/50 outline-hidden focus-visible:outline-hidden dark:border-dark-500 dark:bg-dark-750 dark:shadow-none ltr:right-0 rtl:left-0"
+            className={clsx(
+              "absolute z-50 min-w-[10rem] rounded-lg border border-gray-300 bg-white py-1 shadow-lg outline-hidden focus-visible:outline-hidden dark:border-dark-500 dark:bg-dark-750",
+              menuPosition === "left" && "top-0 right-full mr-1",
+              menuPosition === "above" && "bottom-full mb-1 right-full",
+              menuPosition === "bottom" && "top-full mt-1 right-full"
+            )}
           >
             <MenuItem>
               {({ focus }) => (
@@ -120,7 +142,7 @@ export function RowActions({ row, table }) {
             <MenuItem>
               {({ focus }) => (
                 <button
-                  onClick={() => navigate(`/admin/empresas/editar/`)}
+                  onClick={() => navigate(`/admin/empresas/editar/${row?.original?._id}`)}
                   className={clsx(
                     "flex h-9 w-full hover:cursor-pointer items-center space-x-3 px-3 tracking-wide outline-hidden transition-colors ",
                     focus &&

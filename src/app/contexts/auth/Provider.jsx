@@ -6,7 +6,9 @@ import { useEffect, useReducer } from "react";
 import { setSession } from "utils/jwt";
 import { AuthContext } from "./context";
 import logoutSession from "api/auth/logoutSession";
+import Cookies from "universal-cookie";
 
+const cookies = new Cookies();
 
 const initialState = {
   isAuthenticated: false,
@@ -158,6 +160,12 @@ export function AuthProvider({ children }) {
 
   const logout = async () => {
     await logoutSession()
+    localStorage.removeItem("i18nextLng");
+    cookies.remove("token", { path: "/" });
+    cookies.remove("token-exp-date", { path: "/" });
+    cookies.remove("persona_id", { path: "/" });
+    cookies.remove("userInfo", { path: "/" });
+    localStorage.removeItem("userInfo");
 
     setSession(null);
     dispatch({ type: "LOGOUT" });

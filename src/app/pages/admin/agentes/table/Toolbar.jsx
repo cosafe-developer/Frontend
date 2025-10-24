@@ -12,8 +12,6 @@ import { Button, Input } from "components/ui";
 import { createScopedKeydownHandler } from "utils/dom/createScopedKeydownHandler";
 import { useBreakpointsContext } from "app/contexts/breakpoint/context";
 import { TableConfig } from "./TableConfig";
-import { statusOptions } from "./data";
-import { RoleFilter } from "./RoleFilter";
 
 // ----------------------------------------------------------------------
 
@@ -42,25 +40,12 @@ export function Toolbar({ table }) {
             <SearchInput table={table} />
             <TableConfig table={table} />
           </div>
-          <div
-            className={clsx(
-              "hide-scrollbar flex shrink-0 space-x-2 overflow-x-auto pb-1 pt-4 ",
-              isFullScreenEnabled ? "px-4 sm:px-5" : "px-(--margin-x)",
-            )}
-          >
-            {table.getColumn("status") && (
-              <RoleFilter
-                column={table.getColumn("status")}
-                options={statusOptions}
-              />
-            )}
-          </div>
         </>
       ) : (
         <div
           className={clsx(
             "custom-scrollbar transition-content flex justify-between space-x-4 overflow-x-auto pb-1 pt-4 ",
-            isFullScreenEnabled ? "px-4 sm:px-5" : "px-(--margin-x)",
+            isFullScreenEnabled ? "px-4 sm:px-5" : "",/*  px-(--margin-x) */
           )}
           style={{
             "--margin-scroll": isFullScreenEnabled
@@ -68,12 +53,7 @@ export function Toolbar({ table }) {
               : "var(--margin-x)",
           }}
         >
-          {table.getColumn("status") && (
-            <RoleFilter
-              column={table.getColumn("status")}
-              options={statusOptions}
-            />
-          )}
+
 
           <div className="flex shrink-0 space-x-2 ">
             <SearchInput table={table} />

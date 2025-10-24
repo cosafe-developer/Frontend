@@ -26,7 +26,7 @@ export function Toolbar({ table }) {
       <div
         className={clsx(
           "transition-content flex items-center justify-between space-x-4 ",
-          isFullScreenEnabled ? "px-4 sm:px-5" : "px-(--margin-x) pt-4",
+          isFullScreenEnabled ? "px-4 sm:px-5" : " pt-4",
         )}
       >
       </div>
@@ -36,7 +36,7 @@ export function Toolbar({ table }) {
           <div
             className={clsx(
               "flex space-x-2 pt-4  [&_.input-root]:flex-1",
-              isFullScreenEnabled ? "px-4 sm:px-5" : "px-(--margin-x)",
+              isFullScreenEnabled ? "px-4 sm:px-5" : "",
             )}
           >
             <SearchInput table={table} />
@@ -45,7 +45,7 @@ export function Toolbar({ table }) {
           <div
             className={clsx(
               "hide-scrollbar flex shrink-0 space-x-2 overflow-x-auto pb-1 pt-4 ",
-              isFullScreenEnabled ? "px-4 sm:px-5" : "px-(--margin-x)",
+              isFullScreenEnabled ? "px-4 sm:px-5" : "",
             )}
           >
             {table.getColumn("status") && (
@@ -60,7 +60,7 @@ export function Toolbar({ table }) {
         <div
           className={clsx(
             "custom-scrollbar transition-content flex justify-between space-x-4 overflow-x-auto pb-1 pt-4 ",
-            isFullScreenEnabled ? "px-4 sm:px-5" : "px-(--margin-x)",
+            isFullScreenEnabled ? "px-4 sm:px-5" : "",
           )}
           style={{
             "--margin-scroll": isFullScreenEnabled

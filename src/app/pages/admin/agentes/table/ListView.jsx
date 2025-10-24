@@ -1,6 +1,7 @@
 // Import Dependencies
 import clsx from "clsx";
 import PropTypes from "prop-types";
+import { MdSearchOff } from "react-icons/md";
 
 // Local Imports
 import { Table, THead, TBody, Th, Tr, Td } from "components/ui";
@@ -70,60 +71,68 @@ export function ListView({ table, rows, flexRender }) {
           ))}
         </THead>
         <TBody>
-          {rows.map((row) => {
-            return (
-              <Tr
-                key={row.id}
-                className={clsx(
-                  "relative border-y border-transparent border-b-gray-200 dark:border-b-dark-500",
-                  row.getIsSelected() &&
-                  !isSafari &&
-                  "row-selected after:pointer-events-none after:absolute after:inset-0 after:z-2 after:h-full after:w-full after:border-3 after:border-transparent after:bg-primary-500/10 ltr:after:border-l-primary-500 rtl:after:border-r-primary-500",
-                )}
-              >
-                {/* first row is a normal row */}
-                {row
-                  .getVisibleCells()
-                  .filter((cell) => !cell.column.columnDef.isHiddenColumn)
-                  .map((cell) => {
-                    return (
-                      <Td
-                        key={cell.id}
-                        className={clsx(
-                          "relative",
-                          cardSkin === "shadow-sm"
-                            ? "dark:bg-dark-700"
-                            : "dark:bg-dark-900",
-                          cell.column.getCanPin() && [
-                            cell.column.getIsPinned() === "left" &&
-                            "sticky z-2 ltr:left-0 rtl:right-0",
-                            cell.column.getIsPinned() === "right" &&
-                            "sticky z-2 ltr:right-0 rtl:left-0",
-                          ],
-                          cell.column.id === "status" && "px-3",
-                        )}
-                      >
-                        {cell.column.getIsPinned() && (
-                          <div
-                            className={clsx(
-                              "pointer-events-none absolute inset-0 border-gray-200 dark:border-dark-500",
-                              cell.column.getIsPinned() === "left"
-                                ? "ltr:border-r rtl:border-l"
-                                : "ltr:border-l rtl:border-r",
-                            )}
-                          ></div>
-                        )}
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext(),
-                        )}
-                      </Td>
-                    );
-                  })}
-              </Tr>
-            );
-          })}
+          {rows.length > 0 ? (
+            rows.map((row) => {
+              return (
+                <Tr
+                  key={row.id}
+                  className={clsx(
+                    "relative border-y border-transparent border-b-gray-200 dark:border-b-dark-500",
+                    row.getIsSelected() &&
+                    !isSafari &&
+                    "row-selected after:pointer-events-none after:absolute after:inset-0 after:z-2 after:h-full after:w-full after:border-3 after:border-transparent after:bg-primary-500/10 ltr:after:border-l-primary-500 rtl:after:border-r-primary-500",
+                  )}
+                >
+                  {row
+                    .getVisibleCells()
+                    .filter((cell) => !cell.column.columnDef.isHiddenColumn)
+                    .map((cell) => {
+                      return (
+                        <Td
+                          key={cell.id}
+                          className={clsx(
+                            "relative",
+                            cardSkin === "shadow-sm"
+                              ? "dark:bg-dark-700"
+                              : "dark:bg-dark-900",
+                            cell.column.getCanPin() && [
+                              cell.column.getIsPinned() === "left" &&
+                              "sticky z-2 ltr:left-0 rtl:right-0",
+                              cell.column.getIsPinned() === "right" &&
+                              "sticky z-2 ltr:right-0 rtl:left-0",
+                            ],
+                            cell.column.id === "status" && "px-3",
+                          )}
+                        >
+                          {cell.column.getIsPinned() && (
+                            <div
+                              className={clsx(
+                                "pointer-events-none absolute inset-0 border-gray-200 dark:border-dark-500",
+                                cell.column.getIsPinned() === "left"
+                                  ? "ltr:border-r rtl:border-l"
+                                  : "ltr:border-l rtl:border-r",
+                              )}
+                            ></div>
+                          )}
+                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        </Td>
+                      );
+                    })}
+                </Tr>
+              );
+            })
+          ) : (
+            <Tr>
+              <Td colSpan={table.getAllColumns().length} className="text-center py-10 text-[24px]">
+                <div className="flex flex-col items-center justify-center text-black dark:text-white">
+                  <MdSearchOff size={50} />
+                  <p className="font-medium">No se encontraron agentes</p>
+                </div>
+              </Td>
+            </Tr>
+          )}
         </TBody>
+
       </Table>
     </div>
   );

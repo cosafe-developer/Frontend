@@ -1,4 +1,5 @@
 import { fetchWithCookies } from "helpers/fetch";
+import handleLogin from "helpers/handleLogin.helper";
 /* import handleLogin from "helpers/handleLogin.helper";
  */
 /**
@@ -11,12 +12,10 @@ const emailLogin = async ({ requestBody }) => {
     const resp = await fetchWithCookies("login", requestBody, "POST");
     const body = await resp.json();
 
-    /* if (body?.mensaje === "Login exitoso") {
-      const data = body?.response?.data;
-      if (data?.token) {
-        handleLogin(data.token, data);
-      }
-    } */
+    if (body?.ok) {
+      const data = body?.data?.usuario;
+      handleLogin(data);
+    }
 
     return body;
   } catch (error) {

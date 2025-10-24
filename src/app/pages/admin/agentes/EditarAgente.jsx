@@ -4,36 +4,71 @@ import { Card, Button, Input } from "components/ui";
 import { Listbox } from "components/shared/form/Listbox";
 import { DatePicker } from "components/shared/form/Datepicker";
 
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { Dropzone } from "./upload/DropZoneAgentes";
-import { useNavigate } from "react-router";
+import { useNavigate, useParams } from "react-router";
+import serverStatesFetching from "types/fetch/serverStatesFetching.type";
+import getAgenteById from "api/agente/getAgenteById";
+import LoadingComponent from "components/custom-ui/loadings/Loading.component";
+import LoadingErrorComponent from "components/custom-ui/loadings/LoadingError.component";
+import { useToastContext } from "app/contexts/toast-provider/context";
+import updateAgente from "api/agente/updateAgente";
 
-const empresas = [
-  { id: "1", label: "Empresa A" },
-  { id: "2", label: "Empresa B" },
-];
 
-const estudios = [
-  { id: "1", label: "Estudio X" },
-  { id: "2", label: "Estudio Y" },
-];
 
 const generos = [
-  { id: "masculino", label: "Masculino" },
-  { id: "femenino", label: "Femenino" },
-  { id: "otro", label: "Otro" },
+  { id: "male", label: "Masculino" },
+  { id: "female", label: "Femenino" },
+  { id: "other", label: "Otro" }
 ];
+
+const cargos = [
+  { id: "tecnico-ehs", label: "Técnico EHS" },
+  { id: "coordinador-calidad-normatividad", label: "Coordinador de Calidad y Normatividad" },
+  { id: "inspector-seguridad-industrial", label: "Inspector de Seguridad Industrial" },
+  { id: "perito-ambiental", label: "Perito Ambiental" },
+  { id: "auditor", label: "Auditor Interno de Cumplimiento Normativo" },
+  { id: "agente", label: "Agente" },
+]
 
 const EditarAgente = () => {
   const [uploadedFiles, setUploadedFiles] = useState([]);
+  const [agente, setAgente] = useState(null);
+  const [estado, setEstado] = useState(serverStatesFetching.fetching);
+  const { agente_id } = useParams();
   const navigate = useNavigate();
+  const { showToast } = useToastContext();
+
+  const fetchData = useCallback(async () => {
+    setEstado(serverStatesFetching.fetching);
+
+    const payload = {
+      agente_id: agente_id
+    };
+
+    const response = await getAgenteById({ requestBody: payload });
+
+    if (!response?.ok) {
+      setEstado(serverStatesFetching.error);
+      return;
+    }
+
+    const agenteData = response?.data?.agente ?? null;
+    setAgente(agenteData);
+    setEstado(serverStatesFetching.success);
+
+  }, [agente_id]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const {
     control,
     handleSubmit,
     formState: { errors },
-    watch,
+    reset,
   } = useForm({
     defaultValues: {
       nombres: "",
@@ -43,16 +78,109 @@ const EditarAgente = () => {
       email: "",
       telefono: "",
       cargo: "",
-      password: "",
-      confirmPassword: "",
-      empresa: "",
-      estudio: "",
     },
   });
 
-  const onSubmit = (data) => {
-    console.log("Formulario enviado:", data);
+  const onSubmit = async (data) => {
+    if (!agente) return;
+
+    setEstado(serverStatesFetching.fetching);
+
+    try {
+      const cambios = {};
+
+      const mapping = {
+        nombres: "firstName",
+        apellidos: "lastName",
+        genero: "gender",
+        fechaEntrada: "startDate",
+        email: "email",
+        telefono: "phone",
+        cargo: "position",
+        password: "password",
+      };
+
+      Object.entries(mapping).forEach(([formKey, apiKey]) => {
+        const originalValue = agente[apiKey] ?? "";
+        let currentValue = data[formKey] ?? "";
+
+        if (formKey === "fechaEntrada") {
+          currentValue = data.fechaEntrada?.[0]
+            ? new Date(data.fechaEntrada[0]).toISOString().split("T")[0]
+            : null;
+        }
+
+        const valorOriginal =
+          formKey === "fechaEntrada" && originalValue
+            ? new Date(originalValue).toISOString().split("T")[0]
+            : originalValue;
+
+        if (valorOriginal !== currentValue) {
+          cambios[apiKey] = currentValue;
+        }
+      });
+
+      if (Object.keys(cambios).length === 0) {
+        console.log("No hay cambios para actualizar.");
+        setEstado(serverStatesFetching.success);
+        return;
+      }
+
+      const payload = {
+        agente_id,
+        ...cambios,
+      };
+
+      const response = await updateAgente({ requestBody: payload });
+      if (response.ok) {
+        setAgente((prev) => ({ ...prev, ...cambios }));
+        setEstado(serverStatesFetching.success);
+        showToast({
+          message: "Agente actualizado correctamente",
+          type: "success",
+        });
+      } else {
+        setEstado(serverStatesFetching.error);
+        showToast({
+          message: "Error al actualizar el agente",
+          type: "error",
+        });
+      }
+    } catch (error) {
+      console.error("Error al actualizar agente:", error);
+      setEstado(serverStatesFetching.error);
+      showToast({
+        message: "Error en la comunicación con el servidor",
+        type: "error",
+      });
+    }
   };
+
+  useEffect(() => {
+    if (agente) {
+      reset({
+        nombres: agente.firstName,
+        apellidos: agente.lastName,
+        genero: agente.gender,
+        fechaEntrada: agente.startDate,
+        email: agente.email,
+        telefono: agente.phone,
+        cargo: agente.role
+      });
+
+      setEstado(serverStatesFetching.success);
+    }
+  }, [agente, reset]);
+
+
+  if (estado === serverStatesFetching.fetching) {
+    return <LoadingComponent />;
+  }
+
+  if (estado === serverStatesFetching.error) {
+    return <LoadingErrorComponent />;
+  }
+
 
   return (
     <Page title="Editar Agente">
@@ -146,13 +274,12 @@ const EditarAgente = () => {
                   />
 
                   <Controller
-                    name="numeric"
+                    name="telefono"
                     control={control}
                     render={({ field }) => (
                       <Input
                         type="tel"
                         inputMode="numeric"
-                        pattern="[0-9]*"
                         placeholder="Escribir Teléfono..."
                         label="Teléfono"
                         {...field}
@@ -166,16 +293,19 @@ const EditarAgente = () => {
                   control={control}
                   rules={{ required: "Cargo requerido" }}
                   render={({ field }) => (
-                    <Input
-                      placeholder="Agente PIPC"
+                    <Listbox
                       label="Cargo *"
+                      placeholder="Agente PIPC"
+                      data={cargos}
+                      displayField="label"
+                      value={cargos.find((e) => e.id === field.value) || null}
+                      onChange={(val) => field.onChange(val?.id)}
                       error={errors?.cargo?.message}
-                      {...field}
                     />
                   )}
                 />
 
-                <Controller
+                {/* <Controller
                   name="password"
                   control={control}
                   rules={{ required: "Contraseña requerida" }}
@@ -207,44 +337,7 @@ const EditarAgente = () => {
                       {...field}
                     />
                   )}
-                />
-
-                {/* Empresa y Estudio */}
-                <Controller
-                  name="empresa"
-                  control={control}
-                  rules={{ required: "Asigna una empresa" }}
-                  render={({ field }) => (
-                    <Listbox
-                      label="Empresa *"
-                      placeholder="Asigna una empresa..."
-                      data={empresas}
-                      displayField="label"
-                      value={empresas.find((e) => e.id === field.value) || null}
-                      onChange={(val) => field.onChange(val?.id)}
-                      error={errors?.empresa?.message}
-                    />
-                  )}
-                />
-
-                <Controller
-                  name="estudio"
-                  control={control}
-                  rules={{ required: "Asigna un estudio" }}
-                  render={({ field }) => (
-                    <Listbox
-                      label="Estudio *"
-                      placeholder="Asigna un estudio..."
-                      data={estudios}
-                      displayField="label"
-                      value={estudios.find((e) => e.id === field.value) || null}
-                      onChange={(val) => field.onChange(val?.id)}
-                      error={errors?.estudio?.message}
-                    />
-                  )}
-                />
-
-
+                /> */}
 
                 <p className="text-warning text-sm italic">* Campos obligatorios</p>
 

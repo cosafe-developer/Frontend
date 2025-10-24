@@ -12,40 +12,21 @@ import { useRightSidebarContext } from "app/contexts/sidebar-right/context";
 
 // ----------------------------------------------------------------------
 
-const agentesData = [
-  { name: "Carlos Alberto Mendoza López" },
-  { name: "Lucía Ramírez Gómez" },
-  { name: "José Fernández Martínez Ortega" },
-  { name: "Andrea Torres" },
-  { name: "Pedro Luis Sánchez Rivera" },
-  { name: "Valeria Morales Jiménez" },
-  { name: "Luis García López Ramírez" },
-  { name: "Fernanda López Díaz" },
-  { name: "Javier Castro Hernández" },
-  { name: "Sofía Herrera Martínez González" },
-  { name: "Carlos Alberto Mendoza López" },
-  { name: "Lucía Ramírez Gómez" },
-  { name: "José Fernández Martínez Ortega" },
-  { name: "Andrea Torres" },
-  { name: "Pedro Luis Sánchez Rivera" },
-  { name: "Valeria Morales Jiménez" },
-  { name: "Luis García López Ramírez" },
-  { name: "Fernanda López Díaz" },
-  { name: "Javier Castro Hernández" },
-  { name: "Sofía Herrera Martínez González" },
-];
 
-export function HeaderAsignarAgente({ close }) {
+export function HeaderAsignarAgente({ close, }) {
   const searchRef = useRef(null);
-  const { data } = useRightSidebarContext();
   const [query, setQuery] = useState("");
-  const { result } = useFuse(agentesData, {
-    keys: ["name"],
+
+  const { data } = useRightSidebarContext();
+  const { agentes, setAgentesAsignados, agentesAsignados } = data || {};
+
+
+  const { result } = useFuse(agentes, {
+    keys: ["firstName", "lastName", "_id"],
     threshold: 0.2,
     matchAllOnEmptyQuery: true,
   });
 
-  const { agentesAsignados, setAgentesAsignados } = data || {};
 
   useEffect(() => {
     invariant(searchRef.current, "searchRef is not assigned");
@@ -67,7 +48,7 @@ export function HeaderAsignarAgente({ close }) {
 
       <div className="px-3 text-lg font-semibold w-full">
         <h2 className="text-white font-normal text-xl">Asignar agente</h2>
-        <p className="mt-2 text-base font-light">Listado de Agentes</p>
+        <p className="mt-2  font-light text-lg">Listado de Agentes</p>
 
         <div className="items-center mt-14 w-full font-normal">
           <Input
@@ -86,8 +67,9 @@ export function HeaderAsignarAgente({ close }) {
         <ContentAsignarAgente
           close={close}
           data={result}
-          agentesAsignados={agentesAsignados}
+          agentes={agentes}
           setAgentesAsignados={setAgentesAsignados}
+          agentesAsignados={agentesAsignados}
         />
       </div>
     </div>

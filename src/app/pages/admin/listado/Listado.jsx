@@ -1,64 +1,68 @@
 import { useState, useEffect } from "react";
 import { Page } from "components/shared/Page";
-import { Navigate } from "react-router";
 
-import ListadoCards from "components/listado/ListadoCards";
-import ListadoHeader from "components/listado/ListadoHeader";
+
+/* import ListadoCards from "app/pages/admin/listado/header/ListadoCards"; */
+import ListadoHeader from "app/pages/admin/listado/header/ListadoHeader";
 import LoadingContent from "components/template/LoadingContent";
 import ListadoTabla from "./table";
-
-const dataMock = {
-  header: {
-    titulo: "Listado de Requerimientos",
-    textoBoton: "Nuevo Listado",
-  },
-  stats: {
-    listados_activos: 7,
-    agentes_asignados: 14,
-    empresas_listados_activos: 5,
-    empresas_listados_pendientes: 2,
-  }
-}
+import serverStatesFetching from "types/fetch/serverStatesFetching.type";
+import LoadingErrorComponent from "components/custom-ui/loadings/LoadingError.component";
+import getListados from "api/listados/getListados";
+import { useCallback } from "react";
 
 const Listado = () => {
-  const endPointListado = "/admin/get/listado/";
-  const [isFetching, setIsFetching] = useState(true);
-  const [data, setData] = useState(null);
-  const [redirect, setRedirect] = useState(false);
+  const [listados, setListados] = useState(null);
+  const [estado, setEstado] = useState(serverStatesFetching.fetching);
+
+  const fetchData = useCallback(
+    async () => {
+      setEstado(serverStatesFetching.fetching);
+
+
+      const response = await getListados();
+      if (response?.ok === true) {
+        let nuevos = response?.data?.listadoss ?? [];
+
+
+        setListados(nuevos);
+        setEstado(serverStatesFetching.success);
+      } else {
+        setEstado(serverStatesFetching.error);
+      }
+    },
+    []
+  );
 
   useEffect(() => {
-    const fetchData = async () => {
-      /*  console.log(endpoint); */
-      // SIMULACIÓN DE FETCH
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      setData(dataMock);
-      setIsFetching(false);
-    };
+    fetchData();
+  }, [fetchData]);
+  console.log(listados);
 
-    if (isFetching) {
-      fetchData({ endpoint: endPointListado });
-    }
-  }, [isFetching]);
 
-  if (isFetching) {
-    return <LoadingContent />
+  if (estado === serverStatesFetching.fetching) {
+    return (
+      <>
+        <LoadingContent />
+      </>
+    );
   }
 
-  if (redirect) {
-    return <Navigate to="/admin/listado/crear" replace />;
+  if (estado === serverStatesFetching.error) {
+    return <LoadingErrorComponent />;
   }
 
   return (
     <Page title="Listado de Requerimientos">
-      <div className="transition-content w-full px-(--margin-x) pt-5 lg:pt-6">
-        <div className="transition-content grid grid-cols-1 grid-rows-[auto_auto_1fr] py-4">
+      <div className="flex-1 p-6  min-w-0">
+        <div className="px-10">
           <ListadoHeader
-            titulo={data?.header?.titulo}
-            textoBoton={data?.header?.textoBoton}
-            onClick={() => setRedirect(true)}
+            onClick={() => window.open("/admin/listado/crear", "_blank")}
           />
-          <ListadoCards stats={data?.stats} />
+          {/*   <ListadoCards stats={data?.stats} /> */}
+
         </div>
+
         <ListadoTabla />
       </div>
     </Page>

@@ -136,7 +136,7 @@ export default function ListadoTabla() {
 
   return (
     <Page title="Listado de Requerimientos">
-      <div className="transition-content w-full pb-[3rem]">
+      <div className="transition-content w-full pb-[3rem] px-10">
         <div
           className={clsx(
             "flex h-full w-full flex-col",
@@ -150,7 +150,7 @@ export default function ListadoTabla() {
               "transition-content flex grow flex-col pt-3",
               tableSettings.enableFullScreen
                 ? "overflow-hidden"
-                : "px-(--margin-x)",
+                : "", /* px-(--margin-x) */
             )}
           >
             <WrapComponent

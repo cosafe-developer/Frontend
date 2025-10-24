@@ -9,6 +9,7 @@ import { SidebarProvider } from "app/contexts/sidebar/Provider";
 import { ThemeProvider } from "app/contexts/theme/Provider";
 import { RightSidebarProvider } from "app/contexts/sidebar-right/rightSidebar";
 import router from "app/router/router";
+import { ToastProvider } from "app/contexts/toast-provider/ToastProvider.component";
 
 
 
@@ -21,7 +22,9 @@ function App() {
           <BreakpointProvider>
             <SidebarProvider>
               <RightSidebarProvider>
-                <RouterProvider router={router} />
+                <ToastProvider>
+                  <RouterProvider router={router} />
+                </ToastProvider>
               </RightSidebarProvider>
             </SidebarProvider>
           </BreakpointProvider>

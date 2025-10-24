@@ -20,7 +20,6 @@ import { fuzzyFilter } from "utils/react-table/fuzzyFilter";
 import { useSkipper } from "utils/react-table/useSkipper";
 import { Toolbar } from "./Toolbar";
 import { columns } from "./columns";
-import { usersList } from "./data";
 import { PaginationSection } from "components/shared/table/PaginationSection";
 import { SelectedRowsActions } from "./SelectedRowsActions";
 import { ListView } from "./ListView";
@@ -28,8 +27,10 @@ import { ListView } from "./ListView";
 
 // ----------------------------------------------------------------------
 
-export default function AgentesTabla() {
-  const [users, setUsers] = useState([...usersList]);
+export default function AgentesTabla({
+  agentes
+}) {
+  const [agentesData, setAgentesData] = useState(agentes);
 
   const [tableSettings, setTableSettings] = useState({
     enableFullScreen: false,
@@ -58,7 +59,7 @@ export default function AgentesTabla() {
   const [autoResetPageIndex, skipAutoResetPageIndex] = useSkipper();
 
   const table = useReactTable({
-    data: users,
+    data: agentesData,
     columns: columns,
     initialState: {
       pagination: {
@@ -77,7 +78,7 @@ export default function AgentesTabla() {
       updateData: (rowIndex, columnId, value) => {
         // Skip page index reset until after next rerender
         skipAutoResetPageIndex();
-        setUsers((old) =>
+        setAgentesData((old) =>
           old.map((row, index) => {
             if (index === rowIndex) {
               return {
@@ -92,7 +93,7 @@ export default function AgentesTabla() {
       deleteRow: (row) => {
         // Skip page index reset until after next rerender
         skipAutoResetPageIndex();
-        setUsers((old) =>
+        setAgentesData((old) =>
           old.filter((oldRow) => oldRow.user_id !== row.original.user_id),
         );
       },
@@ -100,7 +101,7 @@ export default function AgentesTabla() {
         // Skip page index reset until after next rerender
         skipAutoResetPageIndex();
         const rowIds = rows.map((row) => row.original.user_id);
-        setUsers((old) => old.filter((row) => !rowIds.includes(row.user_id)));
+        setAgentesData((old) => old.filter((row) => !rowIds.includes(row.user_id)));
       },
       setTableSettings,
       setViewType,
@@ -126,7 +127,7 @@ export default function AgentesTabla() {
     autoResetPageIndex,
   });
 
-  useDidUpdate(() => table.resetRowSelection(), [users]);
+  useDidUpdate(() => table.resetRowSelection(), [agentesData]);
 
   useLockScrollbar(tableSettings.enableFullScreen);
 
@@ -136,7 +137,7 @@ export default function AgentesTabla() {
 
   return (
     <Page title="Agentes">
-      <div className="transition-content w-full pb-5">
+      <div className="transition-content w-full pb-5 px-10">
         <div
           className={clsx(
             "flex h-full w-full flex-col",
@@ -150,7 +151,7 @@ export default function AgentesTabla() {
               "transition-content flex grow flex-col pt-3",
               tableSettings.enableFullScreen
                 ? "overflow-hidden"
-                : "px-(--margin-x)",
+                : "", /* px-(--margin-x) */
             )}
           >
             <WrapComponent
@@ -160,7 +161,11 @@ export default function AgentesTabla() {
               )}
             >
               {viewType === "list" && (
-                <ListView table={table} flexRender={flexRender} rows={rows} />
+                <ListView
+                  table={table}
+                  flexRender={flexRender}
+                  rows={rows}
+                />
               )}
 
               {table.getCoreRowModel().rows.length && (

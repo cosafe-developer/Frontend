@@ -1,13 +1,13 @@
-import { fetchWithToken } from "helpers/fetch";
+import { fetchWithCookies } from "helpers/fetch";
 
 /**
  * Registra un agente usando sesiones/cookies (sin token explícito).
  * @param {Object} data - Datos del agente
  * @returns {Promise<any>}
  */
-const createAgente = async (data) => {
+const createAgente = async ({ requestBody }) => {
   try {
-    const resp = await fetchWithToken("agente/register", data, "POST");
+    const resp = await fetchWithCookies("agente/register", requestBody, "POST");
     const result = await resp.json();
 
     return result;

@@ -1,264 +1,279 @@
 import { useForm, Controller } from "react-hook-form";
 import { Page } from "components/shared/Page";
 import { Card, Button, Input } from "components/ui";
-import { Listbox } from "components/shared/form/Listbox";
-import { DatePicker } from "components/shared/form/Datepicker";
-
-import { useState } from "react";
-
+import { useCallback, useEffect, useState } from "react";
 import { Dropzone } from "./upload/DropZoneEmpresa";
-import { useNavigate } from "react-router";
+import { useToastContext } from "app/contexts/toast-provider/context";
+import { useNavigate, useParams } from "react-router";
 
-const empresas = [
-  { id: "1", label: "Empresa A" },
-  { id: "2", label: "Empresa B" },
-];
+import serverStatesFetching from "types/fetch/serverStatesFetching.type";
+import LoadingComponent from "components/custom-ui/loadings/Loading.component";
+import LoadingErrorComponent from "components/custom-ui/loadings/LoadingError.component";
+import getEmpresaById from "api/empresa/getEmpresaById";
+import updateEmpresa from "api/empresa/updateEmpresa";
 
-const estudios = [
-  { id: "1", label: "Estudio X" },
-  { id: "2", label: "Estudio Y" },
-];
-
-const generos = [
-  { id: "masculino", label: "Masculino" },
-  { id: "femenino", label: "Femenino" },
-  { id: "otro", label: "Otro" },
-];
 
 const EditarEmpresa = () => {
   const [uploadedFiles, setUploadedFiles] = useState([]);
+  const [empresa, setEmpresa] = useState(null);
+  const [estado, setEstado] = useState(serverStatesFetching.fetching);
+  const { showToast } = useToastContext();
+  const { empresa_id } = useParams();
   const navigate = useNavigate();
+
+  const fetchData = useCallback(async () => {
+    setEstado(serverStatesFetching.fetching);
+
+    const payload = {
+      empresa_id: empresa_id
+    };
+
+    const response = await getEmpresaById({ requestBody: payload });
+
+    if (!response?.ok) {
+      setEstado(serverStatesFetching.error);
+      return;
+    }
+
+    const empresaData = response?.data?.empresa ?? null;
+    setEmpresa(empresaData);
+    setEstado(serverStatesFetching.success);
+  }, [empresa_id]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const {
     control,
     handleSubmit,
     formState: { errors },
-    watch,
+    reset,
+    /*   watch, */
   } = useForm({
     defaultValues: {
-      nombres: "",
-      apellidos: "",
-      genero: "",
-      fechaEntrada: null,
+      nombre_empresa: "",
+      rfc: "",
       email: "",
       telefono: "",
-      cargo: "",
       password: "",
       confirmPassword: "",
-      empresa: "",
-      estudio: "",
     },
   });
 
-  const onSubmit = (data) => {
-    console.log("Formulario enviado:", data);
+  const onSubmit = async (data) => {
+    if (!empresa) return;
+
+    setEstado(serverStatesFetching.fetching);
+
+    try {
+      const cambios = {};
+
+      // === Mapeo del formulario → backend ===
+      const mapping = {
+        nombre_empresa: "tradeName",
+        rfc: "rfc",
+        email: "email",
+        telefono: "phone",
+        password: "password",
+      };
+
+      Object.entries(mapping).forEach(([formKey, apiKey]) => {
+        const originalValue = empresa[apiKey] ?? "";
+        const currentValue = data[formKey] ?? "";
+
+        if (originalValue !== currentValue) {
+          cambios[apiKey] = currentValue;
+        }
+      });
+
+
+      if (Object.keys(cambios).length === 0) {
+        console.log("No hay cambios para actualizar.");
+        setEstado(serverStatesFetching.success);
+        return;
+      }
+
+      const payload = {
+        empresa_id: empresa_id,
+        ...cambios,
+      };
+
+      const response = await updateEmpresa({ requestBody: payload });
+      if (response.ok) {
+        setEmpresa((prev) => ({ ...prev, ...cambios }));
+        setEstado(serverStatesFetching.success);
+        showToast({
+          message: "Empresa actualizada correctamente",
+          type: "success",
+        });
+      } else {
+        setEstado(serverStatesFetching.error);
+        showToast({
+          message: "Error al actualizar la empresa",
+          type: "error",
+        });
+      }
+    } catch (error) {
+      console.error("Error al actualizar empresa:", error);
+      setEstado(serverStatesFetching.error);
+      showToast({
+        message: "Error en la comunicación con el servidor",
+        type: "error",
+      });
+    }
   };
+
+
+  useEffect(() => {
+    if (empresa) {
+      reset({
+        nombre_empresa: empresa.tradeName,
+        rfc: empresa.rfc,
+        email: empresa.email,
+        telefono: empresa.phone,
+        password: empresa.password
+      });
+
+      setEstado(serverStatesFetching.success);
+    }
+  }, [empresa, reset]);
+
+
+  if (estado === serverStatesFetching.fetching) {
+    return <LoadingComponent />;
+  }
+
+  if (estado === serverStatesFetching.error) {
+    return <LoadingErrorComponent />;
+  }
 
   return (
     <Page title="Editar Agente">
       <div className="transition-content w-full px-(--margin-x) pt-5 lg:pt-6">
         <h1 className="text-white text-2xl">Editar Agente</h1>
 
-        <div className="mt-8 flex gap-8 mb-[4rem]">
-          <div className="w-full">
-            <Card className="flex flex-col p-5 space-y-6">
-              <div>
-                <h2 className="text-xl text-white">Información de Agente</h2>
-                <p className="mt-2 text-[16px]">Por favor proporcione la información personal para crear su perfil</p>
-              </div>
+        <div className="transition-content w-full px-(--margin-x) pt-5 lg:pt-6">
+          <h1 className="text-white text-2xl">Crear Nueva Empresa</h1>
 
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                <Dropzone files={uploadedFiles} setFiles={setUploadedFiles} />
+          <div className="mt-8 flex gap-8 mb-[4rem]">
+            <div className="w-full">
+              <Card className="flex flex-col p-5 space-y-6">
+                <div>
+                  <h2 className="text-xl text-white">Datos Generales</h2>
+                  <p className="mt-2 text-[16px]">Por favor proporcione la información de la empresa para crear su perfil</p>
+                </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Controller
-                    name="nombres"
-                    control={control}
-                    rules={{ required: "Nombre(s) requerido" }}
-                    render={({ field }) => (
-                      <Input
-                        placeholder="Hernan"
-                        label="Nombre(s) *"
-                        error={errors?.nombres?.message}
-                        {...field}
-                      />
-                    )}
-                  />
+                <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                  <Dropzone files={uploadedFiles} setFiles={setUploadedFiles} />
 
-                  <Controller
-                    name="apellidos"
-                    control={control}
-                    rules={{ required: "Apellido(s) requerido" }}
-                    render={({ field }) => (
-                      <Input
-                        placeholder="Trejo Gonzales"
-                        label="Apellido(s) *"
-                        error={errors?.apellidos?.message}
-                        {...field}
-                      />
-                    )}
-                  />
-
-                  <Controller
-                    name="genero"
-                    control={control}
-                    rules={{ required: "Seleccione un género" }}
-                    render={({ field }) => (
-                      <Listbox
-                        label="Género *"
-                        placeholder="Seleccione género..."
-                        data={generos}
-                        displayField="label"
-                        value={generos.find((g) => g.id === field.value) || null}
-                        onChange={(val) => field.onChange(val?.id)}
-                        error={errors?.genero?.message}
-                      />
-                    )}
-                  />
-
-                  <Controller
-                    name="fechaEntrada"
-                    control={control}
-                    rules={{ required: "Fecha de entrada a la empresa" }}
-                    render={({ field }) => (
-                      <div>
-                        <h2 className="mb-2">Fecha de Entrada a la empresa *</h2>
-                        <DatePicker
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Controller
+                      name="nombre_empresa"
+                      control={control}
+                      rules={{ required: "Empresa Requerida (*)" }}
+                      render={({ field }) => (
+                        <Input
+                          placeholder="Escribir Nombre Comercial de la Empresa... "
+                          label="Nombre Comercial, Denomicación o Razón Social *"
+                          error={errors?.nombre_empresa?.message}
                           {...field}
-                          placeholder="Eligir Fecha..."
-                          error={errors?.fechaEntrada?.message}
                         />
-                      </div>
-                    )}
-                  />
+                      )}
+                    />
 
-                  <Controller
-                    name="email"
+                    <Controller
+                      name="rfc"
+                      control={control}
+                      rules={{ required: "RFC requerido" }}
+                      render={({ field }) => (
+                        <Input
+                          placeholder="RFC de la empresa"
+                          label="RFC *"
+                          error={errors?.apellidos?.message}
+                          {...field}
+                        />
+                      )}
+                    />
+
+                    <Controller
+                      name="email"
+                      control={control}
+                      render={({ field }) => (
+                        <Input
+                          type="email"
+                          placeholder="Escribir email"
+                          label="Email"
+                          {...field}
+                        />
+                      )}
+                    />
+
+                    <Controller
+                      name="telefono"
+                      control={control}
+                      render={({ field }) => (
+                        <Input
+                          type="tel"
+                          inputMode="numeric"
+                          placeholder="Escribir Teléfono..."
+                          label="Teléfono"
+                          {...field}
+                        />
+                      )}
+                    />
+                  </div>
+
+
+                  {/*  <Controller
+                    name="password"
                     control={control}
+                    rules={{ required: "Contraseña requerida (*)" }}
                     render={({ field }) => (
                       <Input
-                        type="email"
-                        placeholder="htrejo@cosafe.com"
-                        label="Email"
+                        label="Contraseña *"
+                        placeholder="htrejos245CV"
+                        type="password"
+                        error={errors?.password?.message}
                         {...field}
                       />
                     )}
                   />
 
                   <Controller
-                    name="numeric"
+                    name="confirmPassword"
                     control={control}
+                    rules={{
+                      required: "Confirme su contraseña",
+                      validate: (value) =>
+                        value === watch("password") || "Las contraseñas no coinciden",
+                    }}
                     render={({ field }) => (
                       <Input
-                        type="tel"
-                        inputMode="numeric"
-                        pattern="[0-9]*"
-                        placeholder="Escribir Teléfono..."
-                        label="Teléfono"
+                        placeholder="htrejos245CV"
+                        label="Confirmar Contraseña *"
+                        type="password"
+                        error={errors?.confirmPassword?.message}
                         {...field}
                       />
                     )}
-                  />
-                </div>
-
-                <Controller
-                  name="cargo"
-                  control={control}
-                  rules={{ required: "Cargo requerido" }}
-                  render={({ field }) => (
-                    <Input
-                      placeholder="Agente PIPC"
-                      label="Cargo *"
-                      error={errors?.cargo?.message}
-                      {...field}
-                    />
-                  )}
-                />
-
-                <Controller
-                  name="password"
-                  control={control}
-                  rules={{ required: "Contraseña requerida" }}
-                  render={({ field }) => (
-                    <Input
-                      label="Contraseña *"
-                      placeholder="htrejos245CV"
-                      type="password"
-                      error={errors?.password?.message}
-                      {...field}
-                    />
-                  )}
-                />
-
-                <Controller
-                  name="confirmPassword"
-                  control={control}
-                  rules={{
-                    required: "Confirme su contraseña",
-                    validate: (value) =>
-                      value === watch("password") || "Las contraseñas no coinciden",
-                  }}
-                  render={({ field }) => (
-                    <Input
-                      placeholder="htrejos245CV"
-                      label="Confirmar Contraseña *"
-                      type="password"
-                      error={errors?.confirmPassword?.message}
-                      {...field}
-                    />
-                  )}
-                />
-
-                {/* Empresa y Estudio */}
-                <Controller
-                  name="empresa"
-                  control={control}
-                  rules={{ required: "Asigna una empresa" }}
-                  render={({ field }) => (
-                    <Listbox
-                      label="Empresa *"
-                      placeholder="Asigna una empresa..."
-                      data={empresas}
-                      displayField="label"
-                      value={empresas.find((e) => e.id === field.value) || null}
-                      onChange={(val) => field.onChange(val?.id)}
-                      error={errors?.empresa?.message}
-                    />
-                  )}
-                />
-
-                <Controller
-                  name="estudio"
-                  control={control}
-                  rules={{ required: "Asigna un estudio" }}
-                  render={({ field }) => (
-                    <Listbox
-                      label="Estudio *"
-                      placeholder="Asigna un estudio..."
-                      data={estudios}
-                      displayField="label"
-                      value={estudios.find((e) => e.id === field.value) || null}
-                      onChange={(val) => field.onChange(val?.id)}
-                      error={errors?.estudio?.message}
-                    />
-                  )}
-                />
+                  /> */}
 
 
+                  <p className="text-warning text-sm italic">* Campos obligatorios</p>
 
-                <p className="text-warning text-sm italic">* Campos obligatorios</p>
+                  <div className="flex justify-end space-x-5">
+                    <Button
+                      onClick={() => navigate(`/admin/agentes`)}
+                      type="button">
+                      Cancelar
+                    </Button>
+                    <Button type="submit" color="primary">Guardar</Button>
+                  </div>
+                </form>
+              </Card>
 
-                <div className="flex justify-end space-x-5">
-                  <Button
-                    onClick={() => navigate(`/admin/agentes`)}
-                    type="button">
-                    Cancelar
-                  </Button>
-                  <Button type="submit" color="primary">Guardar</Button>
-                </div>
-              </form>
-            </Card>
-
+            </div>
           </div>
         </div>
       </div>

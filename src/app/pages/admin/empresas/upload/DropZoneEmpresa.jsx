@@ -18,7 +18,7 @@ const DropzoneEmpresa = ({ files, setFiles }) => {
 
   return (
     <div className="max-w-[20%]">
-      <p className="font-medium text-gray-800 dark:text-dark-100 text-[16px]">Fotografia</p>
+      <p className="font-medium text-gray-800 dark:text-dark-100 text-[16px]">Logotipo</p>
 
       <Upload inputProps={{ ...getInputProps() }} {...getRootProps()}>
         {({ ...props }) => (

@@ -1,19 +1,20 @@
 import { fetchWithCookies } from "helpers/fetch";
 
-
-
-async function updateEmpresa(id, body) {
+/**
+ * Registra un agente usando sesiones/cookies (sin token explícito).
+ * @param {Object} data - Datos del agente
+ * @returns {Promise<any>}
+ */
+const updateEmpresa = async ({ requestBody }) => {
   try {
-    const endpoint = `empresa/${id}`;
-    const resp = await fetchWithCookies(endpoint, null, "PUT");
+    const resp = await fetchWithCookies(`empresa/${requestBody?.empresa_id}`, requestBody, "PUT");
+    const result = await resp.json();
 
-    const data = await resp.json();
-
-    return data;
+    return result;
   } catch (error) {
-    console.error("Error al obtener empresa:", error);
-    return null;
+    console.error("Error al registrar agente:", error);
+    throw error;
   }
-}
+};
 
 export default updateEmpresa;

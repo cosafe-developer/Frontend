@@ -64,7 +64,7 @@ const protectedRoutes = {
               }),
             },
             {
-              path: "agentes/editar",
+              path: "agentes/editar/:agente_id",
               lazy: async () => ({
                 Component: (await import("app/pages/admin/agentes/EditarAgente")).default,
               }),
@@ -82,7 +82,7 @@ const protectedRoutes = {
               }),
             },
             {
-              path: "empresas/editar",
+              path: "empresas/editar/:empresa_id",
               lazy: async () => ({
                 Component: (await import("app/pages/admin/empresas/EditarEmpresa")).default,
               }),

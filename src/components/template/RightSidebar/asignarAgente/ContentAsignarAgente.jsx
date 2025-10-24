@@ -2,11 +2,10 @@ import PropTypes from "prop-types";
 import { Table, TBody, Tr, Td, Button } from "components/ui";
 import { truncateText } from "helpers/truncateText.helper";
 
-export function ContentAsignarAgente({ close, data = [], agentesAsignados, setAgentesAsignados }) {
+export function ContentAsignarAgente({ close, data = [], agentes, setAgentesAsignados, agentesAsignados }) {
 
   return (
     <div className="min-w-full">
-
       <div className="hide-scrollbar max-h-[550px] overflow-y-auto">
         <Table className="w-full text-left rtl:text-right">
           <TBody>
@@ -17,16 +16,17 @@ export function ContentAsignarAgente({ close, data = [], agentesAsignados, setAg
                   }`}
               >
                 <Td className="w-full max-w-0 truncate pr-4">
-                  {truncateText(item?.item?.name || item.name, 50)}
+                  {truncateText(`${item?.item?.firstName} ${item?.item?.lastName}`, 50)}
                 </Td>
 
                 <Td className="w-[120px] text-center align-middle">
                   <Button
                     variant="outlined"
                     onClick={() => {
-                      const nombre = item?.item?.name || item.name;
-                      if (!agentesAsignados.find((agente) => agente.name === nombre)) {
-                        setAgentesAsignados([...agentesAsignados, { name: nombre }]);
+                      const hasAgente = agentes.find((agente) => agente?._id === item?.item?._id);
+                      if (hasAgente) {
+
+                        setAgentesAsignados([...agentesAsignados, hasAgente]);
                       }
                       close();
                     }}
@@ -37,12 +37,10 @@ export function ContentAsignarAgente({ close, data = [], agentesAsignados, setAg
                   </Button>
                 </Td>
               </Tr>
-
             ))}
           </TBody>
         </Table>
       </div>
-
 
       <div className="mt-14 flex justify-end space-x-3">
         <Button
@@ -63,6 +61,7 @@ export function ContentAsignarAgente({ close, data = [], agentesAsignados, setAg
 
 ContentAsignarAgente.propTypes = {
   data: PropTypes.array,
+  agentes: PropTypes.array,
   close: PropTypes.func,
   setAgentesAsignados: PropTypes.func,
 };

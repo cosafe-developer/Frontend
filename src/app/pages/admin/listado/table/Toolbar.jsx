@@ -61,7 +61,7 @@ export function Toolbar({ table }) {
         <div
           className={clsx(
             "custom-scrollbar transition-content flex justify-between space-x-4 overflow-x-auto pb-1 pt-4 ",
-            isFullScreenEnabled ? "px-4 sm:px-5" : "px-(--margin-x)",
+            isFullScreenEnabled ? "px-4 sm:px-5" : "",/*  px-(--margin-x) */
           )}
           style={{
             "--margin-scroll": isFullScreenEnabled

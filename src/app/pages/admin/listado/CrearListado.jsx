@@ -1,25 +1,27 @@
 import { useForm, Controller } from "react-hook-form";
 import { Page } from "components/shared/Page";
-import { Card, Button, Badge, Circlebar } from "components/ui";
+import { Card, Button, Badge/* , Circlebar */ } from "components/ui";
 import { Listbox } from "components/shared/form/Listbox";
 import { FiFilePlus } from "react-icons/fi";
 import { DatePicker } from "components/shared/form/Datepicker";
 import { IoPersonOutline } from "react-icons/io5";
 import { useRightSidebarContext } from "app/contexts/sidebar-right/context";
 import { HeaderAsignarAgente } from "components/template/RightSidebar/asignarAgente/HeaderAsignarAgente";
-import { useState } from "react";
-import { getColorProgress } from "helpers/getColorProgress.helper";
+import { useCallback, useEffect, useState } from "react";
+/* import { getColorProgress } from "helpers/getColorProgress.helper"; */
+import serverStatesFetching from "types/fetch/serverStatesFetching.type";
+import LoadingContent from "components/template/LoadingContent";
+import LoadingErrorComponent from "components/custom-ui/loadings/LoadingError.component";
+import getEmpresasWithoutPagination from "api/empresa/getEmpresasWithoutPagination";
+import getAgentesWithoutPagination from "api/agente/getAgentesWithoutPagination";
+import { getCookies } from "utils/getCookies";
+import getListEstudios from "api/estudios/getListEstudios";
+import { useToastContext } from "app/contexts/toast-provider/context";
+import createListado from "api/listados/createListado";
+import { useNavigate } from "react-router";
 
 
-const empresas = [
-  { id: "1", label: "Empresa A" },
-  { id: "2", label: "Empresa B" },
-];
 
-const estudios = [
-  { id: "1", label: "Estudio X" },
-  { id: "2", label: "Estudio Y" },
-];
 
 const CrearListado = () => {
   const {
@@ -35,13 +37,106 @@ const CrearListado = () => {
     }
   });
 
-
-  const { openSidebar } = useRightSidebarContext();
+  const navigate = useNavigate();
+  const [empresas, setEmpresas] = useState([]);
+  const [agentes, setAgentes] = useState([]);
+  const [estudios, setEstudios] = useState([]);
   const [agentesAsignados, setAgentesAsignados] = useState([]);
+  const [estado, setEstado] = useState(serverStatesFetching.fetching);
+  const { showToast } = useToastContext();
+  const { openSidebar } = useRightSidebarContext();
 
-  const onSubmit = (data) => {
-    console.log("Formulario enviado:", data);
+  const fetchData = useCallback(
+    async () => {
+      setEstado(serverStatesFetching.fetching);
+      const userId = getCookies("user_id");
+
+      const responseEmpresas = await getEmpresasWithoutPagination({ requestBody: { user_id: userId } });
+      const responseAgentes = await getAgentesWithoutPagination({ requestBody: { user_id: userId } });
+      const responseEstudios = await getListEstudios();
+
+      if (responseEmpresas?.ok === true && responseAgentes?.ok === true && responseEstudios?.ok === true) {
+        let empresas = responseEmpresas?.data?.empresas ?? [];
+        let agentes = responseAgentes?.data?.agentes ?? [];
+        let estudios = responseEstudios?.data ?? [];
+
+        setAgentes(agentes);
+        setEmpresas(empresas)
+        setEstudios(estudios);
+        setEstado(serverStatesFetching.success);
+      } else {
+        setEstado(serverStatesFetching.error);
+      }
+    },
+    []
+  );
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+
+  const onSubmit = async (data) => {
+    try {
+      setEstado(serverStatesFetching.fetching);
+      const agentesIds = agentesAsignados.map(a => a._id);
+
+      const payload = {
+        companyId: data.empresa || null,
+        studyId: data.estudio || null,
+        startDate: Array.isArray(data.fechaInicio) && data.fechaInicio.length > 0
+          ? new Date(data.fechaInicio[0]).toISOString().split("T")[0]
+          : null,
+        endDate: Array.isArray(data.fechaEntrega) && data.fechaEntrega.length > 0
+          ? new Date(data.fechaEntrega[0]).toISOString().split("T")[0]
+          : null,
+        agents: agentesIds ?? [],
+        priority: "baja",
+        progressPercentage: 0,
+        status: "pendiente",
+      };
+
+      console.log("Payload listo para enviar:", payload);
+
+      // ejemplo de envío
+      const response = await createListado({ requestBody: payload });
+      if (response?.ok) {
+        setEstado(serverStatesFetching.success);
+        showToast({
+          message: "Proyecto creado correctamente",
+          type: "success",
+        });
+        navigate("/admin/listado");
+      } else {
+        setEstado(serverStatesFetching.error);
+        showToast({
+          message: "Error al crear el proyecto",
+          type: "error",
+        });
+      }
+    } catch (error) {
+      console.error("Error al enviar:", error);
+      showToast({
+        message: "Error en la comunicación con el servidor",
+        type: "error",
+      });
+    }
   };
+
+
+
+  if (estado === serverStatesFetching.fetching) {
+    return (
+      <>
+        <LoadingContent />
+      </>
+    );
+  }
+
+  if (estado === serverStatesFetching.error) {
+    return <LoadingErrorComponent />;
+  }
+
 
   return (
     <Page title="Listado de Requerimientos">
@@ -66,9 +161,9 @@ const CrearListado = () => {
                       label="Empresa"
                       placeholder="Asigna una empresa..."
                       data={empresas}
-                      displayField="label"
-                      value={empresas.find((e) => e.id === field.value) || null}
-                      onChange={(val) => field.onChange(val?.id)}
+                      displayField="tradeName"
+                      value={empresas.find((e) => e._id === field.value) || null}
+                      onChange={(val) => field.onChange(val?._id)}
                       error={errors?.empresa?.message}
                     />
                   )}
@@ -83,9 +178,9 @@ const CrearListado = () => {
                       label="Estudio"
                       placeholder="Asigna un estudio..."
                       data={estudios}
-                      displayField="label"
-                      value={estudios.find((e) => e.id === field.value) || null}
-                      onChange={(val) => field.onChange(val?.id)}
+                      displayField="studyName"
+                      value={estudios.find((e) => e._id === field.value) || null}
+                      onChange={(val) => field.onChange(val?._id)}
                       error={errors?.estudio?.message}
                     />
                   )}
@@ -131,8 +226,9 @@ const CrearListado = () => {
                         openSidebar({
                           header: HeaderAsignarAgente,
                           data: {
-                            agentesAsignados,
+                            agentes,
                             setAgentesAsignados,
+                            agentesAsignados
                           },
                         });
                       }}
@@ -144,17 +240,17 @@ const CrearListado = () => {
                     </Button>
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                       {agentesAsignados.map((agente) => (
-                        <div key={agente.name} className="flex items-center">
+                        <div key={agente?._id} className="flex items-center">
                           <Badge
                             className="rounded-full capitalize px-4 text-sm py-3 border border-gray-500/60 w-full flex justify-between items-center"
                             color="success"
                             variant="soft"
                           >
-                            {agente.name}
+                            {`${agente?.firstName}  ${agente?.lastName ?? ""}`}
                             <button
                               onClick={() =>
                                 setAgentesAsignados((prev) =>
-                                  prev.filter((a) => a.name !== agente.name)
+                                  prev.filter((a) => a._id !== agente._id)
                                 )
                               }
                               className="text-xs text-red-400 hover:text-red-600 hover:cursor-pointer pl-2"
@@ -177,7 +273,6 @@ const CrearListado = () => {
                   <Button
                     type="submit"
                     color="primary"
-                    disabled
                   >
                     Guardar
                   </Button>
@@ -185,7 +280,7 @@ const CrearListado = () => {
               </form>
             </Card>
 
-            <Card className="flex flex-col p-5 space-y-6 mt-10 mb-[3rem]">
+            {/*    <Card className="flex flex-col p-5 space-y-6 mt-10 mb-[3rem]">
               <div className="flex items-center space-x-2">
                 <Circlebar
                   size={13}
@@ -204,7 +299,7 @@ const CrearListado = () => {
 
               </div>
 
-            </Card>
+            </Card> */}
           </div>
         </div>
       </div>
