@@ -19,8 +19,8 @@ import { empresaSteps } from "./steps-datos-empresa/EmpresaSteps";
 // ----------------------------------------------------------------------
 
 const EmpresaSteps = ({ currentEmpresaStep }) => {
-  const addProductFormCtx = useLlenarListadoFormContext();
-  const stepStatus = addProductFormCtx.state.stepStatus;
+  const llenarListadoFormCtx = useLlenarListadoFormContext();
+  const stepStatus = llenarListadoFormCtx.state.stepStatus;
   return (
     <div className="max-w-xl">
       <ol className="steps is-vertical">
@@ -29,7 +29,6 @@ const EmpresaSteps = ({ currentEmpresaStep }) => {
             const isActive = stepStatus[item.key].isDone;
             return (
               <li
-                // className="step pb-6 before:bg-gray-200 dark:before:bg-surface-2"
                 className={clsx(
                   "step pb-6",
                   currentEmpresaStep > i
@@ -41,17 +40,15 @@ const EmpresaSteps = ({ currentEmpresaStep }) => {
                 <div
                   className={clsx(
                     "step-header rounded-full outline-hidden dark:text-white",
-                    // isClickable && "cursor-pointer",
                     currentEmpresaStep === i && "ring-2 ring-primary-500",
                     isActive
                       ? "bg-primary-600 text-white ring-offset-[3px] ring-offset-gray-100 dark:bg-primary-500 dark:ring-offset-dark-900"
                       : "bg-gray-200 text-gray-950 dark:bg-dark-500",
                   )}
-                // className={`step-header rounded-full bg-gray-200 text-gray-800 dark:bg-surface-2 dark:text-white ${currentEmpresaStep === i ? "ring-2 ring-primary-500" : ""}`}
                 >
                   {i + 1}
                 </div>
-                <h3 className="text-gray-600 mt-1.5 ltr:ml-4 rtl:mr-4 dark:text-dark-100">
+                <h3 className="text-gray-600 mt-1.5 ltr:ml-4 rtl:mr-4 text-left dark:text-dark-100">
                   {item.label}
                 </h3>
               </li>
@@ -75,7 +72,7 @@ const EstudioSteps = () => {
               <div className="step-header rounded-full bg-gray-200 text-gray-800 dark:bg-surface-2 dark:text-white">
                 {i + 1}
               </div>
-              <h3 className="text-gray-600 mt-1.5 ltr:ml-4 rtl:mr-4 dark:text-dark-100">
+              <h3 className="text-gray-600 mt-1.5 ltr:ml-4 rtl:mr-4 text-left dark:text-dark-100">
                 {item.label}
               </h3>
             </li>
