@@ -29,7 +29,6 @@ const cargos = [
   { id: "inspector-seguridad-industrial", label: "Inspector de Seguridad Industrial" },
   { id: "perito-ambiental", label: "Perito Ambiental" },
   { id: "auditor", label: "Auditor Interno de Cumplimiento Normativo" },
-  { id: "agente", label: "Agente" },
 ]
 
 const EditarAgente = () => {
@@ -121,7 +120,6 @@ const EditarAgente = () => {
       });
 
       if (Object.keys(cambios).length === 0) {
-        console.log("No hay cambios para actualizar.");
         setEstado(serverStatesFetching.success);
         return;
       }
@@ -165,7 +163,7 @@ const EditarAgente = () => {
         fechaEntrada: agente.startDate,
         email: agente.email,
         telefono: agente.phone,
-        cargo: agente.role
+        cargo: agente.position
       });
 
       setEstado(serverStatesFetching.success);

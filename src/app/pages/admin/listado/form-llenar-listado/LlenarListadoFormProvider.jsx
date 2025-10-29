@@ -10,15 +10,16 @@ import { LlenarListadoFormContextProvider } from "./LlenarListadoFormContext";
 
 const initialState = {
   formData: {
-    informacion_empresa: {
+    riesgos_por_daños_no_estructurales: {
       logotipo: null,
       nombre: "",
       rfc: "",
       email: "",
       domicilio: "",
       domicilio_fisico: "",
+      isDone: false,
     },
-    informacion_de_la_direccion: {
+    riesgos_por_daños_estructurales: {
       constancia_fiscal: null,
       actividades_empresa: "",
       giro_empresarial: "",
@@ -34,10 +35,35 @@ const initialState = {
       poblacion_fija: "",
       colindancias_inmueble: "",
       areas_inmueble: "",
+      isDone: false,
     },
-    informacion_de_riesgo: {},
-    // --------------------------------------
-    estudio: {},
+    informacion_de_riesgo: {
+      isDone: false,
+    },
+    agente_perturbador_socio_organizativo: {
+      isDone: false,
+    },
+    agente_perturbador_geologico: {
+      isDone: false,
+    },
+    agente_perturbador_fisico_quimico: {
+      isDone: false,
+    },
+    agente_perturbador_sanitario: {
+      isDone: false,
+    },
+    riesgos_circundantes: {
+      isDone: false,
+    },
+    medidas_equipos_de_seguridad: {
+      isDone: false,
+    },
+    evaluacion_de_daños: {
+      isDone: false,
+    },
+    estudio: {
+      isDone: false,
+    },
   },
   stepStatus: {
     datos_generales: {

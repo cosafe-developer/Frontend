@@ -10,7 +10,8 @@ import serverStatesFetching from "types/fetch/serverStatesFetching.type";
 import LoadingComponent from "components/custom-ui/loadings/Loading.component";
 import LoadingErrorComponent from "components/custom-ui/loadings/LoadingError.component";
 import getEmpresaById from "api/empresa/getEmpresaById";
-import updateEmpresa from "api/empresa/updateEmpresa";
+import updateEmpresa from "api/empresa/updateEmpresaById";
+
 
 
 const EditarEmpresa = () => {
@@ -89,7 +90,6 @@ const EditarEmpresa = () => {
 
 
       if (Object.keys(cambios).length === 0) {
-        console.log("No hay cambios para actualizar.");
         setEstado(serverStatesFetching.success);
         return;
       }

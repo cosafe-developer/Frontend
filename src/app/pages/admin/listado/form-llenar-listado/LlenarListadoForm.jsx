@@ -10,9 +10,7 @@ import { Stepper } from "./Stepper";
 import { UnderReview } from "./UnderReview";
 import { Estudio } from "./steps-global/Estudio";
 import { useLlenarListadoFormContext } from "./LlenarListadoFormContext";
-
 import { DatosGenerales } from "./steps-global/DatosGenerales";
-
 import { estudioSteps } from "./steps-datos-estudio/EstudioSteps";
 import { empresaSteps } from "./steps-datos-empresa/EmpresaSteps";
 
@@ -20,13 +18,13 @@ import { empresaSteps } from "./steps-datos-empresa/EmpresaSteps";
 
 const EmpresaSteps = ({ currentEmpresaStep }) => {
   const llenarListadoFormCtx = useLlenarListadoFormContext();
-  const stepStatus = llenarListadoFormCtx.state.stepStatus;
+  const stepStatus = llenarListadoFormCtx?.state?.stepStatus;
   return (
     <div className="max-w-xl">
       <ol className="steps is-vertical">
         {empresaSteps
           .map((item, i) => {
-            const isActive = stepStatus[item.key].isDone;
+            const isActive = stepStatus[item.key]?.isDone;
             return (
               <li
                 className={clsx(
@@ -59,24 +57,42 @@ const EmpresaSteps = ({ currentEmpresaStep }) => {
   );
 }
 
-const EstudioSteps = () => {
+const EstudioSteps = ({ currentEstudioStep }) => {
+  const llenarListadoFormCtx = useLlenarListadoFormContext();
+  const stepStatus = llenarListadoFormCtx?.state?.formData;
   return (
     <div className="max-w-xl">
       <ol className="steps is-vertical">
         {estudioSteps
-          .map((item, i) => (
-            <li
-              className="step pb-6 before:bg-gray-200 dark:before:bg-surface-2"
-              key={i}
-            >
-              <div className="step-header rounded-full bg-gray-200 text-gray-800 dark:bg-surface-2 dark:text-white">
-                {i + 1}
-              </div>
-              <h3 className="text-gray-600 mt-1.5 ltr:ml-4 rtl:mr-4 text-left dark:text-dark-100">
-                {item.label}
-              </h3>
-            </li>
-          ))}
+          .map((item, i) => {
+            const isActive = stepStatus[item.key]?.isDone;
+            return (
+              <li
+                className={clsx(
+                  "step pb-6",
+                  currentEstudioStep > i
+                    ? "before:bg-primary-500"
+                    : "before:bg-gray-200 dark:before:bg-dark-500",
+                )}
+                key={i}
+              >
+                <div
+                  className={clsx(
+                    "step-header rounded-full outline-hidden dark:text-white",
+                    currentEstudioStep === i && "ring-2 ring-primary-500",
+                    isActive
+                      ? "bg-primary-600 text-white ring-offset-[3px] ring-offset-gray-100 dark:bg-primary-500 dark:ring-offset-dark-900"
+                      : "bg-gray-200 text-gray-950 dark:bg-dark-500",
+                  )}
+                >
+                  {i + 1}
+                </div>
+                <h3 className="text-gray-600 mt-1.5 ltr:ml-4 rtl:mr-4 text-left dark:text-dark-100">
+                  {item.label}
+                </h3>
+              </li>
+            )
+          })}
       </ol>
     </div>
   );
@@ -104,7 +120,7 @@ const LlenarListadoForm = () => {
   // Pasos - Datos Generales Empresa
   const [currentEmpresaStep, setCurrentEmpresaStep] = useState(0);
   // Pasos - Datos Estudio Empresa
-  const [currentEStudioStep, setCurrentEstudioStep] = useState(0);
+  const [currentEstudioStep, setCurrentEstudioStep] = useState(0);
   // Estado de finalización
   const [finished, setFinished] = useState(false);
 
@@ -136,7 +152,7 @@ const LlenarListadoForm = () => {
                   setFinished={setFinished}
                   setCurrentStep={setCurrentStep}
                   currentEmpresaStep={currentEmpresaStep}
-                  currentEStudioStep={currentEStudioStep}
+                  currentEstudioStep={currentEstudioStep}
                   setCurrentEstudioStep={setCurrentEstudioStep}
                   setCurrentEmpresaStep={setCurrentEmpresaStep}
                 />
@@ -162,7 +178,7 @@ const LlenarListadoForm = () => {
               </div>
               :
               <div className="pl-1.5">
-                <EstudioSteps />
+                <EstudioSteps currentEstudioStep={currentEstudioStep} />
               </div>
           }
         </div>

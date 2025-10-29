@@ -96,7 +96,6 @@ const CrearListado = () => {
         status: "pendiente",
       };
 
-      console.log("Payload listo para enviar:", payload);
 
       // ejemplo de envío
       const response = await createListado({ requestBody: payload });

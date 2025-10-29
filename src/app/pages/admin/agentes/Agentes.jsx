@@ -68,7 +68,6 @@ export default function Agentes() {
     return <LoadingErrorComponent />;
   }
 
-  console.log(agentes);
   return (
     <Page title="Agentes">
       <div className="flex-1 p-6  min-w-0">

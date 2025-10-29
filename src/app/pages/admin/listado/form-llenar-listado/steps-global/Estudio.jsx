@@ -1,80 +1,43 @@
-// Import Dependencies
-import { yupResolver } from "@hookform/resolvers/yup";
-import { useForm } from "react-hook-form";
+// Estudio.jsx
+
 import PropTypes from "prop-types";
+import { estudioSteps } from "../steps-datos-estudio/EstudioSteps";
 
-// Local Imports
-// import { ContextualHelp } from "components/shared/ContextualHelp";
-// import { TextEditor } from "components/shared/form/TextEditor";
-import { Button } from "components/ui";
-import { useLlenarListadoFormContext } from "../LlenarListadoFormContext";
-// import { MetaTags } from "../components/MetaTags";
-import { estudioSchema } from "../schema";
+export function Estudio({
+  currentEstudioStep,
+  setCurrentEstudioStep,
+  setFinished,
+}) {
+  const StepComponent = estudioSteps[currentEstudioStep]?.component;
 
-import { Basic } from "../../basic-table/Basic";
 
-// ----------------------------------------------------------------------
+  if (!StepComponent) return null;
 
-// const editorModules = {
-//   toolbar: [
-//     ["bold", "italic", "underline", "strike"], // toggled buttons
-//     ["blockquote", "code-block"],
-//     [{ header: 1 }, { header: 2 }], // custom button values
-//     [{ list: "ordered" }, { list: "bullet" }],
-//     [{ script: "sub" }, { script: "super" }], // superscript/subscript
-//     [{ indent: "-1" }, { indent: "+1" }], // outdent/indent
-//     [{ direction: "rtl" }], // text direction
-//     [{ size: ["small", false, "large", "huge"] }], // custom dropdown
-//     [{ header: [1, 2, 3, 4, 5, 6, false] }],
-//     [{ color: [] }, { background: [] }], // dropdown with defaults from theme
-//     [{ font: [] }],
-//     [{ align: [] }, "image"],
-//     ["clean"], // remove formatting button
-//   ],
-// };
+  const handleNext = () => {
+    if (currentEstudioStep < estudioSteps.length - 1) {
+      setCurrentEstudioStep((prev) => prev + 1);
+    } else {
+      setFinished(true);
+    }
+  };
 
-export function Estudio({ setCurrentStep }) {
-  const addProductFormCtx = useLlenarListadoFormContext();
-
-  const {
-    // register,
-    handleSubmit,
-    // formState: { errors },
-    // control,
-  } = useForm({
-    resolver: yupResolver(estudioSchema),
-    defaultValues: addProductFormCtx.state.formData.estudio,
-  });
-
-  const onSubmit = (data) => {
-    addProductFormCtx.dispatch({
-      type: "SET_FORM_DATA",
-      payload: { estudio: { ...data } },
-    });
-    addProductFormCtx.dispatch({
-      type: "SET_STEP_STATUS",
-      payload: { estudio: { isDone: true } },
-    });
-    setCurrentStep(2);
+  const handlePrev = () => {
+    if (currentEstudioStep > 0) {
+      setCurrentEstudioStep((prev) => prev - 1);
+    }
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} autoComplete="off">
-      <div>
-        <Basic />
-      </div>
-      <div className="mt-4 flex justify-end space-x-3 ">
-        <Button className="min-w-[7rem]" onClick={() => setCurrentStep(0)}>
-          Regresar
-        </Button>
-        {/* <Button type="submit" className="min-w-[7rem]" color="primary">
-          Siguiente
-        </Button> */}
-      </div>
-    </form>
+    <StepComponent
+      onNext={handleNext}
+      onPrev={handlePrev}
+      currentEStudioStep={currentEstudioStep}
+    />
   );
 }
 
 Estudio.propTypes = {
-  setCurrentStep: PropTypes.func,
+  currentEStudioStep: PropTypes.number,
+  setCurrentEstudioStep: PropTypes.func,
+  setFinished: PropTypes.func,
 };

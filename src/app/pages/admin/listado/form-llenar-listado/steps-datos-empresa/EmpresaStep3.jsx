@@ -43,6 +43,7 @@ const EmpresaStep3 = ({ setCurrentEmpresaStep, setCurrentStep }) => {
       }
     };
     sendData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formDataState]);
 
   // control del formulario

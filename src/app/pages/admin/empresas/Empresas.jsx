@@ -65,7 +65,6 @@ export default function Empresas() {
     return <LoadingErrorComponent />;
   }
 
-  console.log(empresas);
   return (
     <Page title="Empresas">
       <div className="flex-1 p-6  min-w-0">
