@@ -33,7 +33,7 @@ export function NameCell({ row, column, table }) {
         </SwapOn>
         <SwapOff>
           <Avatar
-            size={10}
+            size={11}
             classNames={{
               root: "rounded-full border-2 border-dashed border-transparent p-0.5 transition-colors group-hover/tr:border-gray-400 dark:group-hover/tr:border-dark-300",
               display: "text-xs-plus",
@@ -44,12 +44,21 @@ export function NameCell({ row, column, table }) {
         </SwapOff>
       </Swap>
 
-      <div className="font-medium text-gray-800 dark:text-dark-100">
+      <div className="font-medium text-gray-800 dark:text-dark-100 text-[15px]">
         <Highlight query={[globalQuery, columnQuery]}>{row?.original?.firstName + " " + row?.original?.lastName || ""}</Highlight>
       </div>
     </div>
   );
 }
+
+export function ListAsignados({ row }) {
+  const estudios = row?.original?.studies;
+  return (
+    <p className="text-[15px]">{estudios?.length}</p>
+  )
+
+}
+
 
 export function StatusCell({
   getValue,
@@ -98,6 +107,7 @@ export function StatusCell({
     />
   );
 }
+
 
 NameCell.propTypes = {
   getValue: PropTypes.func,

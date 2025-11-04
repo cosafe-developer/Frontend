@@ -13,6 +13,7 @@ import { getColorProgress } from "helpers/getColorProgress.helper";
 import { useState } from "react";
 import { toast } from "sonner";
 import { StyledSwitch } from "components/shared/form/StyledSwitch";
+import { normalizeDate } from "helpers/normalizeDate.helper";
 
 // ----------------------------------------------------------------------
 
@@ -31,11 +32,11 @@ const getColor = ({ rol }) => {
 
 const getColorPrioridad = ({ prioridad }) => {
   switch (prioridad) {
-    case "Urgente":
+    case "alta":
       return "error";
-    case "Media":
+    case "media":
       return "warning";
-    case "Baja":
+    case "baja":
       return "success";
     default:
       return "neutral";
@@ -50,16 +51,16 @@ export function EmpresaCell({ row, getValue, column, table }) {
   const name = getValue();
 
   return (
-    <div className="flex items-center space-x-2">
+    <div className="flex items-center space-x-3">
       <Avatar
-        size={9}
+        size={12}
         name={name}
         src={row?.original?.customer?.avatar_img}
         classNames={{
           display: "mask is-squircle rounded-none text-sm",
         }}
       />
-      <span className="font-medium text-gray-800 dark:text-dark-100">
+      <span className="font-medium text-gray-800 dark:text-dark-100 text-[16px]">
         <Highlight query={[globalQuery, columnQuery]}>{name}</Highlight>
       </span>
     </div>
@@ -68,30 +69,35 @@ export function EmpresaCell({ row, getValue, column, table }) {
 
 export function EstudioCell({ getValue }) {
   return (
-    <span className="font-medium text-primary-600 dark:text-primary-400">
+    <span className="font-medium text-primary-600 dark:text-primary-400 text-[16px]">
       {getValue()}
     </span>
   );
 }
 
 export function AgentesCell({ row }) {
+
   return (
     <div className="flex -space-x-2 ">
-      {row.original.agentes.map((item, i) => (
-        <Avatar
-          key={i}
-          data-tooltip
-          data-tooltip-content={item.name}
-          size={8}
-          name={item.name}
-          src={item.avatar || ""}
-          initialColor="auto"
-          classNames={{
-            root: "origin-bottom transition-transform hover:z-10 hover:scale-125",
-            display: "text-xs ring-3 ring-white dark:ring-dark-700",
-          }}
-        />
-      ))}
+      {row?.original?.agents.map((item, i) => {
+        const fullName = `${item.firstName} ${item.lastName}`
+
+        return (
+          <Avatar
+            key={i}
+            data-tooltip
+            data-tooltip-content={fullName}
+            size={10}
+            name={fullName}
+            src={item?.avatar || ""}
+            initialColor="auto"
+            classNames={{
+              root: "origin-bottom transition-transform hover:z-10 hover:scale-125",
+              display: "text-xs ring-3 ring-white dark:ring-dark-700",
+            }}
+          />
+        )
+      })}
     </div>
   );
 }
@@ -99,14 +105,17 @@ export function AgentesCell({ row }) {
 export function FechaDeInicioCell({ row }) {
   const { locale } = useLocaleContext();
 
+  const startDateFormated = normalizeDate(row?.original?.startDate);
+  const endDateFormated = normalizeDate(row?.original?.endDate)
+
   return (
     <div>
-      <p>{dayjs(row.original.fecha_inicio).locale(locale).format("DD MMM YYYY")}</p>
-      <p className="mt-1 text-xs">
+      <p className="text-[16px]">{dayjs(startDateFormated).locale(locale).format("DD MMM YYYY")}</p>
+      <p className="mt-1 text-[15px]">
         <span className="font-semibold text-gray-700 dark:text-error-darker">
           Entrega:
         </span>{" "}
-        {dayjs(row.original.fecha_entrega).locale(locale).format("DD MMM YYYY")}
+        {dayjs(endDateFormated).locale(locale).format("DD MMM YYYY")}
       </p>
     </div>
   );
@@ -128,11 +137,11 @@ export function CreadorCell({ row }) {
 }
 
 export function PrioridadCell({ row }) {
-  const prioridad = row.original.prioridad;
+  const prioridad = row.original.priority;
   return (
     <div className="flex">
       <Badge
-        className="rounded-sm border border-white/10 capitalize"
+        className="rounded-sm border border-white/10 capitalize text-[16px]"
         color={getColorPrioridad({ prioridad: prioridad })}
         variant="filled"
       >
@@ -227,14 +236,15 @@ export function ProfitCell({ getValue, row }) {
   );
 }
 
+
+
 export function OrderStatusCell({ getValue }) {
   const val = getValue();
-  const option = statusOptions.find((item) => item.value === val);
+  const option = statusOptions.find((item) => item.value === val) || {};
 
   return (
-    <Badge color={option?.label === "Activo" ? "info" : "neutral"} className="space-x-1.5 ">
-
-      <span>{option?.label}</span>
+    <Badge color={option.color || "neutral"} className="space-x-1.5 text-[15px]">
+      <span>{option.label || "Desconocido"}</span>
     </Badge>
   );
 }

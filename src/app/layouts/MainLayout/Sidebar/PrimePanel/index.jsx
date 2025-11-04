@@ -37,7 +37,7 @@ export function PrimePanel({
         )}
       >
         <div className="relative flex h-16 w-full shrink-0 items-center justify-between pl-4 pr-1 rtl:pl-1 rtl:pr-4">
-          <p className="truncate text-base tracking-wider text-gray-800 dark:text-dark-100">
+          <p className="truncate text-[18px] text-base tracking-wider text-gray-800 dark:text-dark-100">
             {title}
           </p>
           <Button

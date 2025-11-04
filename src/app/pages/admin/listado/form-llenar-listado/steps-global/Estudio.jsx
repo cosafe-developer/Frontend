@@ -1,15 +1,15 @@
 // Estudio.jsx
 
 import PropTypes from "prop-types";
-import { estudioSteps } from "../steps-datos-estudio/EstudioSteps";
+import { estudioSteps } from "../steps-datos-estudio/estudio-pipc/EstudioSteps";
 
 export function Estudio({
   currentEstudioStep,
   setCurrentEstudioStep,
   setFinished,
+  listado,
 }) {
   const StepComponent = estudioSteps[currentEstudioStep]?.component;
-
 
   if (!StepComponent) return null;
 
@@ -32,6 +32,7 @@ export function Estudio({
       onNext={handleNext}
       onPrev={handlePrev}
       currentEStudioStep={currentEstudioStep}
+      listado={listado}
     />
   );
 }

@@ -6,17 +6,18 @@ import { DatePicker } from "components/shared/form/Datepicker";
 import { useToastContext } from "app/contexts/toast-provider/context";
 import { useState } from "react";
 import { UnderReview } from "./UnderReview";
-import { Dropzone } from "./upload/DropZoneAgentes";
 import { useNavigate } from "react-router";
+import { UserIcon } from "@heroicons/react/20/solid";
+import { EnvelopeIcon } from "@heroicons/react/24/outline";
+import { PhoneDialCode } from "./components/PhoneDialCode";
+import { cargosAgentes } from "types/global/global";
 
 import serverStatesFetching from "types/fetch/serverStatesFetching.type";
 import createAgente from "api/agente/createAgente";
 import LoadingComponent from "components/custom-ui/loadings/Loading.component";
 import LoadingErrorComponent from "components/custom-ui/loadings/LoadingError.component";
-import { UserIcon } from "@heroicons/react/20/solid";
-import { EnvelopeIcon } from "@heroicons/react/24/outline";
-import { PhoneDialCode } from "./components/PhoneDialCode";
 import getFirmaUploadImage from "api/upload/getFirmaUploadImage.service";
+import { CoverImageUpload } from "components/custom-ui/dropzone/CoverImageUpload";
 
 
 const generos = [
@@ -25,9 +26,10 @@ const generos = [
   { id: "other", label: "Otro" }
 ];
 
+
 const CrearAgente = () => {
   const { showToast } = useToastContext();
-  const [uploadedFiles, setUploadedFiles] = useState([]);
+
   const [isFinished, setIsFinished] = useState(null);
   const [estado, setEstado] = useState(null);
   const navigate = useNavigate();
@@ -59,20 +61,22 @@ const CrearAgente = () => {
       setEstado(serverStatesFetching.fetching);
 
       const phoneNumber = (data.numeric?.dialCode || "") + (data.numeric?.number || "");
-      const file = uploadedFiles[0];
+      const file = data?.foto_url;
+
       const firmaResp = await getFirmaUploadImage({
         fileName: file.name,
         fileType: file.type,
         folder: "profile",
       });
 
-
-      const uploadUrl = firmaResp.uploadUrl;
+      const uploadUrl = firmaResp.signedUrl;
 
       await fetch(uploadUrl, {
         method: "PUT",
         headers: {
           "Content-Type": file.type,
+          "x-amz-acl": "public-read",
+          "Cache-Control": "public,max-age=31536000,immutable"
         },
         body: file,
       });
@@ -95,23 +99,18 @@ const CrearAgente = () => {
 
 
       const agente = await createAgente({ requestBody: payload });
-
       if (!agente?.ok) {
         setEstado(serverStatesFetching.error);
-        showToast({
-          message: "Error al crear el agente",
-          type: "error",
-        });
-      } else {
-        setEstado(serverStatesFetching.success);
-        setIsFinished(true);
+        showToast({ message: "Error al crear el agente", type: "error" });
+        return;
       }
+
+      showToast({ message: "Agente creado correctamente", type: "success" });
+      setEstado(serverStatesFetching.success);
+      setIsFinished(true);
     } catch (error) {
       setEstado(serverStatesFetching.error);
-      showToast({
-        message: "Error al crear el agente",
-        type: "error",
-      });
+      showToast({ message: "Error al crear el agente", type: "error" });
       console.error("Error creando agente:", error);
     }
   };
@@ -147,7 +146,18 @@ const CrearAgente = () => {
                 </div>
 
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                  <Dropzone files={uploadedFiles} setFiles={setUploadedFiles} />
+                  <Controller
+                    name="foto_url"
+                    control={control}
+                    render={({ field }) => (
+                      <CoverImageUpload
+                        label="Foto de Perfil"
+                        classNames={{ box: "mt-1.5" }}
+                        error={errors?.foto_url?.message}
+                        {...field}
+                      />
+                    )}
+                  />
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <Controller
@@ -259,19 +269,23 @@ const CrearAgente = () => {
                     />
                   </div>
 
-                  {/*  <Controller
+                  <Controller
                     name="cargo"
                     control={control}
                     rules={{ required: "Cargo requerido" }}
                     render={({ field }) => (
-                      <Input
-                        placeholder="Agente PIPC"
+                      <Listbox
                         label="Cargo *"
+                        placeholder="Agente PIPC"
+                        data={cargosAgentes}
+                        displayField="label"
+                        value={cargosAgentes.find((e) => e.id === field.value) || null}
+                        onChange={(val) => field.onChange(val?.id)}
                         error={errors?.cargo?.message}
-                        {...field}
                       />
                     )}
-                  /> */}
+                  />
+
 
                   <Controller
                     name="password"

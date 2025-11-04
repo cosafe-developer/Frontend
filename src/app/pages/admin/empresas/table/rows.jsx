@@ -51,16 +51,16 @@ export function EmpresaCell({ row, getValue, column, table }) {
   const name = getValue();
 
   return (
-    <div className="flex items-center space-x-2">
+    <div className="flex items-center space-x-3">
       <Avatar
-        size={9}
+        size={12}
         name={name}
         src={row?.original?.customer?.avatar_img}
         classNames={{
           display: "mask is-squircle rounded-none text-sm",
         }}
       />
-      <span className="font-medium text-gray-800 dark:text-dark-100">
+      <span className="font-medium text-gray-800 dark:text-dark-100 text-[16px]">
         <Highlight query={[globalQuery, columnQuery]}>{name}</Highlight>
       </span>
     </div>
@@ -74,6 +74,24 @@ export function EstudioCell({ getValue }) {
     </span>
   );
 }
+
+export function ListAsignados({ row }) {
+  const estudios = row?.original?.studies;
+  return (
+    <p className="text-[15px]">{estudios?.length}</p>
+  )
+
+}
+
+
+export function EmailCell({ row }) {
+  const email = row?.original?.email;
+  return (
+    <p className="text-[16px]">{email}</p>
+  )
+
+}
+
 
 export function AgentesCell({ row }) {
   return (

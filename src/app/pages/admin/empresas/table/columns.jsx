@@ -4,7 +4,7 @@ import { createColumnHelper } from "@tanstack/react-table";
 
 import { RowActions } from "./RowActions";
 
-import { EmpresaCell } from "./rows";
+import { EmailCell, EmpresaCell, ListAsignados } from "./rows";
 
 // ----------------------------------------------------------------------
 
@@ -33,7 +33,7 @@ export const columns = [
     id: "age",
     header: "List Agisnados",
     label: "Age",
-    /* cell: HighlightableCell, */
+    cell: ListAsignados,
   }),
   columnHelper.accessor((row) => row.phone, {
     id: "phone",
@@ -45,7 +45,7 @@ export const columns = [
     id: "email",
     header: "Email",
     label: "Email",
-    /*   cell: (props) => <CopyableCell {...props} highlight />, */
+    cell: EmailCell,
   }),
   /*   columnHelper.accessor((row) => row.password, {
       id: "password",

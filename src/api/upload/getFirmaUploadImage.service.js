@@ -18,7 +18,6 @@ const getFirmaUploadImage = async ({ fileName, fileType, folder }) => {
 
     const result = await resp.json();
 
-    // result debe contener { uploadUrl, publicUrl }
     return result;
   } catch (error) {
     console.error("Error obteniendo la firma para upload:", error);

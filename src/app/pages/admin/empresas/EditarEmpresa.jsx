@@ -2,7 +2,6 @@ import { useForm, Controller } from "react-hook-form";
 import { Page } from "components/shared/Page";
 import { Card, Button, Input } from "components/ui";
 import { useCallback, useEffect, useState } from "react";
-import { Dropzone } from "./upload/DropZoneEmpresa";
 import { useToastContext } from "app/contexts/toast-provider/context";
 import { useNavigate, useParams } from "react-router";
 
@@ -11,11 +10,14 @@ import LoadingComponent from "components/custom-ui/loadings/Loading.component";
 import LoadingErrorComponent from "components/custom-ui/loadings/LoadingError.component";
 import getEmpresaById from "api/empresa/getEmpresaById";
 import updateEmpresa from "api/empresa/updateEmpresaById";
+import { CoverImageUpload } from "components/custom-ui/dropzone/CoverImageUpload";
+import getFirmaUploadImage from "api/upload/getFirmaUploadImage.service";
+import deleteImage from "api/shared/deteleImageSpaces";
 
 
 
 const EditarEmpresa = () => {
-  const [uploadedFiles, setUploadedFiles] = useState([]);
+
   const [empresa, setEmpresa] = useState(null);
   const [estado, setEstado] = useState(serverStatesFetching.fetching);
   const { showToast } = useToastContext();
@@ -30,7 +32,6 @@ const EditarEmpresa = () => {
     };
 
     const response = await getEmpresaById({ requestBody: payload });
-
     if (!response?.ok) {
       setEstado(serverStatesFetching.error);
       return;
@@ -62,13 +63,49 @@ const EditarEmpresa = () => {
     },
   });
 
+
   const onSubmit = async (data) => {
     if (!empresa) return;
 
     setEstado(serverStatesFetching.fetching);
 
     try {
+      let newPhotoUrl = null
+      if (data?.foto_url) {
+        const file = data?.foto_url;
+
+        const deletingImage = await deleteImage({ fileName: empresa?.logoUrl })
+        if (!deletingImage?.ok) {
+          showToast({ message: "Error en al borrar la imagen", type: "error", });
+        }
+
+        const firmaResp = await getFirmaUploadImage({
+          fileName: file.name,
+          fileType: file.type,
+          folder: "profile",
+        });
+
+
+        const uploadUrl = firmaResp.signedUrl;
+
+        await fetch(uploadUrl, {
+          method: "PUT",
+          headers: {
+            "Content-Type": file.type,
+            "x-amz-acl": "public-read",
+            "Cache-Control": "public,max-age=31536000,immutable"
+          },
+          body: file,
+        });
+
+        newPhotoUrl = firmaResp.publicUrl;
+      }
+
       const cambios = {};
+
+      if (newPhotoUrl) {
+        cambios.logoUrl = newPhotoUrl;
+      }
 
       // === Mapeo del formulario → backend ===
       const mapping = {
@@ -124,7 +161,6 @@ const EditarEmpresa = () => {
     }
   };
 
-
   useEffect(() => {
     if (empresa) {
       reset({
@@ -149,23 +185,29 @@ const EditarEmpresa = () => {
   }
 
   return (
-    <Page title="Editar Agente">
+    <Page title="Editar Empresa">
       <div className="transition-content w-full px-(--margin-x) pt-5 lg:pt-6">
-        <h1 className="text-white text-2xl">Editar Agente</h1>
+        <h1 className="text-white text-2xl">Editar Empresa</h1>
 
-        <div className="transition-content w-full px-(--margin-x) pt-5 lg:pt-6">
-          <h1 className="text-white text-2xl">Crear Nueva Empresa</h1>
+        <div className="transition-content w-full  pt-5 lg:pt-0">
 
           <div className="mt-8 flex gap-8 mb-[4rem]">
             <div className="w-full">
               <Card className="flex flex-col p-5 space-y-6">
-                <div>
-                  <h2 className="text-xl text-white">Datos Generales</h2>
-                  <p className="mt-2 text-[16px]">Por favor proporcione la información de la empresa para crear su perfil</p>
-                </div>
 
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                  <Dropzone files={uploadedFiles} setFiles={setUploadedFiles} />
+                  <Controller
+                    name="foto_url"
+                    control={control}
+                    render={({ field }) => (
+                      <CoverImageUpload
+                        label="Logotipo"
+                        classNames={{ box: "mt-1.5" }}
+                        error={errors?.foto_url?.message}
+                        {...field}
+                      />
+                    )}
+                  />
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <Controller

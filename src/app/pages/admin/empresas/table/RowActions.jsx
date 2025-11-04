@@ -8,28 +8,28 @@ import {
 } from "@headlessui/react";
 import {
   EllipsisHorizontalIcon,
-  EyeIcon,
+  /*   EyeIcon, */
   PencilIcon,
-  TrashIcon,
+  /*   TrashIcon, */
   /*   ClipboardIcon */
 } from "@heroicons/react/24/outline";
 /* import { FiBell } from "react-icons/fi";  */
 import clsx from "clsx";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { /* useCallback, */ useEffect, useRef, useState } from "react";
 import PropTypes from "prop-types";
 
 // Local Imports
-import { ConfirmModal } from "components/shared/ConfirmModal";
+/* import { ConfirmModal } from "components/shared/ConfirmModal"; */
 import { Button } from "components/ui";
-import { useRightSidebarContext } from "app/contexts/sidebar-right/context";
+/* import { useRightSidebarContext } from "app/contexts/sidebar-right/context"; */
 
 import { useNavigate } from "react-router";
-import { HeaderAdministrarEmpresa } from "components/template/RightSidebar/administrarEmpresa/HeaderAdministrarEmpresa";
+/* import { HeaderAdministrarEmpresa } from "components/template/RightSidebar/administrarEmpresa/HeaderAdministrarEmpresa";
 import { ContentAdministrarEmpresa } from "components/template/RightSidebar/administrarEmpresa/ContentAdministrarEmpresa";
-
+ */
 // ----------------------------------------------------------------------
 
-const confirmMessages = {
+/* const confirmMessages = {
   pending: {
     description:
       "Are you sure you want to delete this user? Once deleted, it cannot be restored.",
@@ -37,15 +37,15 @@ const confirmMessages = {
   success: {
     title: "User Deleted",
   },
-};
+}; */
 
-export function RowActions({ row, table }) {
-  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [confirmDeleteLoading, setConfirmDeleteLoading] = useState(false);
-  const [deleteSuccess, setDeleteSuccess] = useState(false);
-  const [deleteError, setDeleteError] = useState(false);
+export function RowActions({ row }) {
+  /*   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+    const [confirmDeleteLoading, setConfirmDeleteLoading] = useState(false);
+    const [deleteSuccess, setDeleteSuccess] = useState(false);
+    const [deleteError, setDeleteError] = useState(false); */
   const [menuPosition, setMenuPosition] = useState("bottom");
-  const { openSidebar } = useRightSidebarContext();
+  /*   const { openSidebar } = useRightSidebarContext(); */
   const navigate = useNavigate();
   const menuRef = useRef();
 
@@ -64,27 +64,27 @@ export function RowActions({ row, table }) {
     }
   }, [row.index]);
 
-  const closeModal = () => {
-    setDeleteModalOpen(false);
-  };
+  /*   const closeModal = () => {
+      setDeleteModalOpen(false);
+    };
+  
+    const openModal = () => {
+      setDeleteModalOpen(true);
+      setDeleteError(false);
+      setDeleteSuccess(false);
+    }; */
 
-  const openModal = () => {
-    setDeleteModalOpen(true);
-    setDeleteError(false);
-    setDeleteSuccess(false);
-  };
+  /*   const handleDeleteRows = useCallback(() => {
+      setConfirmDeleteLoading(true);
+      setTimeout(() => {
+        table.options.meta?.deleteRow(row);
+        setDeleteSuccess(true);
+        setConfirmDeleteLoading(false);
+      }, 1000);
+     
+    }, [row]); */
 
-  const handleDeleteRows = useCallback(() => {
-    setConfirmDeleteLoading(true);
-    setTimeout(() => {
-      table.options.meta?.deleteRow(row);
-      setDeleteSuccess(true);
-      setConfirmDeleteLoading(false);
-    }, 1000);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [row]);
-
-  const state = deleteError ? "error" : deleteSuccess ? "success" : "pending";
+  /*  const state = deleteError ? "error" : deleteSuccess ? "success" : "pending"; */
 
   return (
     <>
@@ -114,12 +114,12 @@ export function RowActions({ row, table }) {
             leaveTo="opacity-0 translate-y-2"
             className={clsx(
               "absolute z-50 min-w-[10rem] rounded-lg border border-gray-300 bg-white py-1 shadow-lg outline-hidden focus-visible:outline-hidden dark:border-dark-500 dark:bg-dark-750",
-              menuPosition === "left" && "top-0 right-full mr-1",
+              menuPosition === "left" && "-top-4 right-full mr-1",
               menuPosition === "above" && "bottom-full mb-1 right-full",
               menuPosition === "bottom" && "top-full mt-1 right-full"
             )}
           >
-            <MenuItem>
+            {/*  <MenuItem>
               {({ focus }) => (
                 <button
                   onClick={() => {
@@ -138,7 +138,7 @@ export function RowActions({ row, table }) {
                   <span>View</span>
                 </button>
               )}
-            </MenuItem>
+            </MenuItem> */}
             <MenuItem>
               {({ focus }) => (
                 <button
@@ -154,7 +154,7 @@ export function RowActions({ row, table }) {
                 </button>
               )}
             </MenuItem>
-            <MenuItem>
+            {/*    <MenuItem>
               {({ focus }) => (
                 <button
                   onClick={openModal}
@@ -167,19 +167,19 @@ export function RowActions({ row, table }) {
                   <span>Delete</span>
                 </button>
               )}
-            </MenuItem>
+            </MenuItem> */}
           </Transition>
         </Menu>
       </div>
 
-      <ConfirmModal
+      {/*   <ConfirmModal
         show={deleteModalOpen}
         onClose={closeModal}
         messages={confirmMessages}
         onOk={handleDeleteRows}
         confirmLoading={confirmDeleteLoading}
         state={state}
-      />
+      /> */}
     </>
   );
 }

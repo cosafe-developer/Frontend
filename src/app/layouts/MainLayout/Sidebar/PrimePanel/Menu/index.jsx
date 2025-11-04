@@ -117,10 +117,10 @@ export function Menu({ nav, pathname }) {
     >
       <SimpleBar
         scrollableNodeProps={{ ref }}
-        className="h-full overflow-x-hidden pb-6"
+        className="h-full overflow-x-hidden pb-6 "
         style={{ "--scroll-shadow-size": "32px" }}
       >
-        <div className="flex h-full flex-1 flex-col px-4">
+        <div className="flex h-full flex-1 flex-col px-4 text-[16px]">
           {(() => {
             const itemsWithDivider = [];
 

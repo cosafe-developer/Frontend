@@ -112,7 +112,8 @@ export function ListView({ table, rows, flexRender }) {
                           if (!cell.id.includes("actions")) {
                             openSidebar({
                               header: HeaderPreviewEmpresa,
-                              body: ContentPreviewEmpresa
+                              body: ContentPreviewEmpresa,
+                              data: row?.original,
                             });
                           }
                         }}

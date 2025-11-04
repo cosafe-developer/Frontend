@@ -20,7 +20,7 @@ import { fuzzyFilter } from "utils/react-table/fuzzyFilter";
 import { useSkipper } from "utils/react-table/useSkipper";
 import { Toolbar } from "./Toolbar";
 import { columns } from "./columns";
-import { ordersList } from "./data";
+
 import { PaginationSection } from "components/shared/table/PaginationSection";
 import { SelectedRowsActions } from "./SelectedRowsActions";
 import { ListView } from "./ListView";
@@ -29,8 +29,8 @@ import { ListView } from "./ListView";
 
 // ----------------------------------------------------------------------
 
-export default function ListadoTabla() {
-  const [users, setUsers] = useState([...ordersList]);
+export default function ListadoTabla({ listados }) {
+  const [dataListados, setDataListados] = useState(listados);
 
   const [tableSettings, setTableSettings] = useState({
     enableFullScreen: false,
@@ -59,7 +59,7 @@ export default function ListadoTabla() {
   const [autoResetPageIndex, skipAutoResetPageIndex] = useSkipper();
 
   const table = useReactTable({
-    data: users,
+    data: dataListados,
     columns: columns,
     initialState: {
       pagination: {
@@ -77,7 +77,7 @@ export default function ListadoTabla() {
     meta: {
       updateData: (rowIndex, columnId, value) => {
         skipAutoResetPageIndex();
-        setUsers((old) =>
+        setDataListados((old) =>
           old.map((row, index) => {
             if (index === rowIndex) {
               return {
@@ -92,7 +92,7 @@ export default function ListadoTabla() {
       deleteRow: (row) => {
         // Skip page index reset until after next rerender
         skipAutoResetPageIndex();
-        setUsers((old) =>
+        setDataListados((old) =>
           old.filter((oldRow) => oldRow.user_id !== row.original.user_id),
         );
       },
@@ -100,7 +100,7 @@ export default function ListadoTabla() {
         // Skip page index reset until after next rerender
         skipAutoResetPageIndex();
         const rowIds = rows.map((row) => row.original.user_id);
-        setUsers((old) => old.filter((row) => !rowIds.includes(row.user_id)));
+        setDataListados((old) => old.filter((row) => !rowIds.includes(row.user_id)));
       },
       setTableSettings,
       setViewType,
@@ -126,7 +126,7 @@ export default function ListadoTabla() {
     autoResetPageIndex,
   });
 
-  useDidUpdate(() => table.resetRowSelection(), [users]);
+  useDidUpdate(() => table.resetRowSelection(), [dataListados]);
 
   useLockScrollbar(tableSettings.enableFullScreen);
 

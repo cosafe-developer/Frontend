@@ -2,26 +2,22 @@ import { useState } from "react";
 import { Navigate } from "react-router";
 import { Table, THead, TBody, Th, Tr, Td, Button } from "components/ui";
 import { truncateText } from "helpers/truncateText.helper";
+import { estudioSteps } from "app/pages/admin/listado/form-llenar-listado/steps-datos-estudio/estudio-pipc/EstudioSteps";
 
 const cols = ["CHECKLIST", "PROGRESO"];
 
-const data = [
-  { verification_name: "Checklist de Requerimientos", progress: "100%" },
-  { verification_name: "Checklist tipo de Riesgo", progress: "100%" },
-  { verification_name: "Checklist por Daño Estructural", progress: "75%" },
-  { verification_name: "Checklist de Riesgos por Deficiencia en las Instalaciones", progress: "45%" },
-  { verification_name: "Checklist de Riesgos por Acabados en el Inmueble", progress: "25%" },
-  { verification_name: "Checklist de Agente Perturbador de Tipo Socio-Organizativo", progress: "100%" },
-  { verification_name: "Checklist de Requerimientos", progress: "100%" },
-  { verification_name: "Checklist tipo de Riesgo", progress: "100%" },
-  { verification_name: "Checklist por Daño Estructural", progress: "75%" },
-  { verification_name: "Checklist de Riesgos por Deficiencia en las Instalaciones", progress: "45%" },
-  { verification_name: "Checklist de Riesgos por Acabados en el Inmueble", progress: "25%" },
-  { verification_name: "Checklist de Agente Perturbador de Tipo Socio-Organizativo", progress: "100%" },
-];
 
-export function ContentPreviewEmpresa({ close }) {
+export function ContentPreviewEmpresa({ close, data }) {
   const [redirect, setRedirect] = useState(false);
+
+  const taskScores = Object.entries(data?.progressSections).map(([key, value]) => {
+    const labelObj = estudioSteps.find((estudio) => estudio.key === key);
+    return {
+      key: key,
+      label: labelObj ? labelObj.label : key,
+      progress: Math.round(value)
+    };
+  });
 
   const handlePreviewEmpresa = () => {
     setRedirect(true);
@@ -29,7 +25,7 @@ export function ContentPreviewEmpresa({ close }) {
 
   if (redirect) {
     close();
-    return <Navigate to="/admin/listado/completo" />;
+    return <Navigate to={`/admin/listado/completo/${data?._id}`} />;
   }
 
   return (
@@ -50,23 +46,23 @@ export function ContentPreviewEmpresa({ close }) {
           </THead>
 
           <TBody>
-            {data.map((tr, index) => {
+            {taskScores.map((tr, index) => {
               const progressValue = parseInt(tr.progress);
               const textColorClass =
                 progressValue >= 50
                   ? "text-success"
                   : progressValue > 25
                     ? "text-warning"
-                    : "text-[#9b0708]";
+                    : "text-[#DE0405]";
 
               return (
                 <Tr
                   key={index}
                   className="border-y border-transparent border-b-gray-200 dark:border-b-dark-500"
                 >
-                  <Td>{truncateText(tr.verification_name, 60)}</Td>
+                  <Td>{truncateText(tr.label, 60)}</Td>
                   <Td className={`font-semibold ${textColorClass}`}>
-                    {tr.progress}
+                    {tr.progress} %
                   </Td>
                 </Tr>
               );

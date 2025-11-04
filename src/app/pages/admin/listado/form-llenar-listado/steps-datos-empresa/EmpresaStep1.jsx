@@ -2,36 +2,55 @@ import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 
 // Local Imports
-import { Button, Input, Upload } from "components/ui";
-import { useLlenarListadoFormContext } from "../LlenarListadoFormContext";
-import { infoEmpresaSchema } from "../schema";
-import { CloudArrowUpIcon } from "@heroicons/react/24/solid";
-import { FileItemSquare } from "components/shared/form/FileItemSquare";
+import { Button, Input } from "components/ui";
+import { useLlenarListadoFormContext } from "../contexts/LlenarListadoFormContext";
+import { infoEmpresaSchema } from "../contexts/schema";
 
-const EmpresaStep1 = ({ setCurrentEmpresaStep }) => {
+import { useEffect } from "react";
+import { CoverImageUpload } from "components/custom-ui/dropzone/CoverImageUpload";
+
+const EmpresaStep1 = ({
+  setCurrentEmpresaStep,
+  listado,
+  empresa
+}) => {
   const llenarListadoFormCtx = useLlenarListadoFormContext();
+  const companyInfoCtx = llenarListadoFormCtx?.state?.stepStatus?.companyInfo;
 
   // control del formulario
   const {
-    register,
     handleSubmit,
     control,
+    reset,
     formState: { errors },
   } = useForm({
     resolver: yupResolver(infoEmpresaSchema),
-    defaultValues: llenarListadoFormCtx.state.formData.informacion_empresa,
+    defaultValues: companyInfoCtx,
   });
+
+  useEffect(() => {
+    if (empresa && listado) {
+      reset({
+        address: companyInfoCtx?.address ?? listado?.companyInfo?.address,
+        businessName: companyInfoCtx?.businessName ?? empresa?.tradeName,
+        email: companyInfoCtx?.email ?? empresa?.email,
+        logoUrl: companyInfoCtx?.logoUrl ?? empresa?.logoUrl,
+        phone: companyInfoCtx?.phone ?? empresa?.phone,
+        rfc: companyInfoCtx?.rfc ?? empresa?.rfc,
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [empresa, reset, listado]);
 
   const onSubmit = (data) => {
     llenarListadoFormCtx.dispatch({
-      type: "SET_FORM_DATA",
-      payload: {
-        informacion_empresa: data,
-      },
-    });
-    llenarListadoFormCtx.dispatch({
       type: "SET_STEP_STATUS",
-      payload: { informacion_empresa: { isDone: true } },
+      payload: {
+        companyInfo: {
+          ...data,
+          isDone: true
+        },
+      },
     });
     setCurrentEmpresaStep(1);
   };
@@ -48,82 +67,183 @@ const EmpresaStep1 = ({ setCurrentEmpresaStep }) => {
             <span>Logotipo Oficial</span>
             <span className="ml-2 text-error">*</span>
           </label>
+
           <Controller
-            name="logotipo"
+            name="logoUrl"
             control={control}
-            render={({ field: { value, onChange } }) => (
-              <Upload
-                onChange={onChange}
-                accept="image/*"
-              >
-                {({ ...props }) =>
-                  value ? (
-                    <FileItemSquare
-                      handleRemove={() => onChange(null)}
-                      file={value}
-                      {...props}
-                    />
-                  ) : (
-                    <Button
-                      unstyled
-                      className="size-20 shrink-0 space-x-2 rounded-lg border-2 border-current p-0 text-gray-300 hover:text-primary-600 dark:text-dark-450 dark:hover:text-primary-500 "
-                      {...props}
-                    >
-                      <CloudArrowUpIcon className="size-12 stroke-2" />
-                    </Button>
-                  )
-                }
-              </Upload>
+            render={({ field }) => (
+              <CoverImageUpload
+                label=""
+                classNames={{ box: "mt-1.5" }}
+                error={errors?.logoUrl?.message}
+                {...field}
+              />
             )}
           />
-          {errors.logotipo && (
-            <span className="input-text-error mt-1 text-xs text-error dark:text-error-lighter">{errors.logotipo.message}</span>
+        </div>
+        {/* Nombre */}
+        <Controller
+          name="businessName"
+          control={control}
+          render={({ field }) => (
+            <Input
+              {...field}
+              label="Nombre Comercial, Denominación o Razón Social"
+              required
+              placeholder="Escribir Nombre Comercial de la Empresa..."
+              error={errors?.businessName?.message}
+              onChange={(e) => {
+                field.onChange(e);
+                llenarListadoFormCtx.dispatch({
+                  type: "SET_STEP_STATUS",
+                  payload: {
+                    companyInfo: {
+                      businessName: e.target.value,
+                    },
+                  },
+                });
+              }}
+
+            />
           )}
-        </div>
-        <Input
-          {...register("nombre")}
-          label="Nombre Comercial, Denominación o Razón Social"
-          error={errors?.nombre?.message}
-          required
-          placeholder="Escribir Nombre Comercial de la Empresa..."
         />
-        <Input
-          {...register("rfc")}
-          label="RFC"
-          error={errors?.rfc?.message}
-          required
-          placeholder="RFC de la empresa..."
+
+        {/* RFC */}
+        <Controller
+          name="rfc"
+          control={control}
+          render={({ field }) => (
+            <Input
+              {...field}
+              label="RFC"
+              required
+              placeholder="RFC de la empresa..."
+              error={errors?.rfc?.message}
+              onChange={(e) => {
+                field.onChange(e);
+                llenarListadoFormCtx.dispatch({
+                  type: "SET_STEP_STATUS",
+                  payload: {
+                    companyInfo: {
+                      rfc: e.target.value,
+                    },
+                  },
+                });
+              }}
+            />
+          )}
         />
+
+        {/* Email y Teléfono */}
         <div className="grid gap-4 sm:grid-cols-2">
-          <Input
-            {...register("email")}
-            label="Email"
-            type="email"
-            error={errors?.email?.message}
-            required
-            placeholder="Escribir Email..."
+          <Controller
+            name="email"
+            control={control}
+            render={({ field }) => (
+              <Input
+                {...field}
+                label="Email"
+                type="email"
+                required
+                placeholder="Escribir Email..."
+                error={errors?.email?.message}
+                onChange={(e) => {
+                  field.onChange(e);
+                  llenarListadoFormCtx.dispatch({
+                    type: "SET_STEP_STATUS",
+                    payload: {
+                      companyInfo: {
+                        email: e.target.value,
+                      },
+                    },
+                  });
+                }}
+
+              />
+            )}
           />
-          <Input
-            {...register("telefono")}
-            label="Teléfono"
-            type="number"
-            placeholder="Escribir Teléfono"
+          <Controller
+            name="phone"
+            control={control}
+            render={({ field }) => (
+              <Input
+                {...field}
+                label="Teléfono"
+                placeholder="Escribir Teléfono"
+                error={errors?.phone?.message}
+                onChange={(e) => {
+                  field.onChange(e);
+                  llenarListadoFormCtx.dispatch({
+                    type: "SET_STEP_STATUS",
+                    payload: {
+                      companyInfo: {
+                        phone: e.target.value,
+                      },
+                    },
+                  });
+                }}
+
+              />
+            )}
           />
         </div>
-        <Input
-          {...register("domicilio")}
-          label="Domicilio para Oir y Recibir Notificaciones"
-          error={errors?.domicilio?.message}
-          required
-          placeholder="Ingresar Domicilio..."
+
+        <Controller
+          name="address"
+          control={control}
+          render={({ field }) => (
+            <Input
+              {...field}
+              label="Domicilio Fisico"
+              required
+              placeholder="Ingresar Domicilio..."
+              error={errors?.address?.message}
+              onChange={(e) => {
+                field.onChange(e);
+                llenarListadoFormCtx.dispatch({
+                  type: "SET_STEP_STATUS",
+                  payload: {
+                    companyInfo: {
+                      address: e.target.value,
+                    },
+                  },
+                });
+              }}
+
+            />
+          )}
         />
-        <Input
-          {...register("domicilio_fisico")}
-          label="Domicilio Físico"
-          error={errors?.domicilio_fisico?.message}
-          required
-          placeholder="Ingresar Domicilio..."
-        />
+
+        {/* Domicilio para oír notificaciones */}
+        {/* <Controller
+          name="address"
+          control={control}
+          render={({ field }) => (
+            <Input
+              {...field}
+              label="Domicilio para Oir y Recibir Notificaciones"
+              required
+              placeholder="Ingresar Domicilio..."
+              error={errors?.address?.message}
+              onChange={(e) => {
+                field.onChange(e);
+                llenarListadoFormCtx.dispatch({
+                  type: "SET_FORM_DATA",
+                  payload: {
+                    companyInfo: {
+                      ...llenarListadoFormCtx?.state?.formData?.companyInfo,
+                      address: e.target.value,
+                    },
+                  },
+                });
+              }}
+
+            />
+          )}
+        /> */}
+
+
+
       </div>
       <div className="mt-4 flex justify-end space-x-3 pb-4">
         <Button type="submit" className="min-w-[7rem]" color="primary">

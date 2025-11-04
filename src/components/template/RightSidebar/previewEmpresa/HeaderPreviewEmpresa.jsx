@@ -4,10 +4,14 @@ import { XMarkIcon } from "@heroicons/react/24/outline";
 
 // Local Imports
 import { Avatar, Badge, Button } from "components/ui";
+import { normalizeDate } from "helpers/normalizeDate.helper";
 
 // ----------------------------------------------------------------------
 
-export function HeaderPreviewEmpresa({ close }) {
+export function HeaderPreviewEmpresa({ close, data }) {
+  const companyInfo = data?.companyInfo;
+  const startDate = normalizeDate(data?.startDate?.toString(), "letter");
+  const endDate = normalizeDate(data?.endDate?.toString(), "letter");
 
   return (
     <div className="px-4 py-2">
@@ -40,17 +44,18 @@ export function HeaderPreviewEmpresa({ close }) {
             <div className="flex items-center space-x-5 mt-16">
               <Avatar
                 size={18}
+                name={companyInfo?.businessName}
                 classNames={{
                   display: "mask is-squircle rounded-none text-2xl",
                 }}
-              >
-                OX
-              </Avatar>
+              />
+
+
 
               <div className="flex flex-col space-y-1 ">
-                <p className="font-normal text-xl text-white">Oxxo</p>
+                <p className="font-normal text-xl text-white">{companyInfo?.businessName}</p>
                 <p className="font-light text-primary-400">Datos Generales</p>
-                <p className="font-light text-green-400">• Completado 08.03.25</p>
+                {/*     <p className="font-light text-green-400">• Completado 08.03.25</p> */}
               </div>
             </div>
           </div>
@@ -61,15 +66,15 @@ export function HeaderPreviewEmpresa({ close }) {
           <div>
             <h2>Fecha de Inicio:</h2>
             <div className="mt-1">
-              <p className="font-normal text-lg">01 Mar 2025</p>
-              <p className="font-light text-base text-[#7d808d]">04:09 PM</p>
+              <p className="font-normal text-lg">{startDate}</p>
+              {/*  <p className="font-light text-base text-[#7d808d]">{startDateHour}</p> */}
             </div>
           </div>
 
           <div className="mt-10">
             <h2>Fecha de Entrega:</h2>
             <div className="mt-1">
-              <p className="font-normal text-lg  text-error">01 Mar 2025</p>
+              <p className="font-normal text-lg  text-error">{endDate}</p>
             </div>
           </div>
         </div>

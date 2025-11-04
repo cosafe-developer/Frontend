@@ -7,17 +7,38 @@ import EmpresaStep3 from "../steps-datos-empresa/EmpresaStep3";
 export function DatosGenerales({
   setCurrentStep,
   currentEmpresaStep,
+  listado,
   // currentEStudioStep,
   // setCurrentEStudioStep,
-  setCurrentEmpresaStep
+  setCurrentEmpresaStep,
+  empresa,
 }) {
   switch (currentEmpresaStep) {
     case 0:
-      return <EmpresaStep1 setCurrentEmpresaStep={setCurrentEmpresaStep} />;
+      return (
+        <EmpresaStep1
+          setCurrentEmpresaStep={setCurrentEmpresaStep}
+          listado={listado}
+          empresa={empresa}
+        />
+      )
     case 1:
-      return <EmpresaStep2 setCurrentEmpresaStep={setCurrentEmpresaStep} />;
+      return (
+        <EmpresaStep2
+          setCurrentEmpresaStep={setCurrentEmpresaStep}
+          listado={listado}
+          empresa={empresa}
+        />
+      )
     case 2:
-      return <EmpresaStep3 setCurrentEmpresaStep={setCurrentEmpresaStep} setCurrentStep={setCurrentStep} />;
+      return (
+        <EmpresaStep3
+          setCurrentEmpresaStep={setCurrentEmpresaStep}
+          setCurrentStep={setCurrentStep}
+          listado={listado}
+          empresa={empresa}
+        />
+      )
     default:
       return null;
   }

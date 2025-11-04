@@ -1,6 +1,6 @@
 // Import Dependencies
 import { createColumnHelper } from "@tanstack/react-table";
-import { NameCell, StatusCell } from "./rows";
+import { ListAsignados, NameCell, StatusCell } from "./rows";
 import { RowActions } from "./RowActions";
 
 
@@ -21,17 +21,24 @@ export const columns = [
     label: "Name",
     cell: NameCell,
   }),
-  columnHelper.accessor((row) => row.role, {
-    id: "role",
-    header: "Cargo",
-    label: "Role",
-    /*  cell: (props) => <HighlightableCell {...props} className="text-lg text-white/80 font-semibold" />, */
-  }),
-  columnHelper.accessor((row) => row.age, {
+  columnHelper.accessor(
+    (row) => row.positionLabel,
+    {
+      id: "role",
+      header: "Cargo",
+      label: "Rol",
+      cell: (info) => (
+        <p className="text-[15px] ">
+          {info.getValue()}
+        </p>
+      ),
+    }
+  ),
+  columnHelper.accessor((row) => row?.studies?.length, {
     id: "age",
     header: "List Agisnados",
     label: "Age",
-    /*  cell: HighlightableCell, */
+    cell: ListAsignados,
   }),
   columnHelper.accessor((row) => row.phone, {
     id: "phone",

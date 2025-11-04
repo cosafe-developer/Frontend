@@ -5,7 +5,7 @@ import { fetchWithCookies } from "helpers/fetch";
  * @param {Object} data - Datos de la empresa
  * @returns {Promise<any>}
  */
-const createEstudio = async ({ requestBody }) => {
+const createEmpresa = async ({ requestBody }) => {
   try {
     const resp = await fetchWithCookies("empresa/register", requestBody, "POST");
     const result = await resp.json();
@@ -17,4 +17,4 @@ const createEstudio = async ({ requestBody }) => {
   }
 };
 
-export default createEstudio;
+export default createEmpresa;

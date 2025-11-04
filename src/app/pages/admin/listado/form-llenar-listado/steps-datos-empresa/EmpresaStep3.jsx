@@ -11,34 +11,60 @@ import { Spinner } from "components/ui";
 
 // Local Imports
 import { DatePicker } from "components/shared/form/Datepicker";
-import { FileItemSquare } from "components/shared/form/FileItemSquare";
-import { CloudArrowUpIcon } from "@heroicons/react/24/solid";
-import { Button, Input, Upload } from "components/ui";
-import { informacionRiesgoSchema } from "../schema";
-import { useLlenarListadoFormContext } from "../LlenarListadoFormContext";
+
+import { Button, Input } from "components/ui";
+import { informacionRiesgoSchema } from "../contexts/schema";
+import { useLlenarListadoFormContext } from "../contexts/LlenarListadoFormContext";
 
 import { Fragment } from "react";
 import { useDisclosure } from "hooks";
 import { useState, useEffect } from "react";
 import { CheckCircleIcon, XCircleIcon } from "@heroicons/react/24/outline";
+import { resetDataEmpresaStep3 } from "./utils/resetDataEmpresaStep3";
+import { CoverImageUpload } from "components/custom-ui/dropzone/CoverImageUpload";
+import { filterNullsEmptyObject } from "helpers/filterNullsEmptyObject";
+import { filterUnchangedFields } from "helpers/filterUnchangedFields";
 
-const EmpresaStep3 = ({ setCurrentEmpresaStep, setCurrentStep }) => {
+import updateListado from "api/listados/updateListado";
+import { Listbox } from "components/shared/form/Listbox";
+
+
+const EmpresaStep3 = ({
+  setCurrentEmpresaStep,
+  setCurrentStep,
+  listado,
+  empresa
+}) => {
   const [isOpen, { open, close }] = useDisclosure(false);
   const [formDataState, setFormDataState] = useState("[waiting]");
   const llenarListadoFormCtx = useLlenarListadoFormContext();
+  const riskInfoCtx = llenarListadoFormCtx?.state?.stepStatus?.riskInfo;
+  const addressInfoCtx = llenarListadoFormCtx?.state?.stepStatus?.addressInfo;
+  const companyInfoCtx = llenarListadoFormCtx?.state?.stepStatus?.companyInfo;
+
+  const tiposRiesgos = [
+    { id: "ordinario", label: "Ordinario" },
+    { id: "alto", label: "Alto" },
+    { id: "critico", label: "Critico" },
+  ]
 
   useEffect(() => {
     const sendData = async () => {
       if (formDataState === "[send-data]") {
-        const payload = {
-          informacion_empresa: llenarListadoFormCtx.state.formData.informacion_empresa,
-          informacion_de_la_direccion: llenarListadoFormCtx.state.formData.informacion_de_la_direccion,
-          informacion_de_riesgo: llenarListadoFormCtx.state.formData.informacion_de_riesgo,
+        const payloadUnchangedFields = {
+          companyInfo: filterUnchangedFields(companyInfoCtx, listado.companyInfo),
+          addressInfo: filterUnchangedFields(addressInfoCtx, listado.addressInfo),
+          riskInfo: filterUnchangedFields(riskInfoCtx, listado.riskInfo),
+        };
+
+        const payload = filterNullsEmptyObject(payloadUnchangedFields)
+
+        const listadoUpdated = await updateListado({ requestBody: { ...payload, listado_id: listado?._id } })
+        if (!listadoUpdated?.ok) {
+          setFormDataState("[error]")
+          return;
         }
-        const endPointListado = "/post/listado/:id";
-        console.log(endPointListado);
-        console.log("payload: ", payload);
-        await new Promise((resolve) => setTimeout(resolve, 2000));
+
         setFormDataState("[success]");
       }
     };
@@ -48,28 +74,33 @@ const EmpresaStep3 = ({ setCurrentEmpresaStep, setCurrentStep }) => {
 
   // control del formulario
   const {
-    register,
     handleSubmit,
     control,
+    reset,
     formState: { errors },
   } = useForm({
     resolver: yupResolver(informacionRiesgoSchema),
-    defaultValues: llenarListadoFormCtx.state.formData.informacion_de_riesgo,
+    defaultValues: riskInfoCtx,
   });
+
+  useEffect(() => {
+    if (empresa && listado && riskInfoCtx) {
+      reset(resetDataEmpresaStep3({ listado, empresa, riskInfoCtx }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [empresa, reset, listado]);
 
   const onSubmit = async (data) => {
     llenarListadoFormCtx.dispatch({
-      type: "SET_FORM_DATA",
-      payload: {
-        informacion_de_riesgo: data,
-      },
-    });
-    llenarListadoFormCtx.dispatch({
       type: "SET_STEP_STATUS",
       payload: {
-        informacion_de_riesgo: { isDone: true },
+        riskInfo: {
+          ...data,
+          isDone: true
+        }
       },
     });
+
     open();
     setFormDataState("[send-data]");
   };
@@ -82,104 +113,193 @@ const EmpresaStep3 = ({ setCurrentEmpresaStep, setCurrentStep }) => {
         className="flex grow flex-col"
       >
         <div className="grow space-y-8">
+
+          {/* 📄 Inventario de recursos materiales */}
           <div className="flex flex-col gap-y-1.5">
             <label className="input-label">
               <span>Inventario de Recursos Materiales (Ubicación y Condición)</span>
               <span className="ml-2 text-error">*</span>
             </label>
             <Controller
-              name="inventario_recursos"
+              name="materialsInventoryUrl"
               control={control}
-              render={({ field: { value, onChange } }) => (
-                <Upload
-                  onChange={onChange}
-                  accept="application/pdf"
-                >
-                  {({ ...props }) =>
-                    value ? (
-                      <FileItemSquare
-                        handleRemove={() => onChange(null)}
-                        file={value}
-                        {...props}
-                      />
-                    ) : (
-                      <Button
-                        unstyled
-                        className="size-20 shrink-0 space-x-2 rounded-lg border-2 border-current p-0 text-gray-300 hover:text-primary-600 dark:text-dark-450 dark:hover:text-primary-500 "
-                        {...props}
-                      >
-                        <CloudArrowUpIcon className="size-12 stroke-2" />
-                      </Button>
-                    )
-                  }
-                </Upload>
+              render={({ field }) => (
+                <CoverImageUpload
+                  label=""
+                  classNames={{ box: "mt-1.5" }}
+                  error={errors?.materialsInventoryUrl?.message}
+                  {...field}
+                />
               )}
             />
-            {errors.constancia_fiscal && (
-              <span className="input-text-error mt-1 text-xs text-error dark:text-error-lighter">{errors.constancia_fiscal.message}</span>
-            )}
           </div>
 
+          {/* 🏢 Datos de empresa y riesgos */}
           <div className="flex flex-col gap-y-4">
             <div className="grid gap-4 sm:grid-cols-2">
-              <Input
-                {...register("descripcion_empresa")}
-                label="Descripción de la Empresa"
-                error={errors?.descripcion_empresa?.message}
-                required
-                placeholder="Escribir Descripción de la Empresa..."
+              <Controller
+                name="companyDescription"
+                control={control}
+                render={({ field }) => (
+                  <Input
+                    {...field}
+                    label="Descripción de la Empresa"
+                    error={errors?.companyDescription?.message}
+                    required
+                    placeholder="Escribir Descripción de la Empresa..."
+                    onChange={(e) => {
+                      field.onChange(e);
+                      llenarListadoFormCtx.dispatch({
+                        type: "SET_STEP_STATUS",
+                        payload: {
+                          riskInfo: {
+                            ...riskInfoCtx,
+                            companyDescription: e.target.value,
+                          },
+                        },
+                      });
+                    }}
+                  />
+                )}
               />
-              <Input
-                {...register("tipo_riesgo_interno")}
-                label="Tipo de riesgo Interno / Por Entorno (Ordinario / Alto)"
-                error={errors?.tipo_riesgo_interno?.message}
-                required
-                placeholder="Escribir Tipo de Riesgo..."
+
+              {/* Tipo de riesgo interno */}
+              <Controller
+                name="riskType"
+                control={control}
+                render={({ field }) => (
+                  <Listbox
+                    label="Tipo de riesgo Interno / Por Entorno *"
+                    placeholder="Seleccione tipo de riesgo..."
+                    data={tiposRiesgos}
+                    displayField="label"
+                    value={tiposRiesgos.find((r) => r.id === field.value) || null}
+                    onChange={(val) => {
+                      field.onChange(val?.id);
+                      llenarListadoFormCtx.dispatch({
+                        type: "SET_STEP_STATUS",
+                        payload: {
+                          riskInfo: {
+                            ...riskInfoCtx,
+                            riskType: val?.id,
+                          },
+                        },
+                      });
+                    }}
+                    error={errors?.riskType?.message}
+                  />
+                )}
               />
             </div>
-            <Input
-              {...register("antecedentes")}
-              label="Antecedentes"
-              error={errors?.antecedentes?.message}
-              required
-              placeholder="Escribir Antecedentes..."
+
+            {/* Antecedentes */}
+            <Controller
+              name="antecedents"
+              control={control}
+              render={({ field }) => (
+                <Input
+                  {...field}
+                  label="Antecedentes"
+                  error={errors?.antecedents?.message}
+                  required
+                  placeholder="Escribir Antecedentes..."
+                  onChange={(e) => {
+                    field.onChange(e);
+                    llenarListadoFormCtx.dispatch({
+                      type: "SET_STEP_STATUS",
+                      payload: {
+                        riskInfo: {
+                          ...riskInfoCtx,
+                          antecedents: e.target.value,
+                        },
+                      },
+                    });
+                  }}
+                />
+              )}
             />
           </div>
 
-          {/* falta agregarlo a yulp */}
+          {/* 📅 Calendario */}
           <div className="flex flex-col gap-y-2">
             <label className="input-label">
               <span>Calendario de fechas destinadas al subprograma de prevención de riesgos</span>
               <span className="ml-2 text-error">*</span>
             </label>
-            <DatePicker
-              options={{
-                mode: "range",
-                dateFormat: "Y-m-d",
-              }}
-              placeholder="Seleccionar rango de fechas..."
+
+            <Controller
+              name="preventionCalendarDate"
+              control={control}
+              render={({ field }) => (
+                <DatePicker
+                  {...field}
+                  /*  options={{
+                     mode: "range",
+                     dateFormat: "Y-m-d",
+                   }} */
+                  error={errors?.preventionCalendarDate?.message}
+                  placeholder="Seleccionar rango de fechas..."
+                  onChange={(dates) => {
+                    field.onChange(dates);
+                    llenarListadoFormCtx.dispatch({
+                      type: "SET_STEP_STATUS",
+                      payload: {
+                        riskInfo: {
+                          ...riskInfoCtx,
+                          preventionCalendarDate: dates,
+                        },
+                      },
+                    });
+                  }}
+                />
+              )}
             />
           </div>
 
+          {/* ⚠️ Riesgos generales internos */}
           <div>
-            <Input
-              {...register("riesgos_generales_internos")}
-              label="Riesgos Generales Internos"
-              error={errors?.riesgos_generales_internos?.message}
-              required
-              placeholder="Escribir los Riesgos Generales Internos..."
+            <Controller
+              name="internalGeneralRisks"
+              control={control}
+              render={({ field }) => (
+                <Input
+                  {...field}
+                  label="Riesgos Generales Internos"
+                  error={errors?.internalGeneralRisks?.message}
+                  required
+                  placeholder="Escribir los Riesgos Generales Internos..."
+                  onChange={(e) => {
+                    field.onChange(e);
+                    llenarListadoFormCtx.dispatch({
+                      type: "SET_STEP_STATUS",
+                      payload: {
+                        riskInfo: {
+                          ...riskInfoCtx,
+                          internalGeneralRisks: e.target.value,
+                        },
+                      },
+                    });
+                  }}
+                />
+              )}
             />
           </div>
-
         </div>
+
         <div className="mt-4 flex justify-end space-x-3 pb-4">
           <Button type="submit" className="min-w-[7rem]" onClick={() => {
             setCurrentEmpresaStep(1);
             llenarListadoFormCtx.dispatch({
               type: "SET_STEP_STATUS",
               payload: {
-                informacion_de_la_direccion: { isDone: false },
-                informacion_de_riesgo: { isDone: false },
+                addressInfo: {
+                  ...addressInfoCtx,
+                  isDone: listado?.addressInfo?.isDone ?? false
+                },
+                riskInfo: {
+                  ...riskInfoCtx,
+                  isDone: listado?.riskInfo?.isDone ?? false
+                },
               },
             });
           }}>

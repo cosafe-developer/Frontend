@@ -2,22 +2,24 @@ import { useForm, Controller } from "react-hook-form";
 import { Page } from "components/shared/Page";
 import { Card, Button, Input } from "components/ui";
 import { useState } from "react";
-import { Dropzone } from "./upload/DropZoneEmpresa";
-import { useNavigate } from "react-router";
-import LoadingComponent from "components/custom-ui/loadings/Loading.component";
-import serverStatesFetching from "types/fetch/serverStatesFetching.type";
-import LoadingErrorComponent from "components/custom-ui/loadings/LoadingError.component";
-import { useToastContext } from "app/contexts/toast-provider/context";
-import getFirmaUploadImage from "api/upload/getFirmaUploadImage.service";
-import createEstudio from "api/empresa/createEmpresa";
+
 import { UnderReview } from "./UnderReview";
 import { getCookies } from "utils/getCookies";
 import { PhoneDialCode } from "./components/PhoneDialCode";
+import { useToastContext } from "app/contexts/toast-provider/context";
+import { useNavigate } from "react-router";
+
+import LoadingComponent from "components/custom-ui/loadings/Loading.component";
+import serverStatesFetching from "types/fetch/serverStatesFetching.type";
+import LoadingErrorComponent from "components/custom-ui/loadings/LoadingError.component";
+import getFirmaUploadImage from "api/upload/getFirmaUploadImage.service";
+import createEmpresa from "api/empresa/createEmpresa";
+import { CoverImageUpload } from "components/custom-ui/dropzone/CoverImageUpload";
 
 
 
 const CrearEmpresa = () => {
-  const [uploadedFiles, setUploadedFiles] = useState([]);
+
   const navigate = useNavigate();
   const { showToast } = useToastContext();
   const [isFinished, setIsFinished] = useState(null);
@@ -45,7 +47,8 @@ const CrearEmpresa = () => {
       const userId = getCookies("user_id");
 
       const phoneNumber = (data.numeric?.dialCode || "") + (data.numeric?.number || "");
-      const file = uploadedFiles[0];
+      const file = data?.foto_url;
+
       const firmaResp = await getFirmaUploadImage({
         fileName: file.name,
         fileType: file.type,
@@ -53,12 +56,14 @@ const CrearEmpresa = () => {
       });
 
 
-      const uploadUrl = firmaResp.uploadUrl;
+      const uploadUrl = firmaResp.signedUrl;
 
       await fetch(uploadUrl, {
         method: "PUT",
         headers: {
           "Content-Type": file.type,
+          "x-amz-acl": "public-read",
+          "Cache-Control": "public,max-age=31536000,immutable"
         },
         body: file,
       });
@@ -75,25 +80,20 @@ const CrearEmpresa = () => {
         password: data.password,
       };
 
-      const empresa = await createEstudio({ requestBody: payload });
-
+      const empresa = await createEmpresa({ requestBody: payload });
       if (!empresa?.ok) {
         setEstado(serverStatesFetching.error);
-        showToast({
-          message: "Error al crear el agente",
-          type: "error",
-        });
-      } else {
-        setEstado(serverStatesFetching.success);
-        setIsFinished(true);
+        showToast({ message: "Error al crear la empresa", type: "error" });
+        return;
       }
+
+      showToast({ message: "Empresa creada correctamente", type: "success" });
+      setEstado(serverStatesFetching.success);
+      setIsFinished(true);
     } catch (error) {
       setEstado(serverStatesFetching.error);
-      showToast({
-        message: "Error al crear el agente",
-        type: "error",
-      });
-      console.error("Error creando agente:", error);
+      showToast({ message: "Error al crear la empresa", type: "error" });
+      console.error("Error creando empresa:", error);
     }
   };
 
@@ -129,7 +129,18 @@ const CrearEmpresa = () => {
                 </div>
 
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                  <Dropzone files={uploadedFiles} setFiles={setUploadedFiles} />
+                  <Controller
+                    name="foto_url"
+                    control={control}
+                    render={({ field }) => (
+                      <CoverImageUpload
+                        label="Logotipo"
+                        classNames={{ box: "mt-1.5" }}
+                        error={errors?.foto_url?.message}
+                        {...field}
+                      />
+                    )}
+                  />
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <Controller
@@ -245,7 +256,7 @@ const CrearEmpresa = () => {
 
                   <div className="flex justify-end space-x-5">
                     <Button
-                      onClick={() => navigate(`/admin/agentes`)}
+                      onClick={() => navigate(`/admin/empresas`)}
                       type="button">
                       Cancelar
                     </Button>

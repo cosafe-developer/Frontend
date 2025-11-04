@@ -1,16 +1,9 @@
 import { ArrowPathIcon, CheckBadgeIcon, ClockIcon, TruckIcon, XCircleIcon } from "@heroicons/react/24/outline";
 
 export const statusOptions = [
-  {
-    value: "activo",
-    label: 'Activo',
-    color: 'success'
-  },
-  {
-    value: "inactivo",
-    label: 'Inactivo',
-    color: 'info'
-  }
+  { value: "pendiente", label: "Pendiente", color: "warning" },   // 🟠 Amarillo
+  { value: "progreso", label: "En progreso", color: "info" },     // 🔵 Azul
+  { value: "completado", label: "Completado", color: "success" }, // 🟢 Verde
 ];
 
 export const orderStatusOptions = [

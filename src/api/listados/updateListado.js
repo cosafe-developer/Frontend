@@ -7,8 +7,10 @@ import { fetchWithCookies } from "helpers/fetch";
  */
 const updateListado = async ({ requestBody }) => {
   try {
-    const resp = await fetchWithCookies(`update/listrequirements/${requestBody?.listado_id}`, requestBody, "PUT");
+    console.log(requestBody);
+    const resp = await fetchWithCookies(`update/listrequirements/${requestBody?.listado_id}`, requestBody, "POST");
     const result = await resp.json();
+
 
     return result;
   } catch (error) {

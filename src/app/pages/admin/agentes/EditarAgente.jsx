@@ -5,16 +5,18 @@ import { Listbox } from "components/shared/form/Listbox";
 import { DatePicker } from "components/shared/form/Datepicker";
 
 import { useCallback, useEffect, useState } from "react";
-
-import { Dropzone } from "./upload/DropZoneAgentes";
+import { cargosAgentes } from "types/global/global";
+import { CoverImageUpload } from "components/custom-ui/dropzone/CoverImageUpload";
+import { useToastContext } from "app/contexts/toast-provider/context";
 import { useNavigate, useParams } from "react-router";
+
 import serverStatesFetching from "types/fetch/serverStatesFetching.type";
 import getAgenteById from "api/agente/getAgenteById";
 import LoadingComponent from "components/custom-ui/loadings/Loading.component";
 import LoadingErrorComponent from "components/custom-ui/loadings/LoadingError.component";
-import { useToastContext } from "app/contexts/toast-provider/context";
 import updateAgente from "api/agente/updateAgente";
-
+import deleteImage from "api/upload/deleteImage";
+import getFirmaUploadImage from "api/upload/getFirmaUploadImage.service";
 
 
 const generos = [
@@ -23,16 +25,10 @@ const generos = [
   { id: "other", label: "Otro" }
 ];
 
-const cargos = [
-  { id: "tecnico-ehs", label: "Técnico EHS" },
-  { id: "coordinador-calidad-normatividad", label: "Coordinador de Calidad y Normatividad" },
-  { id: "inspector-seguridad-industrial", label: "Inspector de Seguridad Industrial" },
-  { id: "perito-ambiental", label: "Perito Ambiental" },
-  { id: "auditor", label: "Auditor Interno de Cumplimiento Normativo" },
-]
+
 
 const EditarAgente = () => {
-  const [uploadedFiles, setUploadedFiles] = useState([]);
+
   const [agente, setAgente] = useState(null);
   const [estado, setEstado] = useState(serverStatesFetching.fetching);
   const { agente_id } = useParams();
@@ -86,7 +82,52 @@ const EditarAgente = () => {
     setEstado(serverStatesFetching.fetching);
 
     try {
+      let newPhotoUrl = null
+
+      //Deleting Image
+      if (data?.foto_url && agente?.logoUrl?.length > 0) {
+        const pathName = agente.logoUrl.replace("https://cosafeimg.nyc3.digitaloceanspaces.com/", "");
+
+        const deletingImage = await deleteImage({ pathName: pathName });
+
+        if (deletingImage?.message !== "Archivo eliminado correctamente") {
+          setEstado(serverStatesFetching.error);
+          showToast({ message: "Error al borrar la imagen", type: "error" });
+          return
+        }
+      }
+
+      //Add Image
+      if (data?.foto_url) {
+        const file = data?.foto_url;
+
+        const firmaResp = await getFirmaUploadImage({
+          fileName: file.name,
+          fileType: file.type,
+          folder: "profile",
+        });
+
+
+        const uploadUrl = firmaResp.signedUrl;
+
+        await fetch(uploadUrl, {
+          method: "PUT",
+          headers: {
+            "Content-Type": file.type,
+            "x-amz-acl": "public-read",
+            "Cache-Control": "public,max-age=31536000,immutable"
+          },
+          body: file,
+        });
+
+        newPhotoUrl = firmaResp.publicUrl;
+      }
+
       const cambios = {};
+
+      if (newPhotoUrl) {
+        cambios.logoUrl = newPhotoUrl;
+      }
 
       const mapping = {
         nombres: "firstName",
@@ -104,9 +145,24 @@ const EditarAgente = () => {
         let currentValue = data[formKey] ?? "";
 
         if (formKey === "fechaEntrada") {
-          currentValue = data.fechaEntrada?.[0]
-            ? new Date(data.fechaEntrada[0]).toISOString().split("T")[0]
+          const originalDate = originalValue
+            ? new Date(originalValue).toISOString().split("T")[0]
             : null;
+
+          let currentDate = null;
+
+          if (Array.isArray(data.fechaEntrada)) {
+            currentDate = data.fechaEntrada?.[0]
+              ? new Date(data.fechaEntrada[0]).toISOString().split("T")[0]
+              : null;
+          } else if (data.fechaEntrada) {
+            currentDate = new Date(data.fechaEntrada).toISOString().split("T")[0];
+          }
+
+          if (originalDate !== currentDate) {
+            cambios[apiKey] = currentDate;
+          }
+          return;
         }
 
         const valorOriginal =
@@ -114,12 +170,20 @@ const EditarAgente = () => {
             ? new Date(originalValue).toISOString().split("T")[0]
             : originalValue;
 
+        if (apiKey === "password") {
+          if (currentValue && currentValue.trim().length > 0) {
+            cambios[apiKey] = currentValue;
+          }
+          return;
+        }
+
         if (valorOriginal !== currentValue) {
           cambios[apiKey] = currentValue;
         }
       });
 
       if (Object.keys(cambios).length === 0) {
+        showToast({ message: "No hay datos para actualizar", type: "warning", });
         setEstado(serverStatesFetching.success);
         return;
       }
@@ -130,27 +194,19 @@ const EditarAgente = () => {
       };
 
       const response = await updateAgente({ requestBody: payload });
-      if (response.ok) {
-        setAgente((prev) => ({ ...prev, ...cambios }));
-        setEstado(serverStatesFetching.success);
-        showToast({
-          message: "Agente actualizado correctamente",
-          type: "success",
-        });
-      } else {
+      if (!response.ok) {
         setEstado(serverStatesFetching.error);
-        showToast({
-          message: "Error al actualizar el agente",
-          type: "error",
-        });
+        showToast({ message: "Error al actualizar el agente", type: "error", });
+        return;
       }
+
+      setAgente((prev) => ({ ...prev, ...cambios }));
+      setEstado(serverStatesFetching.success);
+      showToast({ message: "Agente actualizado correctamente", type: "success", });
     } catch (error) {
       console.error("Error al actualizar agente:", error);
       setEstado(serverStatesFetching.error);
-      showToast({
-        message: "Error en la comunicación con el servidor",
-        type: "error",
-      });
+      showToast({ message: "Error en la comunicación con el servidor", type: "error", });
     }
   };
 
@@ -188,13 +244,20 @@ const EditarAgente = () => {
         <div className="mt-8 flex gap-8 mb-[4rem]">
           <div className="w-full">
             <Card className="flex flex-col p-5 space-y-6">
-              <div>
-                <h2 className="text-xl text-white">Información de Agente</h2>
-                <p className="mt-2 text-[16px]">Por favor proporcione la información personal para crear su perfil</p>
-              </div>
 
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                <Dropzone files={uploadedFiles} setFiles={setUploadedFiles} />
+                <Controller
+                  name="foto_url"
+                  control={control}
+                  render={({ field }) => (
+                    <CoverImageUpload
+                      label="Foto de Perfil"
+                      classNames={{ box: "mt-1.5" }}
+                      error={errors?.foto_url?.message}
+                      {...field}
+                    />
+                  )}
+                />
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <Controller
@@ -294,9 +357,9 @@ const EditarAgente = () => {
                     <Listbox
                       label="Cargo *"
                       placeholder="Agente PIPC"
-                      data={cargos}
+                      data={cargosAgentes}
                       displayField="label"
-                      value={cargos.find((e) => e.id === field.value) || null}
+                      value={cargosAgentes.find((e) => e.id === field.value) || null}
                       onChange={(val) => field.onChange(val?.id)}
                       error={errors?.cargo?.message}
                     />

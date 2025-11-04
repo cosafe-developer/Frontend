@@ -8,6 +8,7 @@ import serverStatesFetching from "types/fetch/serverStatesFetching.type";
 import getAgentesWithPaginationById from "api/agente/getAgentesWithPaginationById";
 import LoadingErrorComponent from "components/custom-ui/loadings/LoadingError.component";
 import LoadingContent from "components/template/LoadingContent";
+import { cargosAgentes } from "types/global/global";
 
 export default function Agentes() {
   const [agentes, setAgentes] = useState(null);
@@ -26,19 +27,23 @@ export default function Agentes() {
 
       const userId = getCookies("user_id");
       const payload = {
-        paginacion: {
-          page: page,
-          limit: limit
-        },
-        user_id: userId
+        paginacion: { page, limit },
+        user_id: userId,
       };
-
 
       const response = await getAgentesWithPaginationById({ requestBody: payload });
       if (response?.ok === true) {
         let nuevos = response?.data?.agentes ?? [];
-        const info = response?.data?.paginacion ?? {};
 
+        nuevos = nuevos.map((agente) => {
+          const cargo = cargosAgentes.find((c) => c.id === agente.position);
+          return {
+            ...agente,
+            positionLabel: cargo ? cargo.label : agente.position,
+          };
+        });
+
+        const info = response?.data?.paginacion ?? {};
         setAgentes((prev) => (append ? [...prev, ...nuevos] : nuevos));
         setPaginacion(info);
         setEstado(serverStatesFetching.success);
@@ -48,8 +53,6 @@ export default function Agentes() {
     },
     [paginacion.limit]
   );
-
-
 
   useEffect(() => {
     fetchData(1, 30);

@@ -34,7 +34,7 @@ const protectedRoutes = {
               }),
             },
             {
-              path: "listado/completo",
+              path: "listado/completo/:listado_id",
               lazy: async () => ({
                 Component: (await import("app/pages/admin/listado/ListadoCompleto")).default,
               }),
@@ -46,9 +46,9 @@ const protectedRoutes = {
               }),
             },
             {
-              path: "listado/llenar",
+              path: "listado/llenar/:listado_id",
               lazy: async () => ({
-                Component: (await import("app/pages/admin/listado/LlenarListado")).default,
+                Component: (await import("app/pages/admin/listado/form-llenar-listado/LlenarListadoIndex.jsx")).default,
               }),
             },
             {

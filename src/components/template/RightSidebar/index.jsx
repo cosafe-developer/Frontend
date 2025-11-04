@@ -51,6 +51,7 @@ function RightSidebarContent({ isOpen, close, SideBarHeader, SideBarBody, sideBa
           {SideBarHeader &&
             <SideBarHeader
               close={close}
+              data={sideBarData}
             />
           }
 
