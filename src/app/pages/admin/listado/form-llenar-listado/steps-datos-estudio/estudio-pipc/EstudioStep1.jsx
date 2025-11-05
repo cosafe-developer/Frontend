@@ -1,4 +1,3 @@
-// EstudioStep1.jsx
 import { useForm, Controller } from "react-hook-form";
 import { Button, Switch, Table, THead, TBody, Th, Tr, Td, Upload } from "components/ui";
 import { PlusIcon } from "@heroicons/react/20/solid";
@@ -47,6 +46,7 @@ const filterForBackend = (item) => {
 
 const EstudioStep1 = ({ onNext, listado }) => {
   const llenarListadoFormCtx = useLlenarListadoFormContext();
+  //? Step 1 -> Actual
   const nonStructuralRisksCtx = llenarListadoFormCtx?.state?.formData?.nonStructuralRisks ?? {};
 
   useEffect(() => {

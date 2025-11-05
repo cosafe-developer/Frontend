@@ -64,6 +64,6 @@ export const estudioSteps = [
   {
     key: "attachments",
     component: EstudioStep11,
-    label: "Evaluación de Daños",
+    label: "Anexos",
   },
 ];

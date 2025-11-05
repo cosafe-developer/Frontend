@@ -8,17 +8,13 @@ import { tiposRiesgosEstudios } from "../../utils/types";
 import { useEffect } from "react";
 import { resetDataEstudioStep1 } from "./utils/resetDataEstudioStep1";
 import { deepMergeDefaults } from "../../utils/deepMergeDefaultsInfo";
-
+import { documentsElements } from "./utils/elementsTask";
 import updateListado from "api/listados/updateListado";
 import uploadImageWithFirma from "api/upload/uploadImageWithFirma.service";
 
 
 const sections = [
-  { key: "fallingObjects", label: "Objetos que se pueden caer", elements: ["Ventanas de vidrio", "Ventilas", "Canceles de vidrio", "Lámparas", "Entrepaños o repisas", "Objetos sobre entrepaños o repisas", "Cuadros", "Plantillas", "Espejos", "Líquidos tóxicos o inflamables"] },
-  { key: "slidingObjects", label: "Objetos que puedan deslizarse", elements: ["Escritorios", "Máquinas", "Sillas", "Estanterías"] },
-  { key: "overturningObjects", label: "Objetos que puedan volcarse", elements: ["Estanterías grandes", "Máquinas pesadas"] },
-  { key: "flammableObjects", label: "Objetos que puedan inflamarse", elements: ["Líquidos inflamables", "Gas", "Papel combustible"] },
-  { key: "evacuationBlockingObjects", label: "Objetos que puedan entorpecer la evacuación", elements: ["Cables", "Muebles en pasillos", "Equipos en rutas de escape"] },
+  { key: "documents", label: "Anexo", elements: documentsElements },
 ];
 
 const buildDefaultSection = (elements) =>
@@ -42,17 +38,38 @@ const filterForBackend = (item) => {
   return out;
 };
 
-const EstudioStep11 = ({ onNext, listado }) => {
+// onNext
+const EstudioStep11 = ({ onPrev, listado }) => {
   const llenarListadoFormCtx = useLlenarListadoFormContext();
+  //? Step 1
   const nonStructuralRisksCtx = llenarListadoFormCtx?.state?.formData?.nonStructuralRisks ?? {};
+  // Step 2
+  const structuralRisksCtx = llenarListadoFormCtx?.state?.formData?.structuralRisks ?? {};
+  //? Step 3
+  const serviceInstallationsCtx = llenarListadoFormCtx?.state?.formData?.serviceInstallations ?? {};
+  //? Step 4
+  const socioOrganizationalAgentCtx = llenarListadoFormCtx?.state?.formData?.socioOrganizationalAgent ?? {};
+  //? Step 5
+  const geologicalAgentCtx = llenarListadoFormCtx?.state?.formData?.geologicalAgent ?? {};
+  //? Step 6
+  const physicochemicalAgentCtx = llenarListadoFormCtx?.state?.formData?.physicochemicalAgent ?? {};
+  //? Step 7
+  const sanitaryAgentCtx = llenarListadoFormCtx?.state?.formData?.sanitaryAgent ?? {};
+  //? Step 8
+  const surroundingRisksCtx = llenarListadoFormCtx?.state?.formData?.surroundingRisks ?? {};
+  //? Step 9
+  const securityMeasuresCtx = llenarListadoFormCtx?.state?.formData?.securityMeasures ?? {};
+  //? Step 10
+  const damageEvaluationCtx = llenarListadoFormCtx?.state?.formData?.damageEvaluation ?? {};
+  //? Step 11 -> Actual
+  const attachmentsCtx = llenarListadoFormCtx?.state?.formData?.attachments ?? {};
 
   const defaultValues = {}
 
   sections.forEach((section) => {
     defaultValues[section.key] =
-      nonStructuralRisksCtx[section.key] && Array.isArray(nonStructuralRisksCtx[section.key])
-        ?
-        nonStructuralRisksCtx[section.key].map((it, i) => ({
+      Array.isArray(attachmentsCtx[section.key]) && attachmentsCtx[section.key].length > 0
+        ? attachmentsCtx[section.key].map((it, i) => ({
           _uid: i,
           element: it.element ?? section.elements[i] ?? `Elemento ${i + 1}`,
           evidenceUrl: it.evidenceUrl ?? null,
@@ -67,8 +84,8 @@ const EstudioStep11 = ({ onNext, listado }) => {
   });
 
   useEffect(() => {
-    if (listado && nonStructuralRisksCtx) {
-      const newData = resetDataEstudioStep1({ listado, nonStructuralRisksCtx });
+    if (listado && attachmentsCtx) {
+      const newData = resetDataEstudioStep1({ listado, attachmentsCtx });
       const merged = deepMergeDefaults(defaultValues, newData);
       reset(merged);
     }
@@ -87,23 +104,23 @@ const EstudioStep11 = ({ onNext, listado }) => {
       llenarListadoFormCtx.dispatch({
         type: "SET_FORM_DATA",
         payload: {
-          nonStructuralRisks: {
-            ...nonStructuralRisksCtx,
+          attachments: {
+            ...attachmentsCtx,
             [sectionKey]: updatedArray,
           },
         },
       });
 
-      const backendData = listado?.studyData?.nonStructuralRisks ?? {};
+      const backendData = listado?.studyData?.attachments ?? {};
 
       const merged = {
         ...backendData,
-        ...nonStructuralRisksCtx,
+        ...attachmentsCtx,
         [sectionKey]: updatedArray,
       };
 
 
-      const structuredNonRisks = Object.fromEntries(
+      const attachments = Object.fromEntries(
         Object.entries(merged).map(([key, arr]) => [
           key,
           Array.isArray(arr) ? arr.map(filterForBackend) : arr,
@@ -115,7 +132,7 @@ const EstudioStep11 = ({ onNext, listado }) => {
         requestBody: {
           listado_id: listado?._id,
           studyData: {
-            nonStructuralRisks: structuredNonRisks,
+            attachments: attachments,
           },
         },
       });
@@ -124,52 +141,53 @@ const EstudioStep11 = ({ onNext, listado }) => {
     }
   };
 
-  const onSubmit = async (formValues) => {
+  // formValues
+  const onSubmit = async () => {
     try {
-      const backendData = listado?.studyData?.nonStructuralRisks ?? {};
-      const currentCtx = nonStructuralRisksCtx ?? {};
+      // const backendData = listado?.studyData?.nonStructuralRisks ?? {};
+      // const currentCtx = nonStructuralRisksCtx ?? {};
 
-      const filteredFormValues = Object.fromEntries(
-        Object.entries(formValues).map(([key, arr]) => [
-          key,
-          Array.isArray(arr) ? arr.map(filterForBackend) : arr,
-        ])
-      );
+      // const filteredFormValues = Object.fromEntries(
+      //   Object.entries(formValues).map(([key, arr]) => [
+      //     key,
+      //     Array.isArray(arr) ? arr.map(filterForBackend) : arr,
+      //   ])
+      // );
 
-      const nonStructuralRisksData = {
-        ...backendData,
-        ...currentCtx,
-        ...filteredFormValues,
-      };
+      // const nonStructuralRisksData = {
+      //   ...backendData,
+      //   ...currentCtx,
+      //   ...filteredFormValues,
+      // };
 
-      llenarListadoFormCtx.dispatch({
-        type: "SET_FORM_DATA",
-        payload: {
-          nonStructuralRisks: nonStructuralRisksData,
-        },
-      });
+      // llenarListadoFormCtx.dispatch({
+      //   type: "SET_FORM_DATA",
+      //   payload: {
+      //     nonStructuralRisks: nonStructuralRisksData,
+      //   },
+      // });
 
 
-      await updateListado({
-        requestBody: {
-          listado_id: listado?._id,
-          studyData: {
-            nonStructuralRisks: nonStructuralRisksData,
-          },
-        },
-      });
+      // await updateListado({
+      //   requestBody: {
+      //     listado_id: listado?._id,
+      //     studyData: {
+      //       nonStructuralRisks: nonStructuralRisksData,
+      //     },
+      //   },
+      // });
 
-      llenarListadoFormCtx.dispatch({
-        type: "SET_STEP_STATUS",
-        payload: {
-          nonStructuralRisks: {
-            ...nonStructuralRisksData,
-            isDone: true,
-          },
-        },
-      });
+      // llenarListadoFormCtx.dispatch({
+      //   type: "SET_STEP_STATUS",
+      //   payload: {
+      //     nonStructuralRisks: {
+      //       ...nonStructuralRisksData,
+      //       isDone: true,
+      //     },
+      //   },
+      // });
 
-      onNext();
+      // onNext();
     } catch (error) {
       console.error("Error al enviar estudio paso 1:", error);
     }
@@ -271,6 +289,77 @@ const EstudioStep11 = ({ onNext, listado }) => {
       })}
 
       <div className="flex justify-end pt-4">
+        <Button
+          type="button"
+          className="min-w-[7rem]"
+          onClick={() => {
+            llenarListadoFormCtx.dispatch({
+              type: "SET_STEP_STATUS",
+              payload: {
+                //? Step 1
+                nonStructuralRisks: {
+                  ...nonStructuralRisksCtx,
+                  isDone: listado?.studyData?.nonStructuralRisks?.isDone ?? false,
+                },
+                //? Step 2
+                structuralRisks: {
+                  ...structuralRisksCtx,
+                  isDone: listado?.studyData?.structuralRisks?.isDone ?? false,
+                },
+                //? Step 3
+                serviceInstallations: {
+                  ...serviceInstallationsCtx,
+                  isDone: listado?.studyData?.serviceInstallations?.isDone ?? false,
+                },
+                //? Step 4
+                socioOrganizationalAgent: {
+                  ...socioOrganizationalAgentCtx,
+                  isDone: listado?.studyData?.socioOrganizationalAgent?.isDone ?? false,
+                },
+                //? Step 5
+                geologicalAgent: {
+                  ...geologicalAgentCtx,
+                  isDone: listado?.studyData?.geologicalAgent?.isDone ?? false,
+                },
+                //? Step 6
+                physicochemicalAgent: {
+                  ...physicochemicalAgentCtx,
+                  isDone: listado?.studyData?.physicochemicalAgent?.isDone ?? false,
+                },
+                //? Step 7
+                sanitaryAgent: {
+                  ...sanitaryAgentCtx,
+                  isDone: listado?.studyData?.sanitaryAgent?.isDone ?? false,
+                },
+                //? Step 8
+                surroundingRisks: {
+                  ...surroundingRisksCtx,
+                  isDone: listado?.studyData?.surroundingRisks?.isDone ?? false,
+                },
+                //? Step 9
+                securityMeasures: {
+                  ...securityMeasuresCtx,
+                  isDone: listado?.studyData?.securityMeasures?.isDone ?? false,
+                },
+                //? Step 10
+                damageEvaluation: {
+                  ...damageEvaluationCtx,
+                  isDone: listado?.studyData?.damageEvaluation?.isDone ?? false,
+                },
+                //? Step 11
+                attachments: {
+                  ...attachmentsCtx,
+                  isDone: listado?.studyData?.attachments?.isDone ?? false,
+                },
+              },
+            });
+
+            onPrev()
+          }}
+        >
+          Atrás
+        </Button>
+
         <Button type="submit" color="primary" className="min-w-[7rem]">
           Siguiente
         </Button>

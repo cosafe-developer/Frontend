@@ -1,4 +1,3 @@
-// EstudioStep1.jsx
 import { useForm, Controller } from "react-hook-form";
 import { Button, Switch, Table, THead, TBody, Th, Tr, Td, Upload } from "components/ui";
 import { PlusIcon } from "@heroicons/react/20/solid";
@@ -8,19 +7,17 @@ import { tiposRiesgosEstudios } from "../../utils/types";
 import { useEffect } from "react";
 import { resetDataEstudioStep6 } from "./utils/resetDataEstudioStep6";
 import { deepMergeDefaults } from "../../utils/deepMergeDefaultsInfo";
-import { fireAgentElements } from "./utils/elementsTask";
+import { fireAgentElements, chemicalSpillElements, explosionAgentElements, contaminationElements, floodingElements } from "./utils/elementsTask";
 
 import updateListado from "api/listados/updateListado";
 import uploadImageWithFirma from "api/upload/uploadImageWithFirma.service";
 
-
-
 const sections = [
   { key: "fireAgent", label: "Agente perturbador de incendio", elements: fireAgentElements },
-  { key: "slidingObjects", label: "Objetos que puedan deslizarse", elements: ["Escritorios", "Máquinas", "Sillas", "Estanterías"] },
-  { key: "overturningObjects", label: "Objetos que puedan volcarse", elements: ["Estanterías grandes", "Máquinas pesadas"] },
-  { key: "flammableObjects", label: "Objetos que puedan inflamarse", elements: ["Líquidos inflamables", "Gas", "Papel combustible"] },
-  { key: "evacuationBlockingObjects", label: "Objetos que puedan entorpecer la evacuación", elements: ["Cables", "Muebles en pasillos", "Equipos en rutas de escape"] },
+  { key: "chemicalSpill", label: "Fuga o derrame de materiales químicos peligrosos", elements: chemicalSpillElements },
+  { key: "explosionAgent", label: "Agente Perturbador", elements: explosionAgentElements },
+  { key: "contamination", label: "Contaminación", elements: contaminationElements },
+  { key: "flooding", label: "Inundación", elements: floodingElements },
 ];
 
 const buildDefaultSection = (elements) =>
@@ -46,11 +43,18 @@ const filterForBackend = (item) => {
 
 const EstudioStep6 = ({ onNext, onPrev, listado }) => {
   const llenarListadoFormCtx = useLlenarListadoFormContext();
-  const physicochemicalAgentCtx = llenarListadoFormCtx?.state?.formData?.physicochemicalAgent ?? {};
-  const geologicalAgentCtx = llenarListadoFormCtx?.state?.formData?.geologicalAgent ?? {};
-  const socioOrganizationalAgentCtx = llenarListadoFormCtx?.state?.formData?.socioOrganizationalAgent ?? {};
-  const serviceInstallationsCtx = llenarListadoFormCtx?.state?.formData?.serviceInstallations ?? {};
+  //? Step 1
+  const nonStructuralRisksCtx = llenarListadoFormCtx?.state?.formData?.nonStructuralRisks ?? {};
+  // Step 2
   const structuralRisksCtx = llenarListadoFormCtx?.state?.formData?.structuralRisks ?? {};
+  //? Step 3
+  const serviceInstallationsCtx = llenarListadoFormCtx?.state?.formData?.serviceInstallations ?? {};
+  //? Step 4
+  const socioOrganizationalAgentCtx = llenarListadoFormCtx?.state?.formData?.socioOrganizationalAgent ?? {};
+  //? Step 5
+  const geologicalAgentCtx = llenarListadoFormCtx?.state?.formData?.geologicalAgent ?? {};
+  //? Step 6 -> Actual
+  const physicochemicalAgentCtx = llenarListadoFormCtx?.state?.formData?.physicochemicalAgent ?? {};
 
   useEffect(() => {
     window.scrollTo({
@@ -63,9 +67,8 @@ const EstudioStep6 = ({ onNext, onPrev, listado }) => {
 
   sections.forEach((section) => {
     defaultValues[section.key] =
-      physicochemicalAgentCtx[section.key] && Array.isArray(physicochemicalAgentCtx[section.key])
-        ?
-        physicochemicalAgentCtx[section.key].map((it, i) => ({
+      Array.isArray(physicochemicalAgentCtx[section.key]) && physicochemicalAgentCtx[section.key].length > 0
+        ? physicochemicalAgentCtx[section.key].map((it, i) => ({
           _uid: i,
           element: it.element ?? section.elements[i] ?? `Elemento ${i + 1}`,
           evidenceUrl: it.evidenceUrl ?? null,
@@ -100,14 +103,14 @@ const EstudioStep6 = ({ onNext, onPrev, listado }) => {
       llenarListadoFormCtx.dispatch({
         type: "SET_FORM_DATA",
         payload: {
-          nonStructuralRisks: {
+          physicochemicalAgent: {
             ...physicochemicalAgentCtx,
             [sectionKey]: updatedArray,
           },
         },
       });
 
-      const backendData = listado?.studyData?.nonStructuralRisks ?? {};
+      const backendData = listado?.studyData?.physicochemicalAgent ?? {};
 
       const merged = {
         ...backendData,
@@ -116,7 +119,7 @@ const EstudioStep6 = ({ onNext, onPrev, listado }) => {
       };
 
 
-      const structuredNonRisks = Object.fromEntries(
+      const physicochemicalAgent = Object.fromEntries(
         Object.entries(merged).map(([key, arr]) => [
           key,
           Array.isArray(arr) ? arr.map(filterForBackend) : arr,
@@ -128,7 +131,7 @@ const EstudioStep6 = ({ onNext, onPrev, listado }) => {
         requestBody: {
           listado_id: listado?._id,
           studyData: {
-            nonStructuralRisks: structuredNonRisks,
+            physicochemicalAgent: physicochemicalAgent,
           },
         },
       });
@@ -250,25 +253,35 @@ const EstudioStep6 = ({ onNext, onPrev, listado }) => {
             llenarListadoFormCtx.dispatch({
               type: "SET_STEP_STATUS",
               payload: {
-                physicochemicalAgent: {
-                  ...physicochemicalAgentCtx,
-                  isDone: listado?.studyData?.physicochemicalAgent?.isDone ?? false,
+                //? Step 1
+                nonStructuralRisks: {
+                  ...nonStructuralRisksCtx,
+                  isDone: listado?.studyData?.nonStructuralRisks?.isDone ?? false,
                 },
-                geologicalAgent: {
-                  ...geologicalAgentCtx,
-                  isDone: listado?.studyData?.geologicalAgent?.isDone ?? false,
-                },
-                socioOrganizationalAgent: {
-                  ...socioOrganizationalAgentCtx,
-                  isDone: listado?.studyData?.socioOrganizationalAgent?.isDone ?? false,
-                },
+                //? Step 2
                 structuralRisks: {
                   ...structuralRisksCtx,
                   isDone: listado?.studyData?.structuralRisks?.isDone ?? false,
                 },
+                //? Step 3
                 serviceInstallations: {
                   ...serviceInstallationsCtx,
                   isDone: listado?.studyData?.serviceInstallations?.isDone ?? false,
+                },
+                //? Step 4
+                socioOrganizationalAgent: {
+                  ...socioOrganizationalAgentCtx,
+                  isDone: listado?.studyData?.socioOrganizationalAgent?.isDone ?? false,
+                },
+                //? Step 5
+                geologicalAgent: {
+                  ...geologicalAgentCtx,
+                  isDone: listado?.studyData?.geologicalAgent?.isDone ?? false,
+                },
+                //? Step 6
+                physicochemicalAgent: {
+                  ...physicochemicalAgentCtx,
+                  isDone: listado?.studyData?.physicochemicalAgent?.isDone ?? false,
                 },
               },
             });

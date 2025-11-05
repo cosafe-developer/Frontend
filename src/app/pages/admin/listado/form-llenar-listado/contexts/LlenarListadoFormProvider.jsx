@@ -10,6 +10,7 @@ import { LlenarListadoFormContextProvider } from "./LlenarListadoFormContext";
 
 const initialState = {
   formData: {
+    //? Step 1
     nonStructuralRisks: {
       fallingObjects: null,
       slidingObjects: null,
@@ -18,12 +19,14 @@ const initialState = {
       evacuationBlockingObjects: null,
       isDone: false,
     },
+    //? Step 2
     structuralRisks: {
       structuralDamage: null,
       nonStructuralElements: null,
       finishes: null,
       isDone: false,
     },
+    //? Step 3
     serviceInstallations: {
       hydraulicInstallation: null,
       gasInstallation: null,
@@ -32,18 +35,21 @@ const initialState = {
       externalRisks: null,
       isDone: false,
     },
+    //? Step 4
     socioOrganizationalAgent: {
       majorAccidents: null,
       criminalActs: null,
       socialDisturbances: null,
       isDone: false,
     },
+    //? Step 5
     geologicalAgent: {
       geologicalDisruptions: null,
       seismicEvents: null,
       volcanism: null,
       isDone: false,
     },
+    //? Step 6
     physicochemicalAgent: {
       fireAgent: null,
       chemicalSpill: null,
@@ -52,23 +58,30 @@ const initialState = {
       flooding: null,
       isDone: false,
     },
+    //? Step 7
     sanitaryAgent: {
       epidemic: null,
       plague: null,
+      // TODO: Validar cual es la key del "Agente pertubador"
+      agent: null,
       isDone: false,
     },
+    //? Step 8
     surroundingRisks: {
       externalRiskElements: null,
       isDone: false,
     },
+    //? Step 9
     securityMeasures: {
       alarmSystem: null,
       isDone: false,
     },
+    //? Step 10
     damageEvaluation: {
       damageElements: null,
       isDone: false,
     },
+    //? Step 11
     attachments: {
       documents: null,
       isDone: false,

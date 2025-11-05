@@ -1,4 +1,3 @@
-// EstudioStep2.jsx
 import { useForm, Controller } from "react-hook-form";
 import {
   Button,
@@ -93,6 +92,9 @@ const filterForBackend = (item) => {
 
 const EstudioStep2 = ({ onNext, onPrev, listado }) => {
   const llenarListadoFormCtx = useLlenarListadoFormContext();
+  //? Step 1
+  const nonStructuralRisksCtx = llenarListadoFormCtx?.state?.formData?.nonStructuralRisks ?? {};
+  // Step 2 -> Actual
   const structuralRisksCtx = llenarListadoFormCtx?.state?.formData?.structuralRisks ?? {};
 
   useEffect(() => {
@@ -301,6 +303,12 @@ const EstudioStep2 = ({ onNext, onPrev, listado }) => {
             llenarListadoFormCtx.dispatch({
               type: "SET_STEP_STATUS",
               payload: {
+                //? Step 1
+                nonStructuralRisks: {
+                  ...nonStructuralRisksCtx,
+                  isDone: listado?.studyData?.nonStructuralRisks?.isDone ?? false,
+                },
+                //? Step 2
                 structuralRisks: {
                   ...structuralRisksCtx,
                   isDone: listado?.studyData?.structuralRisks?.isDone ?? false,

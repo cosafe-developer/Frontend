@@ -1,4 +1,3 @@
-// EstudioStep1.jsx
 import { useEffect, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { Button, Switch, Table, THead, TBody, Th, Tr, Td, Upload, Checkbox } from "components/ui";
@@ -71,8 +70,12 @@ const filterForBackend = (item) => {
 
 const EstudioStep3 = ({ onNext, onPrev, listado }) => {
   const llenarListadoFormCtx = useLlenarListadoFormContext();
-  const serviceInstallationsCtx = llenarListadoFormCtx?.state?.formData?.serviceInstallations ?? {};
+  //? Step 1
+  const nonStructuralRisksCtx = llenarListadoFormCtx?.state?.formData?.nonStructuralRisks ?? {};
+  // Step 2
   const structuralRisksCtx = llenarListadoFormCtx?.state?.formData?.structuralRisks ?? {};
+  //? Step 3 -> Actual
+  const serviceInstallationsCtx = llenarListadoFormCtx?.state?.formData?.serviceInstallations ?? {};
 
   useEffect(() => {
     window.scrollTo({
@@ -111,7 +114,6 @@ const EstudioStep3 = ({ onNext, onPrev, listado }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reset, listado]);
 
-  console.log(serviceInstallationsCtx);
   const handleFieldChange = async (sectionKey, rowIndex, changedFields) => {
     try {
       const backendData = listado?.studyData?.serviceInstallations ?? {};
@@ -286,10 +288,17 @@ const EstudioStep3 = ({ onNext, onPrev, listado }) => {
             llenarListadoFormCtx.dispatch({
               type: "SET_STEP_STATUS",
               payload: {
+                //? Step 1
+                nonStructuralRisks: {
+                  ...nonStructuralRisksCtx,
+                  isDone: listado?.studyData?.nonStructuralRisks?.isDone ?? false,
+                },
+                //? Step 2
                 structuralRisks: {
                   ...structuralRisksCtx,
                   isDone: listado?.studyData?.structuralRisks?.isDone ?? false,
                 },
+                //? Step 3
                 serviceInstallations: {
                   ...serviceInstallationsCtx,
                   isDone: listado?.studyData?.serviceInstallations?.isDone ?? false,

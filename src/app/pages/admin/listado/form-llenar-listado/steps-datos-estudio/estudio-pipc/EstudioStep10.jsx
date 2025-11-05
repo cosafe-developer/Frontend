@@ -8,17 +8,12 @@ import { tiposRiesgosEstudios } from "../../utils/types";
 import { useEffect } from "react";
 import { deepMergeDefaults } from "../../utils/deepMergeDefaultsInfo";
 import { resetDataEstudioStep10 } from "./utils/resetDataEstudioStep10";
-
+import { damageElements } from "./utils/elementsTask";
 import updateListado from "api/listados/updateListado";
 import uploadImageWithFirma from "api/upload/uploadImageWithFirma.service";
 
-
 const sections = [
-  { key: "fallingObjects", label: "Objetos que se pueden caer", elements: ["Ventanas de vidrio", "Ventilas", "Canceles de vidrio", "Lámparas", "Entrepaños o repisas", "Objetos sobre entrepaños o repisas", "Cuadros", "Plantillas", "Espejos", "Líquidos tóxicos o inflamables"] },
-  { key: "slidingObjects", label: "Objetos que puedan deslizarse", elements: ["Escritorios", "Máquinas", "Sillas", "Estanterías"] },
-  { key: "overturningObjects", label: "Objetos que puedan volcarse", elements: ["Estanterías grandes", "Máquinas pesadas"] },
-  { key: "flammableObjects", label: "Objetos que puedan inflamarse", elements: ["Líquidos inflamables", "Gas", "Papel combustible"] },
-  { key: "evacuationBlockingObjects", label: "Objetos que puedan entorpecer la evacuación", elements: ["Cables", "Muebles en pasillos", "Equipos en rutas de escape"] },
+  { key: "damageElements", label: "Daños", elements: damageElements },
 ];
 
 const buildDefaultSection = (elements) =>
@@ -44,15 +39,26 @@ const filterForBackend = (item) => {
 
 const EstudioStep10 = ({ onNext, onPrev, listado }) => {
   const llenarListadoFormCtx = useLlenarListadoFormContext();
-  const damageEvaluationCtx = llenarListadoFormCtx?.state?.formData?.damageEvaluation ?? {};
-  const securityMeasuresCtx = llenarListadoFormCtx?.state?.formData?.securityMeasures ?? {};
-  const surroundingRisksCtx = llenarListadoFormCtx?.state?.formData?.surroundingRisks ?? {};
-  const sanitaryAgentCtx = llenarListadoFormCtx?.state?.formData?.sanitaryAgent ?? {};
-  const physicochemicalAgentCtx = llenarListadoFormCtx?.state?.formData?.physicochemicalAgent ?? {};
-  const geologicalAgentCtx = llenarListadoFormCtx?.state?.formData?.geologicalAgent ?? {};
-  const socioOrganizationalAgentCtx = llenarListadoFormCtx?.state?.formData?.socioOrganizationalAgent ?? {};
-  const serviceInstallationsCtx = llenarListadoFormCtx?.state?.formData?.serviceInstallations ?? {};
+  //? Step 1
+  const nonStructuralRisksCtx = llenarListadoFormCtx?.state?.formData?.nonStructuralRisks ?? {};
+  // Step 2
   const structuralRisksCtx = llenarListadoFormCtx?.state?.formData?.structuralRisks ?? {};
+  //? Step 3
+  const serviceInstallationsCtx = llenarListadoFormCtx?.state?.formData?.serviceInstallations ?? {};
+  //? Step 4
+  const socioOrganizationalAgentCtx = llenarListadoFormCtx?.state?.formData?.socioOrganizationalAgent ?? {};
+  //? Step 5
+  const geologicalAgentCtx = llenarListadoFormCtx?.state?.formData?.geologicalAgent ?? {};
+  //? Step 6
+  const physicochemicalAgentCtx = llenarListadoFormCtx?.state?.formData?.physicochemicalAgent ?? {};
+  //? Step 7
+  const sanitaryAgentCtx = llenarListadoFormCtx?.state?.formData?.sanitaryAgent ?? {};
+  //? Step 8
+  const surroundingRisksCtx = llenarListadoFormCtx?.state?.formData?.surroundingRisks ?? {};
+  //? Step 9
+  const securityMeasuresCtx = llenarListadoFormCtx?.state?.formData?.securityMeasures ?? {};
+  //? Step 10 -> Actual
+  const damageEvaluationCtx = llenarListadoFormCtx?.state?.formData?.damageEvaluation ?? {};
 
   useEffect(() => {
     window.scrollTo({
@@ -66,9 +72,8 @@ const EstudioStep10 = ({ onNext, onPrev, listado }) => {
 
   sections.forEach((section) => {
     defaultValues[section.key] =
-      damageEvaluationCtx[section.key] && Array.isArray(damageEvaluationCtx[section.key])
-        ?
-        damageEvaluationCtx[section.key].map((it, i) => ({
+      Array.isArray(damageEvaluationCtx[section.key]) && damageEvaluationCtx[section.key].length > 0
+        ? damageEvaluationCtx[section.key].map((it, i) => ({
           _uid: i,
           element: it.element ?? section.elements[i] ?? `Elemento ${i + 1}`,
           evidenceUrl: it.evidenceUrl ?? null,
@@ -103,14 +108,14 @@ const EstudioStep10 = ({ onNext, onPrev, listado }) => {
       llenarListadoFormCtx.dispatch({
         type: "SET_FORM_DATA",
         payload: {
-          nonStructuralRisks: {
+          damageEvaluation: {
             ...damageEvaluationCtx,
             [sectionKey]: updatedArray,
           },
         },
       });
 
-      const backendData = listado?.studyData?.nonStructuralRisks ?? {};
+      const backendData = listado?.studyData?.damageEvaluation ?? {};
 
       const merged = {
         ...backendData,
@@ -119,7 +124,7 @@ const EstudioStep10 = ({ onNext, onPrev, listado }) => {
       };
 
 
-      const structuredNonRisks = Object.fromEntries(
+      const damageEvaluation = Object.fromEntries(
         Object.entries(merged).map(([key, arr]) => [
           key,
           Array.isArray(arr) ? arr.map(filterForBackend) : arr,
@@ -131,7 +136,7 @@ const EstudioStep10 = ({ onNext, onPrev, listado }) => {
         requestBody: {
           listado_id: listado?._id,
           studyData: {
-            nonStructuralRisks: structuredNonRisks,
+            damageEvaluation: damageEvaluation,
           },
         },
       });
@@ -140,50 +145,51 @@ const EstudioStep10 = ({ onNext, onPrev, listado }) => {
     }
   };
 
-  const onSubmit = async (formValues) => {
+  // formValues
+  const onSubmit = async () => {
     try {
-      const backendData = listado?.studyData?.nonStructuralRisks ?? {};
-      const currentCtx = damageEvaluationCtx ?? {};
+      // const backendData = listado?.studyData?.nonStructuralRisks ?? {};
+      // const currentCtx = damageEvaluationCtx ?? {};
 
-      const filteredFormValues = Object.fromEntries(
-        Object.entries(formValues).map(([key, arr]) => [
-          key,
-          Array.isArray(arr) ? arr.map(filterForBackend) : arr,
-        ])
-      );
+      // const filteredFormValues = Object.fromEntries(
+      //   Object.entries(formValues).map(([key, arr]) => [
+      //     key,
+      //     Array.isArray(arr) ? arr.map(filterForBackend) : arr,
+      //   ])
+      // );
 
-      const nonStructuralRisksData = {
-        ...backendData,
-        ...currentCtx,
-        ...filteredFormValues,
-      };
+      // const nonStructuralRisksData = {
+      //   ...backendData,
+      //   ...currentCtx,
+      //   ...filteredFormValues,
+      // };
 
-      llenarListadoFormCtx.dispatch({
-        type: "SET_FORM_DATA",
-        payload: {
-          nonStructuralRisks: nonStructuralRisksData,
-        },
-      });
+      // llenarListadoFormCtx.dispatch({
+      //   type: "SET_FORM_DATA",
+      //   payload: {
+      //     nonStructuralRisks: nonStructuralRisksData,
+      //   },
+      // });
 
 
-      await updateListado({
-        requestBody: {
-          listado_id: listado?._id,
-          studyData: {
-            nonStructuralRisks: nonStructuralRisksData,
-          },
-        },
-      });
+      // await updateListado({
+      //   requestBody: {
+      //     listado_id: listado?._id,
+      //     studyData: {
+      //       nonStructuralRisks: nonStructuralRisksData,
+      //     },
+      //   },
+      // });
 
-      llenarListadoFormCtx.dispatch({
-        type: "SET_STEP_STATUS",
-        payload: {
-          nonStructuralRisks: {
-            ...nonStructuralRisksData,
-            isDone: true,
-          },
-        },
-      });
+      // llenarListadoFormCtx.dispatch({
+      //   type: "SET_STEP_STATUS",
+      //   payload: {
+      //     nonStructuralRisks: {
+      //       ...nonStructuralRisksData,
+      //       isDone: true,
+      //     },
+      //   },
+      // });
 
       onNext();
     } catch (error) {
@@ -294,41 +300,55 @@ const EstudioStep10 = ({ onNext, onPrev, listado }) => {
             llenarListadoFormCtx.dispatch({
               type: "SET_STEP_STATUS",
               payload: {
-                damageEvaluation: {
-                  ...damageEvaluationCtx,
-                  isDone: listado?.studyData?.damageEvaluation?.isDone ?? false,
+                //? Step 1
+                nonStructuralRisks: {
+                  ...nonStructuralRisksCtx,
+                  isDone: listado?.studyData?.nonStructuralRisks?.isDone ?? false,
                 },
-                securityMeasures: {
-                  ...securityMeasuresCtx,
-                  isDone: listado?.studyData?.securityMeasures?.isDone ?? false,
-                },
-                surroundingRisks: {
-                  ...surroundingRisksCtx,
-                  isDone: listado?.studyData?.surroundingRisks?.isDone ?? false,
-                },
-                sanitaryAgent: {
-                  ...sanitaryAgentCtx,
-                  isDone: listado?.studyData?.sanitaryAgent?.isDone ?? false,
-                },
-                physicochemicalAgent: {
-                  ...physicochemicalAgentCtx,
-                  isDone: listado?.studyData?.physicochemicalAgent?.isDone ?? false,
-                },
-                geologicalAgent: {
-                  ...geologicalAgentCtx,
-                  isDone: listado?.studyData?.geologicalAgent?.isDone ?? false,
-                },
-                socioOrganizationalAgent: {
-                  ...socioOrganizationalAgentCtx,
-                  isDone: listado?.studyData?.socioOrganizationalAgent?.isDone ?? false,
-                },
+                //? Step 2
                 structuralRisks: {
                   ...structuralRisksCtx,
                   isDone: listado?.studyData?.structuralRisks?.isDone ?? false,
                 },
+                //? Step 3
                 serviceInstallations: {
                   ...serviceInstallationsCtx,
                   isDone: listado?.studyData?.serviceInstallations?.isDone ?? false,
+                },
+                //? Step 4
+                socioOrganizationalAgent: {
+                  ...socioOrganizationalAgentCtx,
+                  isDone: listado?.studyData?.socioOrganizationalAgent?.isDone ?? false,
+                },
+                //? Step 5
+                geologicalAgent: {
+                  ...geologicalAgentCtx,
+                  isDone: listado?.studyData?.geologicalAgent?.isDone ?? false,
+                },
+                //? Step 6
+                physicochemicalAgent: {
+                  ...physicochemicalAgentCtx,
+                  isDone: listado?.studyData?.physicochemicalAgent?.isDone ?? false,
+                },
+                //? Step 7
+                sanitaryAgent: {
+                  ...sanitaryAgentCtx,
+                  isDone: listado?.studyData?.sanitaryAgent?.isDone ?? false,
+                },
+                //? Step 8
+                surroundingRisks: {
+                  ...surroundingRisksCtx,
+                  isDone: listado?.studyData?.surroundingRisks?.isDone ?? false,
+                },
+                //? Step 9
+                securityMeasures: {
+                  ...securityMeasuresCtx,
+                  isDone: listado?.studyData?.securityMeasures?.isDone ?? false,
+                },
+                //? Step 10
+                damageEvaluation: {
+                  ...damageEvaluationCtx,
+                  isDone: listado?.studyData?.damageEvaluation?.isDone ?? false,
                 },
               },
             });

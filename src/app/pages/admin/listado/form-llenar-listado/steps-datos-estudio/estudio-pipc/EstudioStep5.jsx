@@ -1,4 +1,3 @@
-// EstudioStep1.jsx
 import { useForm, Controller } from "react-hook-form";
 import { Button, Switch, Table, THead, TBody, Th, Tr, Td, Upload } from "components/ui";
 import { PlusIcon } from "@heroicons/react/20/solid";
@@ -43,10 +42,16 @@ const filterForBackend = (item) => {
 
 const EstudioStep5 = ({ onNext, onPrev, listado }) => {
   const llenarListadoFormCtx = useLlenarListadoFormContext();
-  const geologicalAgentCtx = llenarListadoFormCtx?.state?.formData?.geologicalAgent ?? {};
-  const socioOrganizationalAgentCtx = llenarListadoFormCtx?.state?.formData?.socioOrganizationalAgent ?? {};
-  const serviceInstallationsCtx = llenarListadoFormCtx?.state?.formData?.serviceInstallations ?? {};
+  //? Step 1
+  const nonStructuralRisksCtx = llenarListadoFormCtx?.state?.formData?.nonStructuralRisks ?? {};
+  // Step 2
   const structuralRisksCtx = llenarListadoFormCtx?.state?.formData?.structuralRisks ?? {};
+  //? Step 3
+  const serviceInstallationsCtx = llenarListadoFormCtx?.state?.formData?.serviceInstallations ?? {};
+  //? Step 4
+  const socioOrganizationalAgentCtx = llenarListadoFormCtx?.state?.formData?.socioOrganizationalAgent ?? {};
+  //? Step 5 -> Actual
+  const geologicalAgentCtx = llenarListadoFormCtx?.state?.formData?.geologicalAgent ?? {};
 
   useEffect(() => {
     window.scrollTo({
@@ -59,9 +64,8 @@ const EstudioStep5 = ({ onNext, onPrev, listado }) => {
 
   sections.forEach((section) => {
     defaultValues[section.key] =
-      geologicalAgentCtx[section.key] && Array.isArray(geologicalAgentCtx[section.key])
-        ?
-        geologicalAgentCtx[section.key].map((it, i) => ({
+      Array.isArray(geologicalAgentCtx[section.key]) && geologicalAgentCtx[section.key].length > 0
+        ? geologicalAgentCtx[section.key].map((it, i) => ({
           _uid: i,
           element: it.element ?? section.elements[i] ?? `Elemento ${i + 1}`,
           evidenceUrl: it.evidenceUrl ?? null,
@@ -96,14 +100,14 @@ const EstudioStep5 = ({ onNext, onPrev, listado }) => {
       llenarListadoFormCtx.dispatch({
         type: "SET_FORM_DATA",
         payload: {
-          nonStructuralRisks: {
+          geologicalAgent: {
             ...geologicalAgentCtx,
             [sectionKey]: updatedArray,
           },
         },
       });
 
-      const backendData = listado?.studyData?.nonStructuralRisks ?? {};
+      const backendData = listado?.studyData?.geologicalAgent ?? {};
 
       const merged = {
         ...backendData,
@@ -112,7 +116,7 @@ const EstudioStep5 = ({ onNext, onPrev, listado }) => {
       };
 
 
-      const structuredNonRisks = Object.fromEntries(
+      const geologicalAgent = Object.fromEntries(
         Object.entries(merged).map(([key, arr]) => [
           key,
           Array.isArray(arr) ? arr.map(filterForBackend) : arr,
@@ -124,7 +128,7 @@ const EstudioStep5 = ({ onNext, onPrev, listado }) => {
         requestBody: {
           listado_id: listado?._id,
           studyData: {
-            nonStructuralRisks: structuredNonRisks,
+            geologicalAgent: geologicalAgent,
           },
         },
       });
@@ -246,21 +250,30 @@ const EstudioStep5 = ({ onNext, onPrev, listado }) => {
             llenarListadoFormCtx.dispatch({
               type: "SET_STEP_STATUS",
               payload: {
-                geologicalAgent: {
-                  ...geologicalAgentCtx,
-                  isDone: listado?.studyData?.geologicalAgent?.isDone ?? false,
+                //? Step 1
+                nonStructuralRisks: {
+                  ...nonStructuralRisksCtx,
+                  isDone: listado?.studyData?.nonStructuralRisks?.isDone ?? false,
                 },
-                socioOrganizationalAgent: {
-                  ...socioOrganizationalAgentCtx,
-                  isDone: listado?.studyData?.socioOrganizationalAgent?.isDone ?? false,
-                },
+                //? Step 2
                 structuralRisks: {
                   ...structuralRisksCtx,
                   isDone: listado?.studyData?.structuralRisks?.isDone ?? false,
                 },
+                //? Step 3
                 serviceInstallations: {
                   ...serviceInstallationsCtx,
                   isDone: listado?.studyData?.serviceInstallations?.isDone ?? false,
+                },
+                //? Step 4
+                socioOrganizationalAgent: {
+                  ...socioOrganizationalAgentCtx,
+                  isDone: listado?.studyData?.socioOrganizationalAgent?.isDone ?? false,
+                },
+                //? Step 5
+                geologicalAgent: {
+                  ...geologicalAgentCtx,
+                  isDone: listado?.studyData?.geologicalAgent?.isDone ?? false,
                 },
               },
             });
