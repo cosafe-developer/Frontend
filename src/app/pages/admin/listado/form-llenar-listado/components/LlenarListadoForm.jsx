@@ -69,7 +69,7 @@ const EstudioSteps = ({ currentEstudioStep, setCurrentEstudioStep }) => {
       <ol className="steps is-vertical">
         {estudioSteps.map((item, i) => {
           const isActive = stepStatus[item.key]?.isDone;
-          const isClickable = isActive;
+          const isClickable = true;
           return (
             <li
               key={i}
@@ -179,11 +179,30 @@ const LlenarListadoForm = ({ listado, empresa }) => {
     if (isDatosGeneralesEmpresaCompleted) {
       setCurrentStep(1);
 
+      const excludedKeys = [
+        "socioOrganizationalAgent",
+        "geologicalAgent",
+        "physicochemicalAgent",
+        "sanitaryAgent",
+        "surroundingRisks",
+        "securityMeasures"
+      ];
+
       const lastDoneIndex = estudioSteps.reduce((acc, step, index) => {
         return listado?.studyData?.[step.key]?.isDone ? index : acc;
       }, -1);
 
-      setCurrentEstudioStep(lastDoneIndex + 1);
+      if (lastDoneIndex !== -1) {
+        const lastDoneKey = estudioSteps[lastDoneIndex].key;
+
+        if (excludedKeys.includes(lastDoneKey)) {
+          setCurrentEstudioStep(lastDoneIndex);
+        } else {
+          setCurrentEstudioStep(lastDoneIndex + 1);
+        }
+      } else {
+        setCurrentEstudioStep(0);
+      }
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -10,10 +10,22 @@ export function calculateProgressGeneralListado(studyData, strictRiskLevel = fal
   let totalItemsGlobal = 0;
   let totalCompletedGlobal = 0;
 
+  const alwaysCompleteSections = [
+    "socioOrganizationalAgent",
+    "geologicalAgent",
+    "physicochemicalAgent",
+    "sanitaryAgent",
+    "securityMeasures"
+  ];
+
   for (const sectionKey of sectionsList) {
     const section = studyData[sectionKey];
 
-    // Pasamos el sectionKey para que se apliquen reglas distintas según la sección
+    if (alwaysCompleteSections.includes(sectionKey)) {
+      sectionPercents[sectionKey] = 100;
+      continue;
+    }
+
     const { total, completados, percent } = calculateProgressTaskListado(section, sectionKey, strictRiskLevel);
 
     sectionPercents[sectionKey] = percent;

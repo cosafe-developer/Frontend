@@ -2,8 +2,6 @@ import { useForm, Controller } from "react-hook-form";
 import { Button, Switch, Table, THead, TBody, Th, Tr, Td, Upload } from "components/ui";
 import { PlusIcon } from "@heroicons/react/20/solid";
 import { useLlenarListadoFormContext } from "../../contexts/LlenarListadoFormContext";
-import { Listbox } from "components/shared/form/Listbox";
-import { tiposRiesgosEstudios } from "../../utils/types";
 import { useEffect } from "react";
 import { resetDataEstudioStep7 } from "./utils/resetDataEstudioStep7";
 import { deepMergeDefaults } from "../../utils/deepMergeDefaultsInfo";
@@ -19,41 +17,28 @@ const sections = [
 ];
 
 const buildDefaultSection = (elements) =>
-  elements.map((el, i) => ({
+  elements.map((element, i) => ({
     _uid: i,
-    element: el,
+    element: element,
     evidenceUrl: null,
     applies: false,
-    riskLevel: null,
   }));
 
 const filterForBackend = (item) => {
-  // Siempre mandar element para identificar el ítem
   const out = { element: item.element };
-
-  // Incluye solo las propiedades que tienen valor (null/undefined NO se mandan)
-  if (typeof item.applies !== "undefined") out.applies = item.applies;
   if (item.evidenceUrl) out.evidenceUrl = item.evidenceUrl;
-  if (item.riskLevel) out.riskLevel = item.riskLevel;
-
+  if (typeof item.applies !== "undefined") out.applies = item.applies;
   return out;
 };
 
 const EstudioStep7 = ({ onNext, onPrev, listado }) => {
   const llenarListadoFormCtx = useLlenarListadoFormContext();
-  //? Step 1
   const nonStructuralRisksCtx = llenarListadoFormCtx?.state?.formData?.nonStructuralRisks ?? {};
-  // Step 2
   const structuralRisksCtx = llenarListadoFormCtx?.state?.formData?.structuralRisks ?? {};
-  //? Step 3
   const serviceInstallationsCtx = llenarListadoFormCtx?.state?.formData?.serviceInstallations ?? {};
-  //? Step 4
   const socioOrganizationalAgentCtx = llenarListadoFormCtx?.state?.formData?.socioOrganizationalAgent ?? {};
-  //? Step 5
   const geologicalAgentCtx = llenarListadoFormCtx?.state?.formData?.geologicalAgent ?? {};
-  //? Step 6
   const physicochemicalAgentCtx = llenarListadoFormCtx?.state?.formData?.physicochemicalAgent ?? {};
-  //? Step 7 -> Actual
   const sanitaryAgentCtx = llenarListadoFormCtx?.state?.formData?.sanitaryAgent ?? {};
 
   useEffect(() => {
@@ -73,12 +58,11 @@ const EstudioStep7 = ({ onNext, onPrev, listado }) => {
           element: it.element ?? section.elements[i] ?? `Elemento ${i + 1}`,
           evidenceUrl: it.evidenceUrl ?? null,
           applies: typeof it.applies === "boolean" ? it.applies : false,
-          riskLevel: it.riskLevel ?? null,
         }))
         : buildDefaultSection(section.elements);
   });
 
-  const { control, handleSubmit, setValue, watch, reset } = useForm({
+  const { control, handleSubmit, watch, reset } = useForm({
     defaultValues,
   });
 
@@ -94,30 +78,31 @@ const EstudioStep7 = ({ onNext, onPrev, listado }) => {
 
   const handleFieldChange = async (sectionKey, rowIndex, changedFields) => {
     try {
+      const backendData = listado?.studyData?.sanitaryAgent ?? {};
       const currentArray = watch(sectionKey) || [];
       const updatedArray = [...currentArray];
       updatedArray[rowIndex] = { ...updatedArray[rowIndex], ...changedFields };
 
-      setValue(sectionKey, updatedArray);
+      const newSanitaryAgent = {
+        ...sanitaryAgentCtx,
+        [sectionKey]: updatedArray,
+      };
+
 
       llenarListadoFormCtx.dispatch({
         type: "SET_FORM_DATA",
         payload: {
           sanitaryAgent: {
-            ...sanitaryAgentCtx,
-            [sectionKey]: updatedArray,
+            ...newSanitaryAgent,
+            isDone: true,
           },
         },
       });
 
-      const backendData = listado?.studyData?.sanitaryAgent ?? {};
-
       const merged = {
         ...backendData,
-        ...sanitaryAgentCtx,
-        [sectionKey]: updatedArray,
+        ...newSanitaryAgent,
       };
-
 
       const sanitaryAgent = Object.fromEntries(
         Object.entries(merged).map(([key, arr]) => [
@@ -126,12 +111,14 @@ const EstudioStep7 = ({ onNext, onPrev, listado }) => {
         ])
       );
 
-
       await updateListado({
         requestBody: {
           listado_id: listado?._id,
           studyData: {
-            sanitaryAgent: sanitaryAgent,
+            sanitaryAgent: {
+              ...sanitaryAgent,
+              isDone: true,
+            },
           },
         },
       });
@@ -166,7 +153,6 @@ const EstudioStep7 = ({ onNext, onPrev, listado }) => {
                     <Th className="w-[45%] min-w-[250px] break-words">Elemento a Evaluar</Th>
                     <Th className="w-[20%] text-center">Evidencia</Th>
                     <Th className="w-[10%] text-center">No / Sí</Th>
-                    <Th className="w-[20%] text-center">Grado de Riesgo</Th>
                   </Tr>
                 </THead>
 
@@ -217,25 +203,7 @@ const EstudioStep7 = ({ onNext, onPrev, listado }) => {
                         />
                       </Td>
 
-                      {/* RISK LEVEL */}
-                      <Td className="text-center ">
-                        <Controller
-                          name={`${section.key}.${rowIndex}.riskLevel`}
-                          control={control}
-                          render={({ field }) => (
-                            <Listbox
-                              placeholder="Seleccione tipo de riesgo..."
-                              data={tiposRiesgosEstudios}
-                              displayField="label"
-                              value={tiposRiesgosEstudios?.find((r) => r.id === field.value) || null}
-                              onChange={(val) => {
-                                field.onChange(val?.id ?? null);
-                                handleFieldChange(section.key, rowIndex, { riskLevel: val?.id ?? null });
-                              }}
-                            />
-                          )}
-                        />
-                      </Td>
+
                     </Tr>
                   ))}
                 </TBody>

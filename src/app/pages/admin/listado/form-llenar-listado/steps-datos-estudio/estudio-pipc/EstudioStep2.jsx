@@ -38,7 +38,7 @@ function ObservationCell({ sectionKey, rowIndex, currentValue, handleFieldChange
     <>
       <Button onClick={() => setIsOpen(true)}>
         <PencilSquareIcon className="size-4 mr-1" />
-        Observaciones
+        Comentar
       </Button>
 
       <ObservationModal
@@ -147,7 +147,7 @@ const EstudioStep2 = ({ onNext, onPrev, listado }) => {
         [sectionKey]: updatedArray,
       };
 
-      const isDoneNonStructural = checkIfSectionIsDone(newStructuralRisks, ["observations", "applies"]);
+      const isDoneNonStructural = checkIfSectionIsDone(newStructuralRisks, ["observations", "applies", "exists", "no_aplica"], "some");
 
       llenarListadoFormCtx.dispatch({
         type: "SET_FORM_DATA",

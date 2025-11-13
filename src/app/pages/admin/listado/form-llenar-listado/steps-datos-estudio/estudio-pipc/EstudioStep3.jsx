@@ -1,41 +1,33 @@
 import { useEffect, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
-import { Button, Switch, Table, THead, TBody, Th, Tr, Td, Upload, Checkbox } from "components/ui";
-import { PlusIcon } from "@heroicons/react/20/solid";
+import {
+  Button,
+  Switch,
+  Table,
+  THead,
+  TBody,
+  Th,
+  Tr,
+  Td,
+  Upload,
+  Checkbox,
+} from "components/ui";
+import { PlusIcon, CheckIcon } from "@heroicons/react/20/solid";
 import { useLlenarListadoFormContext } from "../../contexts/LlenarListadoFormContext";
 import { checkIfSectionIsDone } from "../utils/checkIfSectionIsDone";
 import { deepMergeDefaults } from "../../utils/deepMergeDefaultsInfo";
 import { resetDataEstudioStep3 } from "./utils/resetDataEstudioStep3";
-import { airConditioningInstallationElements, electricalInstallationElements, externalRisksElements, gasInstallationElements, hydraulicInstallationElements } from "./utils/elementsTask";
-import { PencilSquareIcon } from "@heroicons/react/24/outline";
-import { ObservationModal } from "../../modals/ObservacionesModal";
-
+import {
+  airConditioningInstallationElements,
+  electricalInstallationElements,
+  externalRisksElements,
+  gasInstallationElements,
+  hydraulicInstallationElements,
+} from "./utils/elementsTask";
 import updateListado from "api/listados/updateListado";
 import uploadImageWithFirma from "api/upload/uploadImageWithFirma.service";
-
-function ObservationCell({ sectionKey, rowIndex, currentValue, handleFieldChange }) {
-  const [isOpen, setIsOpen] = useState(false);
-
-  const saveObservation = (newValue) => {
-    handleFieldChange(sectionKey, rowIndex, { observations: newValue });
-  };
-
-  return (
-    <>
-      <Button onClick={() => setIsOpen(true)}>
-        <PencilSquareIcon className="size-4 mr-1" />
-        Observaciones
-      </Button>
-
-      <ObservationModal
-        isOpen={isOpen}
-        onClose={() => setIsOpen(false)}
-        initialValue={currentValue || ""}
-        onSave={saveObservation}
-      />
-    </>
-  );
-}
+import { PencilSquareIcon } from "@heroicons/react/24/outline";
+import { ObservationModal } from "../../modals/ObservacionesModal";
 
 const sections = [
   { key: "hydraulicInstallation", label: "Instalación Hidráulica", elements: hydraulicInstallationElements },
@@ -52,40 +44,56 @@ const buildDefaultSection = (elements) =>
     evidenceUrl: null,
     applies: false,
     no_aplica: false,
+    distancia_aproximada: null,
     observations: "",
   }));
 
 const filterForBackend = (item) => {
-  // Siempre mandar element para identificar el ítem
   const out = { element: item.element };
-
-  // Incluye solo las propiedades que tienen valor (null/undefined NO se mandan)
   if (typeof item.applies !== "undefined") out.applies = item.applies;
   if (item.evidenceUrl) out.evidenceUrl = item.evidenceUrl;
   if (typeof item.no_aplica !== "undefined") out.no_aplica = item.no_aplica;
+  if (item.distancia_aproximada) out.distancia_aproximada = item.distancia_aproximada;
   if (item.observations) out.observations = item.observations;
-
   return out;
 };
 
+function ObservationCell({ sectionKey, rowIndex, currentValue, handleFieldChange }) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const saveObservation = (newValue) => {
+    handleFieldChange(sectionKey, rowIndex, { observations: newValue });
+  };
+
+  return (
+    <>
+      <Button onClick={() => setIsOpen(true)}>
+        <PencilSquareIcon className="size-4 mr-1" />
+        Comentar
+      </Button>
+
+      <ObservationModal
+        isOpen={isOpen}
+        onClose={() => setIsOpen(false)}
+        initialValue={currentValue || ""}
+        onSave={saveObservation}
+      />
+    </>
+  );
+}
+
 const EstudioStep3 = ({ onNext, onPrev, listado }) => {
   const llenarListadoFormCtx = useLlenarListadoFormContext();
-  //? Step 1
   const nonStructuralRisksCtx = llenarListadoFormCtx?.state?.formData?.nonStructuralRisks ?? {};
-  // Step 2
   const structuralRisksCtx = llenarListadoFormCtx?.state?.formData?.structuralRisks ?? {};
-  //? Step 3 -> Actual
   const serviceInstallationsCtx = llenarListadoFormCtx?.state?.formData?.serviceInstallations ?? {};
+  const [focusedInput, setFocusedInput] = useState({ section: null, row: null });
 
   useEffect(() => {
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
 
-  const defaultValues = {}
-
+  const defaultValues = {};
   sections.forEach((section) => {
     defaultValues[section.key] =
       Array.isArray(serviceInstallationsCtx[section.key]) && serviceInstallationsCtx[section.key].length > 0
@@ -95,15 +103,13 @@ const EstudioStep3 = ({ onNext, onPrev, listado }) => {
           evidenceUrl: item.evidenceUrl ?? null,
           applies: typeof item.applies === "boolean" ? item.applies : false,
           no_aplica: typeof item.no_aplica === "boolean" ? item.no_aplica : false,
+          distancia_aproximada: item.distancia_aproximada ?? null,
           observations: item.observations ?? "",
         }))
         : buildDefaultSection(section.elements);
   });
 
-
-  const { control, handleSubmit, watch, reset } = useForm({
-    defaultValues,
-  });
+  const { control, handleSubmit, watch, reset } = useForm({ defaultValues });
 
   useEffect(() => {
     if (listado && serviceInstallationsCtx) {
@@ -126,8 +132,8 @@ const EstudioStep3 = ({ onNext, onPrev, listado }) => {
         [sectionKey]: updatedArray,
       };
 
-      const isDoneServiceInstallations = checkIfSectionIsDone(newServiceInstallations, ["observations", "applies"]);
 
+      const isDoneServiceInstallations = checkIfSectionIsDone(newServiceInstallations, ["observations", "applies", "no_aplica", "distancia_aproximada",], "some");
       llenarListadoFormCtx.dispatch({
         type: "SET_FORM_DATA",
         payload: {
@@ -168,13 +174,11 @@ const EstudioStep3 = ({ onNext, onPrev, listado }) => {
 
   const onSubmit = async () => {
     try {
-
       onNext();
     } catch (error) {
-      console.error("Error al enviar estudio paso 1:", error);
+      console.error("Error al enviar estudio paso 3:", error);
     }
   };
-
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex grow flex-col space-y-8">
@@ -192,7 +196,9 @@ const EstudioStep3 = ({ onNext, onPrev, listado }) => {
                     <Th className="w-[20%] text-center">Evidencia</Th>
                     <Th className="w-[5%] text-center">No / Sí</Th>
                     <Th className="w-[5%] text-center">N/A</Th>
-                    <Th className="w-[20%] text-center">Observaciones</Th>
+                    <Th className="w-[20%] text-center">
+                      {section.key === "externalRisks" ? "Distancia aproximada" : "Observaciones"}
+                    </Th>
                   </Tr>
                 </THead>
 
@@ -200,9 +206,9 @@ const EstudioStep3 = ({ onNext, onPrev, listado }) => {
                   {rows.map((row, rowIndex) => (
                     <Tr key={row._uid ?? rowIndex} className="border-b border-gray-200 dark:border-dark-500">
                       <Td>{rowIndex + 1}</Td>
-                      <Td className="break-words  text-[15px]">{row.element}</Td>
+                      <Td className="break-words text-[15px]">{row.element}</Td>
 
-                      {/* EVIDENCIA */}
+                      {/* === EVIDENCIA === */}
                       <Td className="text-center">
                         <Upload
                           onChange={async (file) => {
@@ -217,33 +223,34 @@ const EstudioStep3 = ({ onNext, onPrev, listado }) => {
                             </Button>
                           )}
                         </Upload>
-
                         {row.evidenceUrl ? (
                           <div className="mt-1 text-xs">
-                            <a className="underline" href={row.evidenceUrl} target="_blank" rel="noreferrer">Ver evidencia</a>
+                            <a className="underline" href={row.evidenceUrl} target="_blank" rel="noreferrer">
+                              Ver evidencia
+                            </a>
                           </div>
                         ) : null}
                       </Td>
 
-                      {/* SWITCH (applies) */}
-                      <Td className="text-center ">
+                      {/* === SWITCH (applies) === */}
+                      <Td className="text-center">
                         <Controller
                           name={`${section.key}.${rowIndex}.applies`}
                           control={control}
                           render={({ field }) => (
                             <Switch
                               checked={field.value}
-                              onChange={(event) => {
-                                const isChecked = event.target.checked;
-                                field.onChange(isChecked);
-                                handleFieldChange(section.key, rowIndex, { applies: isChecked });
+                              onChange={(e) => {
+                                const checked = e.target.checked;
+                                field.onChange(checked);
+                                handleFieldChange(section.key, rowIndex, { applies: checked });
                               }}
                             />
                           )}
                         />
                       </Td>
 
-                      {/* N/A */}
+                      {/* === N/A === */}
                       <Td className="text-center">
                         <Controller
                           name={`${section.key}.${rowIndex}.no_aplica`}
@@ -262,14 +269,57 @@ const EstudioStep3 = ({ onNext, onPrev, listado }) => {
                         />
                       </Td>
 
-                      {/* OBSERVACIONES */}
                       <Td className="text-center">
-                        <ObservationCell
-                          sectionKey={section.key}
-                          rowIndex={rowIndex}
-                          currentValue={row.observations}
-                          handleFieldChange={handleFieldChange}
-                        />
+                        {section.key === "externalRisks" ? (
+                          <Controller
+                            name={`${section.key}.${rowIndex}.distancia_aproximada`}
+                            control={control}
+                            render={({ field }) => {
+
+
+                              const isFocused =
+                                focusedInput.section === section.key && focusedInput.row === rowIndex;
+
+
+                              return (
+                                <div className="flex items-center text-center justify-center space-x-1">
+                                  <input
+                                    type="number"
+                                    min={0}
+                                    className="w-20 rounded-full border border-[#2A2C32] px-3 py-1 text-center text-sm focus:ring-2 focus:ring-primary-400 outline-none"
+                                    value={field.value ?? ""}
+                                    onChange={(e) => field.onChange(e.target.value)}
+                                    onFocus={() => setFocusedInput({ section: section.key, row: rowIndex })}
+                                    onBlur={() => setFocusedInput({ section: null, row: null })}
+                                  />
+                                  <div className="space-x-2 items-center flex justify-center ml-1">
+                                    <span className="text-sm text-gray-400">metros</span>
+
+                                    {isFocused && (
+                                      <button
+                                        type="button"
+                                        onMouseDown={() => {
+                                          handleFieldChange(section.key, rowIndex, { distancia_aproximada: field.value });
+                                        }}
+                                        className="text-green-500 hover:text-green-600 cursor-pointer"
+                                      >
+                                        <CheckIcon className="h-5 w-5" />
+                                      </button>
+                                    )}
+                                  </div>
+
+                                </div>
+                              );
+                            }}
+                          />
+                        ) : (
+                          <ObservationCell
+                            sectionKey={section.key}
+                            rowIndex={rowIndex}
+                            currentValue={row.observations}
+                            handleFieldChange={handleFieldChange}
+                          />
+                        )}
                       </Td>
                     </Tr>
                   ))}
@@ -288,25 +338,21 @@ const EstudioStep3 = ({ onNext, onPrev, listado }) => {
             llenarListadoFormCtx.dispatch({
               type: "SET_STEP_STATUS",
               payload: {
-                //? Step 1
                 nonStructuralRisks: {
                   ...nonStructuralRisksCtx,
                   isDone: listado?.studyData?.nonStructuralRisks?.isDone ?? false,
                 },
-                //? Step 2
                 structuralRisks: {
                   ...structuralRisksCtx,
                   isDone: listado?.studyData?.structuralRisks?.isDone ?? false,
                 },
-                //? Step 3
                 serviceInstallations: {
                   ...serviceInstallationsCtx,
                   isDone: listado?.studyData?.serviceInstallations?.isDone ?? false,
                 },
               },
             });
-
-            onPrev()
+            onPrev();
           }}
         >
           Atrás

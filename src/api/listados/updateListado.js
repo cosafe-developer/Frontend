@@ -7,7 +7,6 @@ import { fetchWithCookies } from "helpers/fetch";
  */
 const updateListado = async ({ requestBody }) => {
   try {
-    console.log(requestBody);
     const resp = await fetchWithCookies(`update/listrequirements/${requestBody?.listado_id}`, requestBody, "POST");
     const result = await resp.json();
 

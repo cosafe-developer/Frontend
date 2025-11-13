@@ -57,7 +57,6 @@ const EstudioStep1 = ({ onNext, listado }) => {
   }, []);
 
   const defaultValues = {}
-
   sections.forEach((section) => {
     defaultValues[section.key] =
       nonStructuralRisksCtx[section.key] && Array.isArray(nonStructuralRisksCtx[section.key])

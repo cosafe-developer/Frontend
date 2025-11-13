@@ -1,6 +1,6 @@
 // EstudioStep1.jsx
 import { useForm, Controller } from "react-hook-form";
-import { Button, Switch, Table, THead, TBody, Th, Tr, Td, Upload } from "components/ui";
+import { Button, Table, THead, TBody, Th, Tr, Td, Upload } from "components/ui";
 import { PlusIcon } from "@heroicons/react/20/solid";
 import { useLlenarListadoFormContext } from "../../contexts/LlenarListadoFormContext";
 import { Listbox } from "components/shared/form/Listbox";
@@ -9,6 +9,8 @@ import { useEffect } from "react";
 import { deepMergeDefaults } from "../../utils/deepMergeDefaultsInfo";
 import { resetDataEstudioStep10 } from "./utils/resetDataEstudioStep10";
 import { damageElements } from "./utils/elementsTask";
+import { checkIfSectionIsDone } from "../utils/checkIfSectionIsDone";
+
 import updateListado from "api/listados/updateListado";
 import uploadImageWithFirma from "api/upload/uploadImageWithFirma.service";
 
@@ -21,43 +23,27 @@ const buildDefaultSection = (elements) =>
     _uid: i,
     element: el,
     evidenceUrl: null,
-    applies: false,
     riskLevel: null,
   }));
 
 const filterForBackend = (item) => {
-  // Siempre mandar element para identificar el ítem
   const out = { element: item.element };
-
-  // Incluye solo las propiedades que tienen valor (null/undefined NO se mandan)
-  if (typeof item.applies !== "undefined") out.applies = item.applies;
   if (item.evidenceUrl) out.evidenceUrl = item.evidenceUrl;
   if (item.riskLevel) out.riskLevel = item.riskLevel;
-
   return out;
 };
 
 const EstudioStep10 = ({ onNext, onPrev, listado }) => {
   const llenarListadoFormCtx = useLlenarListadoFormContext();
-  //? Step 1
   const nonStructuralRisksCtx = llenarListadoFormCtx?.state?.formData?.nonStructuralRisks ?? {};
-  // Step 2
   const structuralRisksCtx = llenarListadoFormCtx?.state?.formData?.structuralRisks ?? {};
-  //? Step 3
   const serviceInstallationsCtx = llenarListadoFormCtx?.state?.formData?.serviceInstallations ?? {};
-  //? Step 4
   const socioOrganizationalAgentCtx = llenarListadoFormCtx?.state?.formData?.socioOrganizationalAgent ?? {};
-  //? Step 5
   const geologicalAgentCtx = llenarListadoFormCtx?.state?.formData?.geologicalAgent ?? {};
-  //? Step 6
   const physicochemicalAgentCtx = llenarListadoFormCtx?.state?.formData?.physicochemicalAgent ?? {};
-  //? Step 7
   const sanitaryAgentCtx = llenarListadoFormCtx?.state?.formData?.sanitaryAgent ?? {};
-  //? Step 8
   const surroundingRisksCtx = llenarListadoFormCtx?.state?.formData?.surroundingRisks ?? {};
-  //? Step 9
   const securityMeasuresCtx = llenarListadoFormCtx?.state?.formData?.securityMeasures ?? {};
-  //? Step 10 -> Actual
   const damageEvaluationCtx = llenarListadoFormCtx?.state?.formData?.damageEvaluation ?? {};
 
   useEffect(() => {
@@ -69,21 +55,23 @@ const EstudioStep10 = ({ onNext, onPrev, listado }) => {
 
 
   const defaultValues = {}
-
   sections.forEach((section) => {
     defaultValues[section.key] =
       Array.isArray(damageEvaluationCtx[section.key]) && damageEvaluationCtx[section.key].length > 0
-        ? damageEvaluationCtx[section.key].map((it, i) => ({
+        ? damageEvaluationCtx[section.key].map((item, i) => ({
           _uid: i,
-          element: it.element ?? section.elements[i] ?? `Elemento ${i + 1}`,
-          evidenceUrl: it.evidenceUrl ?? null,
-          applies: typeof it.applies === "boolean" ? it.applies : false,
-          riskLevel: it.riskLevel ?? null,
+          element: item.element ?? section.elements[i] ?? `Elemento ${i + 1}`,
+          evidenceUrl: item.evidenceUrl ?? null,
+          applies: typeof item.applies === "boolean" ? item.applies : false,
+          no_aplica: typeof item.no_aplica === "boolean" ? item.no_aplica : false,
+          distancia_aproximada: item.distancia_aproximada ?? null,
+          observations: item.observations ?? "",
         }))
         : buildDefaultSection(section.elements);
   });
 
-  const { control, handleSubmit, setValue, watch, reset } = useForm({
+
+  const { control, handleSubmit, watch, reset } = useForm({
     defaultValues,
   });
 
@@ -99,30 +87,31 @@ const EstudioStep10 = ({ onNext, onPrev, listado }) => {
 
   const handleFieldChange = async (sectionKey, rowIndex, changedFields) => {
     try {
+      const backendData = listado?.studyData?.damageEvaluation ?? {};
       const currentArray = watch(sectionKey) || [];
       const updatedArray = [...currentArray];
       updatedArray[rowIndex] = { ...updatedArray[rowIndex], ...changedFields };
 
-      setValue(sectionKey, updatedArray);
+      const newDamageEvaluation = {
+        ...nonStructuralRisksCtx,
+        [sectionKey]: updatedArray,
+      };
 
+      const isDoneDamageEvaluation = checkIfSectionIsDone(newDamageEvaluation, ["riskLevel"]);
       llenarListadoFormCtx.dispatch({
         type: "SET_FORM_DATA",
         payload: {
           damageEvaluation: {
-            ...damageEvaluationCtx,
-            [sectionKey]: updatedArray,
+            ...newDamageEvaluation,
+            isDone: isDoneDamageEvaluation,
           },
         },
       });
 
-      const backendData = listado?.studyData?.damageEvaluation ?? {};
-
       const merged = {
         ...backendData,
-        ...damageEvaluationCtx,
-        [sectionKey]: updatedArray,
+        ...newDamageEvaluation,
       };
-
 
       const damageEvaluation = Object.fromEntries(
         Object.entries(merged).map(([key, arr]) => [
@@ -131,12 +120,14 @@ const EstudioStep10 = ({ onNext, onPrev, listado }) => {
         ])
       );
 
-
       await updateListado({
         requestBody: {
           listado_id: listado?._id,
           studyData: {
-            damageEvaluation: damageEvaluation,
+            damageEvaluation: {
+              ...damageEvaluation,
+              isDone: isDoneDamageEvaluation,
+            },
           },
         },
       });
@@ -148,49 +139,6 @@ const EstudioStep10 = ({ onNext, onPrev, listado }) => {
   // formValues
   const onSubmit = async () => {
     try {
-      // const backendData = listado?.studyData?.nonStructuralRisks ?? {};
-      // const currentCtx = damageEvaluationCtx ?? {};
-
-      // const filteredFormValues = Object.fromEntries(
-      //   Object.entries(formValues).map(([key, arr]) => [
-      //     key,
-      //     Array.isArray(arr) ? arr.map(filterForBackend) : arr,
-      //   ])
-      // );
-
-      // const nonStructuralRisksData = {
-      //   ...backendData,
-      //   ...currentCtx,
-      //   ...filteredFormValues,
-      // };
-
-      // llenarListadoFormCtx.dispatch({
-      //   type: "SET_FORM_DATA",
-      //   payload: {
-      //     nonStructuralRisks: nonStructuralRisksData,
-      //   },
-      // });
-
-
-      // await updateListado({
-      //   requestBody: {
-      //     listado_id: listado?._id,
-      //     studyData: {
-      //       nonStructuralRisks: nonStructuralRisksData,
-      //     },
-      //   },
-      // });
-
-      // llenarListadoFormCtx.dispatch({
-      //   type: "SET_STEP_STATUS",
-      //   payload: {
-      //     nonStructuralRisks: {
-      //       ...nonStructuralRisksData,
-      //       isDone: true,
-      //     },
-      //   },
-      // });
-
       onNext();
     } catch (error) {
       console.error("Error al enviar estudio paso 1:", error);
@@ -212,7 +160,6 @@ const EstudioStep10 = ({ onNext, onPrev, listado }) => {
                     <Th className="w-[5%] text-center">#</Th>
                     <Th className="w-[45%] min-w-[250px] break-words">Elemento a Evaluar</Th>
                     <Th className="w-[20%] text-center">Evidencia</Th>
-                    <Th className="w-[10%] text-center">No / Sí</Th>
                     <Th className="w-[20%] text-center">Grado de Riesgo</Th>
                   </Tr>
                 </THead>
@@ -244,24 +191,6 @@ const EstudioStep10 = ({ onNext, onPrev, listado }) => {
                             <a className="underline" href={row.evidenceUrl} target="_blank" rel="noreferrer">Ver evidencia</a>
                           </div>
                         ) : null}
-                      </Td>
-
-                      {/* SWITCH (applies) */}
-                      <Td className="text-center ">
-                        <Controller
-                          name={`${section.key}.${rowIndex}.applies`}
-                          control={control}
-                          render={({ field }) => (
-                            <Switch
-                              checked={field.value}
-                              onChange={(event) => {
-                                const isChecked = event.target.checked;
-                                field.onChange(isChecked);
-                                handleFieldChange(section.key, rowIndex, { applies: isChecked });
-                              }}
-                            />
-                          )}
-                        />
                       </Td>
 
                       {/* RISK LEVEL */}

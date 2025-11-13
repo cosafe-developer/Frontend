@@ -1,13 +1,12 @@
 import { useForm, Controller } from "react-hook-form";
-import { Button, Switch, Table, THead, TBody, Th, Tr, Td, Upload } from "components/ui";
+import { Button, Table, THead, TBody, Th, Tr, Td, Upload, Checkbox } from "components/ui";
 import { PlusIcon } from "@heroicons/react/20/solid";
 import { useLlenarListadoFormContext } from "../../contexts/LlenarListadoFormContext";
-import { Listbox } from "components/shared/form/Listbox";
-import { tiposRiesgosEstudios } from "../../utils/types";
 import { useEffect } from "react";
 import { resetDataEstudioStep9 } from "./utils/resetDataEstudioStep9";
 import { deepMergeDefaults } from "../../utils/deepMergeDefaultsInfo";
 import { alarmSystemElements } from "./utils/elementsTask";
+
 import updateListado from "api/listados/updateListado";
 import uploadImageWithFirma from "api/upload/uploadImageWithFirma.service";
 
@@ -20,41 +19,26 @@ const buildDefaultSection = (elements) =>
     _uid: i,
     element: el,
     evidenceUrl: null,
-    applies: false,
-    riskLevel: null,
+    exists: false,
   }));
 
 const filterForBackend = (item) => {
-  // Siempre mandar element para identificar el ítem
   const out = { element: item.element };
-
-  // Incluye solo las propiedades que tienen valor (null/undefined NO se mandan)
-  if (typeof item.applies !== "undefined") out.applies = item.applies;
   if (item.evidenceUrl) out.evidenceUrl = item.evidenceUrl;
-  if (item.riskLevel) out.riskLevel = item.riskLevel;
-
+  if (typeof item.exists !== "undefined") out.exists = item.exists;
   return out;
 };
 
 const EstudioStep9 = ({ onNext, onPrev, listado }) => {
   const llenarListadoFormCtx = useLlenarListadoFormContext();
-  //? Step 1
   const nonStructuralRisksCtx = llenarListadoFormCtx?.state?.formData?.nonStructuralRisks ?? {};
-  // Step 2
   const structuralRisksCtx = llenarListadoFormCtx?.state?.formData?.structuralRisks ?? {};
-  //? Step 3
   const serviceInstallationsCtx = llenarListadoFormCtx?.state?.formData?.serviceInstallations ?? {};
-  //? Step 4
   const socioOrganizationalAgentCtx = llenarListadoFormCtx?.state?.formData?.socioOrganizationalAgent ?? {};
-  //? Step 5
   const geologicalAgentCtx = llenarListadoFormCtx?.state?.formData?.geologicalAgent ?? {};
-  //? Step 6
   const physicochemicalAgentCtx = llenarListadoFormCtx?.state?.formData?.physicochemicalAgent ?? {};
-  //? Step 7
   const sanitaryAgentCtx = llenarListadoFormCtx?.state?.formData?.sanitaryAgent ?? {};
-  //? Step 8
   const surroundingRisksCtx = llenarListadoFormCtx?.state?.formData?.surroundingRisks ?? {};
-  //? Step 9 -> Actual
   const securityMeasuresCtx = llenarListadoFormCtx?.state?.formData?.securityMeasures ?? {};
 
   useEffect(() => {
@@ -65,21 +49,19 @@ const EstudioStep9 = ({ onNext, onPrev, listado }) => {
   }, []);
 
   const defaultValues = {}
-
   sections.forEach((section) => {
     defaultValues[section.key] =
       Array.isArray(securityMeasuresCtx[section.key]) && securityMeasuresCtx[section.key].length > 0
-        ? securityMeasuresCtx[section.key].map((it, i) => ({
+        ? securityMeasuresCtx[section.key].map((item, i) => ({
           _uid: i,
-          element: it.element ?? section.elements[i] ?? `Elemento ${i + 1}`,
-          evidenceUrl: it.evidenceUrl ?? null,
-          applies: typeof it.applies === "boolean" ? it.applies : false,
-          riskLevel: it.riskLevel ?? null,
+          element: item.element ?? section.elements[i] ?? `Elemento ${i + 1}`,
+          evidenceUrl: item.evidenceUrl ?? null,
+          exists: typeof item.exists === "boolean" ? item.exists : false,
         }))
         : buildDefaultSection(section.elements);
   });
 
-  const { control, handleSubmit, setValue, watch, reset } = useForm({
+  const { control, handleSubmit, watch, reset } = useForm({
     defaultValues,
   });
 
@@ -95,30 +77,32 @@ const EstudioStep9 = ({ onNext, onPrev, listado }) => {
 
   const handleFieldChange = async (sectionKey, rowIndex, changedFields) => {
     try {
+      const backendData = listado?.studyData?.securityMeasures ?? {};
       const currentArray = watch(sectionKey) || [];
       const updatedArray = [...currentArray];
       updatedArray[rowIndex] = { ...updatedArray[rowIndex], ...changedFields };
 
-      setValue(sectionKey, updatedArray);
+      const newSecurityMeasures = {
+        ...securityMeasuresCtx,
+        [sectionKey]: updatedArray,
+      };
+
+
 
       llenarListadoFormCtx.dispatch({
         type: "SET_FORM_DATA",
         payload: {
           securityMeasures: {
-            ...securityMeasuresCtx,
-            [sectionKey]: updatedArray,
+            ...newSecurityMeasures,
+            isDone: true,
           },
         },
       });
 
-      const backendData = listado?.studyData?.securityMeasures ?? {};
-
       const merged = {
         ...backendData,
-        ...securityMeasuresCtx,
-        [sectionKey]: updatedArray,
+        ...newSecurityMeasures,
       };
-
 
       const securityMeasures = Object.fromEntries(
         Object.entries(merged).map(([key, arr]) => [
@@ -127,12 +111,14 @@ const EstudioStep9 = ({ onNext, onPrev, listado }) => {
         ])
       );
 
-
       await updateListado({
         requestBody: {
           listado_id: listado?._id,
           studyData: {
-            securityMeasures: securityMeasures,
+            securityMeasures: {
+              ...securityMeasures,
+              isDone: true,
+            },
           },
         },
       });
@@ -143,8 +129,6 @@ const EstudioStep9 = ({ onNext, onPrev, listado }) => {
 
   const onSubmit = async () => {
     try {
-
-
       onNext();
     } catch (error) {
       console.error("Error al enviar estudio paso 1:", error);
@@ -166,8 +150,7 @@ const EstudioStep9 = ({ onNext, onPrev, listado }) => {
                     <Th className="w-[5%] text-center">#</Th>
                     <Th className="w-[45%] min-w-[250px] break-words">Elemento a Evaluar</Th>
                     <Th className="w-[20%] text-center">Evidencia</Th>
-                    <Th className="w-[10%] text-center">No / Sí</Th>
-                    <Th className="w-[20%] text-center">Grado de Riesgo</Th>
+                    <Th className="w-[10%] text-center">EXISTENCIA DE LA ALARMA</Th>
                   </Tr>
                 </THead>
 
@@ -200,38 +183,19 @@ const EstudioStep9 = ({ onNext, onPrev, listado }) => {
                         ) : null}
                       </Td>
 
-                      {/* SWITCH (applies) */}
-                      <Td className="text-center ">
+                      {/* EXISTE */}
+                      <Td className="text-center">
                         <Controller
-                          name={`${section.key}.${rowIndex}.applies`}
+                          name={`${section.key}.${rowIndex}.exists`}
                           control={control}
                           render={({ field }) => (
-                            <Switch
-                              checked={field.value}
-                              onChange={(event) => {
-                                const isChecked = event.target.checked;
-                                field.onChange(isChecked);
-                                handleFieldChange(section.key, rowIndex, { applies: isChecked });
-                              }}
-                            />
-                          )}
-                        />
-                      </Td>
-
-                      {/* RISK LEVEL */}
-                      <Td className="text-center ">
-                        <Controller
-                          name={`${section.key}.${rowIndex}.riskLevel`}
-                          control={control}
-                          render={({ field }) => (
-                            <Listbox
-                              placeholder="Seleccione tipo de riesgo..."
-                              data={tiposRiesgosEstudios}
-                              displayField="label"
-                              value={tiposRiesgosEstudios?.find((r) => r.id === field.value) || null}
-                              onChange={(val) => {
-                                field.onChange(val?.id ?? null);
-                                handleFieldChange(section.key, rowIndex, { riskLevel: val?.id ?? null });
+                            <Checkbox
+                              color="success"
+                              checked={field.value || false}
+                              onChange={(e) => {
+                                const checked = e.target.checked;
+                                field.onChange(checked);
+                                handleFieldChange(section.key, rowIndex, { exists: checked });
                               }}
                             />
                           )}

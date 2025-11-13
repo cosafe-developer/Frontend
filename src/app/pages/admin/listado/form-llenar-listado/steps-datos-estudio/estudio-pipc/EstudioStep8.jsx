@@ -1,59 +1,74 @@
 import { useForm, Controller } from "react-hook-form";
-import { Button, Switch, Table, THead, TBody, Th, Tr, Td, Upload } from "components/ui";
+import { Button, Switch, Table, THead, TBody, Th, Tr, Td, Upload, Checkbox } from "components/ui";
 import { PlusIcon } from "@heroicons/react/20/solid";
 import { useLlenarListadoFormContext } from "../../contexts/LlenarListadoFormContext";
-import { Listbox } from "components/shared/form/Listbox";
-import { tiposRiesgosEstudios } from "../../utils/types";
-import { useEffect } from "react";
+import { PencilSquareIcon } from "@heroicons/react/24/outline";
+import { ObservationModal } from "../../modals/ObservacionesModal";
+import { checkIfSectionIsDone } from "../utils/checkIfSectionIsDone";
+import { useEffect, useState } from "react";
 import { resetDataEstudioStep8 } from "./utils/resetDataEstudioStep8";
 import { deepMergeDefaults } from "../../utils/deepMergeDefaultsInfo";
 import { externalRiskElements } from "./utils/elementsTask";
+
 import updateListado from "api/listados/updateListado";
 import uploadImageWithFirma from "api/upload/uploadImageWithFirma.service";
-
 
 const sections = [
   { key: "externalRiskElements", label: "Tipo de Riesgo", elements: externalRiskElements },
 ];
 
 const buildDefaultSection = (elements) =>
-  elements.map((el, i) => ({
+  elements.map((element, i) => ({
     _uid: i,
-    element: el,
+    element: element,
     evidenceUrl: null,
-    applies: false,
-    riskLevel: null,
+    has_riesgo: false,
+    no_aplica: false,
+    observations: "",
   }));
 
 const filterForBackend = (item) => {
-  // Siempre mandar element para identificar el ítem
   const out = { element: item.element };
-
-  // Incluye solo las propiedades que tienen valor (null/undefined NO se mandan)
-  if (typeof item.applies !== "undefined") out.applies = item.applies;
   if (item.evidenceUrl) out.evidenceUrl = item.evidenceUrl;
-  if (item.riskLevel) out.riskLevel = item.riskLevel;
-
+  if (typeof item.has_riesgo !== "undefined") out.has_riesgo = item.has_riesgo;
+  if (typeof item.no_aplica !== "undefined") out.no_aplica = item.no_aplica;
+  if (item.observations) out.observations = item.observations;
   return out;
 };
 
+function ObservationCell({ sectionKey, rowIndex, currentValue, handleFieldChange }) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const saveObservation = (newValue) => {
+    handleFieldChange(sectionKey, rowIndex, { observations: newValue });
+  };
+
+  return (
+    <>
+      <Button onClick={() => setIsOpen(true)}>
+        <PencilSquareIcon className="size-4 mr-1" />
+        Comentar
+      </Button>
+
+      <ObservationModal
+        isOpen={isOpen}
+        onClose={() => setIsOpen(false)}
+        initialValue={currentValue || ""}
+        onSave={saveObservation}
+      />
+    </>
+  );
+}
+
 const EstudioStep8 = ({ onNext, onPrev, listado }) => {
   const llenarListadoFormCtx = useLlenarListadoFormContext();
-  //? Step 1
   const nonStructuralRisksCtx = llenarListadoFormCtx?.state?.formData?.nonStructuralRisks ?? {};
-  // Step 2
   const structuralRisksCtx = llenarListadoFormCtx?.state?.formData?.structuralRisks ?? {};
-  //? Step 3
   const serviceInstallationsCtx = llenarListadoFormCtx?.state?.formData?.serviceInstallations ?? {};
-  //? Step 4
   const socioOrganizationalAgentCtx = llenarListadoFormCtx?.state?.formData?.socioOrganizationalAgent ?? {};
-  //? Step 5
   const geologicalAgentCtx = llenarListadoFormCtx?.state?.formData?.geologicalAgent ?? {};
-  //? Step 6
   const physicochemicalAgentCtx = llenarListadoFormCtx?.state?.formData?.physicochemicalAgent ?? {};
-  //? Step 7
   const sanitaryAgentCtx = llenarListadoFormCtx?.state?.formData?.sanitaryAgent ?? {};
-  //? Step 8 -> Actual
   const surroundingRisksCtx = llenarListadoFormCtx?.state?.formData?.surroundingRisks ?? {};
 
   useEffect(() => {
@@ -64,21 +79,21 @@ const EstudioStep8 = ({ onNext, onPrev, listado }) => {
   }, []);
 
   const defaultValues = {}
-
   sections.forEach((section) => {
     defaultValues[section.key] =
       Array.isArray(surroundingRisksCtx[section.key]) && surroundingRisksCtx[section.key].length > 0
-        ? surroundingRisksCtx[section.key].map((it, i) => ({
+        ? surroundingRisksCtx[section.key].map((item, i) => ({
           _uid: i,
-          element: it.element ?? section.elements[i] ?? `Elemento ${i + 1}`,
-          evidenceUrl: it.evidenceUrl ?? null,
-          applies: typeof it.applies === "boolean" ? it.applies : false,
-          riskLevel: it.riskLevel ?? null,
+          element: item.element ?? section.elements[i] ?? `Elemento ${i + 1}`,
+          evidenceUrl: item.evidenceUrl ?? null,
+          has_riesgo: typeof item.has_riesgo === "boolean" ? item.has_riesgo : false,
+          no_aplica: typeof item.no_aplica === "boolean" ? item.no_aplica : false,
+          observations: item.observations ?? "",
         }))
         : buildDefaultSection(section.elements);
   });
 
-  const { control, handleSubmit, setValue, watch, reset } = useForm({
+  const { control, handleSubmit, watch, reset } = useForm({
     defaultValues,
   });
 
@@ -94,30 +109,32 @@ const EstudioStep8 = ({ onNext, onPrev, listado }) => {
 
   const handleFieldChange = async (sectionKey, rowIndex, changedFields) => {
     try {
+      const backendData = listado?.studyData?.surroundingRisks ?? {};
       const currentArray = watch(sectionKey) || [];
       const updatedArray = [...currentArray];
       updatedArray[rowIndex] = { ...updatedArray[rowIndex], ...changedFields };
 
-      setValue(sectionKey, updatedArray);
-
-      llenarListadoFormCtx.dispatch({
-        type: "SET_FORM_DATA",
-        payload: {
-          surroundingRisks: {
-            ...surroundingRisksCtx,
-            [sectionKey]: updatedArray,
-          },
-        },
-      });
-
-      const backendData = listado?.studyData?.surroundingRisks ?? {};
-
-      const merged = {
-        ...backendData,
+      const newSurroundingRisksCtx = {
         ...surroundingRisksCtx,
         [sectionKey]: updatedArray,
       };
 
+
+      const isDoneSurroundingRisks = checkIfSectionIsDone(newSurroundingRisksCtx, ["observations", "has_riesgo", "no_aplica",], "some");
+      llenarListadoFormCtx.dispatch({
+        type: "SET_FORM_DATA",
+        payload: {
+          surroundingRisks: {
+            ...newSurroundingRisksCtx,
+            isDone: isDoneSurroundingRisks,
+          },
+        },
+      });
+
+      const merged = {
+        ...backendData,
+        ...newSurroundingRisksCtx,
+      };
 
       const surroundingRisks = Object.fromEntries(
         Object.entries(merged).map(([key, arr]) => [
@@ -126,12 +143,14 @@ const EstudioStep8 = ({ onNext, onPrev, listado }) => {
         ])
       );
 
-
       await updateListado({
         requestBody: {
           listado_id: listado?._id,
           studyData: {
-            surroundingRisks: surroundingRisks,
+            surroundingRisks: {
+              ...surroundingRisks,
+              isDone: isDoneSurroundingRisks,
+            },
           },
         },
       });
@@ -142,8 +161,6 @@ const EstudioStep8 = ({ onNext, onPrev, listado }) => {
 
   const onSubmit = async () => {
     try {
-
-
       onNext();
     } catch (error) {
       console.error("Error al enviar estudio paso 1:", error);
@@ -165,8 +182,9 @@ const EstudioStep8 = ({ onNext, onPrev, listado }) => {
                     <Th className="w-[5%] text-center">#</Th>
                     <Th className="w-[45%] min-w-[250px] break-words">Elemento a Evaluar</Th>
                     <Th className="w-[20%] text-center">Evidencia</Th>
-                    <Th className="w-[10%] text-center">No / Sí</Th>
-                    <Th className="w-[20%] text-center">Grado de Riesgo</Th>
+                    <Th className="w-[5%] text-center">SIN RIESGO / CON RIESGO</Th>
+                    <Th className="w-[5%] text-center">N/A</Th>
+                    <Th className="w-[20%] text-center">Observaciones</Th>
                   </Tr>
                 </THead>
 
@@ -199,10 +217,11 @@ const EstudioStep8 = ({ onNext, onPrev, listado }) => {
                         ) : null}
                       </Td>
 
-                      {/* SWITCH (applies) */}
+
+                      {/* SWITCH (has_riesgo) */}
                       <Td className="text-center ">
                         <Controller
-                          name={`${section.key}.${rowIndex}.applies`}
+                          name={`${section.key}.${rowIndex}.has_riesgo`}
                           control={control}
                           render={({ field }) => (
                             <Switch
@@ -210,30 +229,38 @@ const EstudioStep8 = ({ onNext, onPrev, listado }) => {
                               onChange={(event) => {
                                 const isChecked = event.target.checked;
                                 field.onChange(isChecked);
-                                handleFieldChange(section.key, rowIndex, { applies: isChecked });
+                                handleFieldChange(section.key, rowIndex, { has_riesgo: isChecked });
                               }}
                             />
                           )}
                         />
                       </Td>
 
-                      {/* RISK LEVEL */}
-                      <Td className="text-center ">
+                      {/* === N/A === */}
+                      <Td className="text-center">
                         <Controller
-                          name={`${section.key}.${rowIndex}.riskLevel`}
+                          name={`${section.key}.${rowIndex}.no_aplica`}
                           control={control}
                           render={({ field }) => (
-                            <Listbox
-                              placeholder="Seleccione tipo de riesgo..."
-                              data={tiposRiesgosEstudios}
-                              displayField="label"
-                              value={tiposRiesgosEstudios?.find((r) => r.id === field.value) || null}
-                              onChange={(val) => {
-                                field.onChange(val?.id ?? null);
-                                handleFieldChange(section.key, rowIndex, { riskLevel: val?.id ?? null });
+                            <Checkbox
+                              color="warning"
+                              checked={field.value || false}
+                              onChange={(e) => {
+                                const checked = e.target.checked;
+                                field.onChange(checked);
+                                handleFieldChange(section.key, rowIndex, { no_aplica: checked });
                               }}
                             />
                           )}
+                        />
+                      </Td>
+
+                      <Td className="text-center">
+                        <ObservationCell
+                          sectionKey={section.key}
+                          rowIndex={rowIndex}
+                          currentValue={row.observations}
+                          handleFieldChange={handleFieldChange}
                         />
                       </Td>
                     </Tr>
