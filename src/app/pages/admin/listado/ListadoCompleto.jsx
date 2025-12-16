@@ -1,5 +1,6 @@
 import getEmpresaById from "api/empresa/getEmpresaById";
 import getListadoById from "api/listados/getListadoById";
+import { fetchWithCookies } from "helpers/fetch";
 import { useToastContext } from "app/contexts/toast-provider/context";
 import LoadingErrorComponent from "components/custom-ui/loadings/LoadingError.component";
 import { Page } from "components/shared/Page";
@@ -64,6 +65,48 @@ const ListadoCompleto = () => {
     fetchData();
   }, [fetchData]);
 
+  // Función rápida para demo - ver JSON de listados
+  const handleDescargarPlantilla = async () => {
+    try {
+      const resp = await fetchWithCookies(`/get/listrequirements?filter=all`, null, "GET");
+      const result = await resp.json();
+
+      if (!result?.ok) {
+        showToast({ message: "Error al obtener los listados", type: "error" });
+        return;
+      }
+
+      const listados = result?.data?.listados || [];
+      const jsonString = JSON.stringify(listados, null, 2);
+
+      const newWindow = window.open();
+      if (newWindow) {
+        newWindow.document.write(`
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <title>Listados - JSON</title>
+              <style>
+                body { font-family: 'Courier New', monospace; background-color: #1e1e1e; color: #d4d4d4; padding: 20px; margin: 0; }
+                pre { background-color: #252526; padding: 20px; border-radius: 5px; overflow-x: auto; border: 1px solid #3e3e42; }
+                h1 { color: #ffffff; margin-bottom: 20px; }
+              </style>
+            </head>
+            <body>
+              <h1>Listados - JSON (${listados.length} registros)</h1>
+              <pre>${jsonString}</pre>
+            </body>
+          </html>
+        `);
+        newWindow.document.close();
+      }
+
+      showToast({ message: `Se mostraron ${listados.length} listados`, type: "success" });
+    } catch (error) {
+      console.error("Error:", error);
+      showToast({ message: "Error al procesar", type: "error" });
+    }
+  };
 
   if (estado === serverStatesFetching.fetching) {
     return (
@@ -122,9 +165,9 @@ const ListadoCompleto = () => {
                 </Button>
 
                 <Button
+                  onClick={handleDescargarPlantilla}
                   color="primary"
                   className="h-10 text-base font-light"
-                  disabled
                 >
                   Descargar Plantilla
                 </Button>
