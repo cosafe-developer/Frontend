@@ -27,6 +27,7 @@ import { filterUnchangedFields } from "helpers/filterUnchangedFields";
 
 import updateListado from "api/listados/updateListado";
 import { Listbox } from "components/shared/form/Listbox";
+import { replaceImage } from "helpers/updateImageUpload";
 
 
 const EmpresaStep3 = ({
@@ -48,29 +49,92 @@ const EmpresaStep3 = ({
     { id: "critico", label: "Critico" },
   ]
 
+
   useEffect(() => {
     const sendData = async () => {
       if (formDataState === "[send-data]") {
+
         const payloadUnchangedFields = {
           companyInfo: filterUnchangedFields(companyInfoCtx, listado.companyInfo),
           addressInfo: filterUnchangedFields(addressInfoCtx, listado.addressInfo),
           riskInfo: filterUnchangedFields(riskInfoCtx, listado.riskInfo),
         };
 
-        const payload = filterNullsEmptyObject(payloadUnchangedFields)
+        const payload = filterNullsEmptyObject(payloadUnchangedFields);
 
-        const listadoUpdated = await updateListado({ requestBody: { ...payload, listado_id: listado?._id } })
+        if (
+          payload.companyInfo?.logoUrl ||
+          payload.addressInfo?.taxCertificateUrl ||
+          payload.addressInfo?.legalRepresentativeSignatureUrl ||
+          payload.addressInfo?.legalRepresentativeIneUrl ||
+          payload.riskInfo?.materialsInventoryUrl
+        ) {
+
+          // COMPANY → Logo
+          if (payload.companyInfo?.logoUrl) {
+            payload.companyInfo.logoUrl = await replaceImage({
+              previousUrl: listado.companyInfo?.logoUrl,
+              newFile: companyInfoCtx.logoUrl,
+              folder: "empresa"
+            });
+          }
+
+          // ADDRESS → Tax Certificate
+          if (payload.addressInfo?.taxCertificateUrl) {
+            payload.addressInfo.taxCertificateUrl = await replaceImage({
+              previousUrl: listado.addressInfo?.taxCertificateUrl,
+              newFile: addressInfoCtx.taxCertificateUrl,
+              folder: `listado-${listado?._id}`
+            });
+          }
+
+          // ADDRESS → Firma
+          if (payload.addressInfo?.legalRepresentativeSignatureUrl) {
+            payload.addressInfo.legalRepresentativeSignatureUrl = await replaceImage({
+              previousUrl: listado.addressInfo?.legalRepresentativeSignatureUrl,
+              newFile: addressInfoCtx.legalRepresentativeSignatureUrl,
+              folder: `listado-${listado?._id}`
+            });
+          }
+
+          // ADDRESS → INE
+          if (payload.addressInfo?.legalRepresentativeIneUrl) {
+            payload.addressInfo.legalRepresentativeIneUrl = await replaceImage({
+              previousUrl: listado.addressInfo?.legalRepresentativeIneUrl,
+              newFile: addressInfoCtx.legalRepresentativeIneUrl,
+              folder: `listado-${listado?._id}`
+            });
+          }
+
+          // RISK → Inventario de materiales
+          if (payload.riskInfo?.materialsInventoryUrl) {
+            payload.riskInfo.materialsInventoryUrl = await replaceImage({
+              previousUrl: listado.riskInfo?.materialsInventoryUrl,
+              newFile: riskInfoCtx.materialsInventoryUrl,
+              folder: `listado-${listado?._id}`
+            });
+          }
+        }
+
+
+        // ⬇️ Aquí ya el payload tiene las URLs públicas nuevas
+        const listadoUpdated = await updateListado({
+          requestBody: { ...payload, listado_id: listado?._id }
+        });
+
         if (!listadoUpdated?.ok) {
-          setFormDataState("[error]")
+          setFormDataState("[error]");
           return;
         }
 
         setFormDataState("[success]");
       }
     };
+
     sendData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formDataState]);
+
 
   // control del formulario
   const {
@@ -120,6 +184,7 @@ const EmpresaStep3 = ({
               <span>Inventario de Recursos Materiales (Ubicación y Condición)</span>
               <span className="ml-2 text-error">*</span>
             </label>
+
             <Controller
               name="materialsInventoryUrl"
               control={control}

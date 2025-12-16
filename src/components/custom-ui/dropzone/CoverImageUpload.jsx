@@ -23,6 +23,7 @@ const CoverImageUpload = forwardRef(
         ? { name: value.split("/").pop(), preview: value }
         : value;
 
+
     const { getRootProps, getInputProps, isDragReject, isDragAccept } =
       useDropzone({
         onDrop: useCallback((acceptedFiles) => {

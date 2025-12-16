@@ -1,6 +1,5 @@
 import { useForm, Controller } from "react-hook-form";
-import { Button, Switch, Table, THead, TBody, Th, Tr, Td, Upload } from "components/ui";
-import { PlusIcon } from "@heroicons/react/20/solid";
+import { Button, Switch, Table, THead, TBody, Th, Tr, Td } from "components/ui";
 import { useLlenarListadoFormContext } from "../../contexts/LlenarListadoFormContext";
 import { Listbox } from "components/shared/form/Listbox";
 import { tiposRiesgosEstudios } from "../../utils/types";
@@ -9,9 +8,11 @@ import { resetDataEstudioStep1 } from "./utils/resetDataEstudioStep1";
 import { deepMergeDefaults } from "../../utils/deepMergeDefaultsInfo";
 import { evacuationBlockingObjects, fallingObjects, flammableObjects, overturningObjects, slidingObjects } from "./utils/elementsTask";
 import { checkIfSectionIsDone } from "../utils/checkIfSectionIsDone";
+import { replaceImage } from "helpers/updateImageUpload";
 
 import updateListado from "api/listados/updateListado";
-import uploadImageWithFirma from "api/upload/uploadImageWithFirma.service";
+import EvidenceUpload from "components/custom-ui/upload-button/EvidenceUpload.component";
+
 
 
 const sections = [
@@ -28,6 +29,7 @@ const buildDefaultSection = (elements) =>
     _uid: i,
     element: el,
     evidenceUrl: null,
+    localPreview: null,
     applies: false,
     riskLevel: null,
   }));
@@ -49,6 +51,7 @@ const EstudioStep1 = ({ onNext, listado }) => {
   //? Step 1 -> Actual
   const nonStructuralRisksCtx = llenarListadoFormCtx?.state?.formData?.nonStructuralRisks ?? {};
 
+
   useEffect(() => {
     window.scrollTo({
       top: 0,
@@ -57,6 +60,7 @@ const EstudioStep1 = ({ onNext, listado }) => {
   }, []);
 
   const defaultValues = {}
+
   sections.forEach((section) => {
     defaultValues[section.key] =
       nonStructuralRisksCtx[section.key] && Array.isArray(nonStructuralRisksCtx[section.key])
@@ -65,6 +69,7 @@ const EstudioStep1 = ({ onNext, listado }) => {
           _uid: i,
           element: it.element ?? section.elements[i] ?? `Elemento ${i + 1}`,
           evidenceUrl: it.evidenceUrl ?? null,
+          localPreview: null,
           applies: typeof it.applies === "boolean" ? it.applies : false,
           riskLevel: it.riskLevel ?? null,
         }))
@@ -140,6 +145,7 @@ const EstudioStep1 = ({ onNext, listado }) => {
     }
   };
 
+
   const onSubmit = async () => {
     try {
       onNext();
@@ -175,26 +181,27 @@ const EstudioStep1 = ({ onNext, listado }) => {
 
                       {/* EVIDENCIA */}
                       <Td className="text-center">
-                        <Upload
+                        <EvidenceUpload
+                          value={row.evidenceUrl}
                           onChange={async (file) => {
-                            const url = await uploadImageWithFirma(file);
-                            await handleFieldChange(section.key, rowIndex, { evidenceUrl: url });
-                          }}
-                        >
-                          {({ ...props }) => (
-                            <Button color="primary" {...props}>
-                              <PlusIcon className="size-5" />
-                              Subir Evidencia
-                            </Button>
-                          )}
-                        </Upload>
+                            await handleFieldChange(section.key, rowIndex, { evidenceUrl: file });
 
-                        {row.evidenceUrl ? (
-                          <div className="mt-1 text-xs">
-                            <a className="underline" href={row.evidenceUrl} target="_blank" rel="noreferrer">Ver evidencia</a>
-                          </div>
-                        ) : null}
+                            const url = await replaceImage({
+                              previousUrl: row?.evidenceUrl,
+                              newFile: file,
+                              folder: `listado-formulario-${listado?._id}`,
+                            });
+
+                            await handleFieldChange(section.key, rowIndex, {
+                              evidenceUrl: url,
+                            });
+                          }}
+                          onRemove={() =>
+                            handleFieldChange(section.key, rowIndex, { evidenceUrl: null })
+                          }
+                        />
                       </Td>
+
 
                       {/* SWITCH (applies) */}
                       <Td className="text-center ">

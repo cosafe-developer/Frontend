@@ -51,7 +51,6 @@ const EditarEmpresa = () => {
     handleSubmit,
     formState: { errors },
     reset,
-    /*   watch, */
   } = useForm({
     defaultValues: {
       nombre_empresa: "",
@@ -63,7 +62,6 @@ const EditarEmpresa = () => {
     },
   });
 
-
   const onSubmit = async (data) => {
     if (!empresa) return;
 
@@ -71,18 +69,26 @@ const EditarEmpresa = () => {
 
     try {
       let newPhotoUrl = null
+
+      //Deleting Image
+      if (data?.foto_url && empresa?.logoUrl?.length > 0) {
+        const pathName = empresa.logoUrl.replace("https://cosafeimg.nyc3.digitaloceanspaces.com/", "");
+
+        const deletingImage = await deleteImage({ pathName: pathName });
+
+        if (deletingImage?.message !== "Archivo eliminado correctamente") {
+          setEstado(serverStatesFetching.error);
+          showToast({ message: "Error al borrar la imagen", type: "error" });
+          return
+        }
+      }
+
       if (data?.foto_url) {
         const file = data?.foto_url;
-
-        const deletingImage = await deleteImage({ fileName: empresa?.logoUrl })
-        if (!deletingImage?.ok) {
-          showToast({ message: "Error en al borrar la imagen", type: "error", });
-        }
-
         const firmaResp = await getFirmaUploadImage({
           fileName: file.name,
           fileType: file.type,
-          folder: "profile",
+          folder: "empresa",
         });
 
 
@@ -166,6 +172,7 @@ const EditarEmpresa = () => {
       reset({
         nombre_empresa: empresa.tradeName,
         rfc: empresa.rfc,
+        foto_url: empresa.logoUrl,
         email: empresa.email,
         telefono: empresa.phone,
         password: empresa.password

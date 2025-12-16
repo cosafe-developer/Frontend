@@ -1,40 +1,31 @@
 // Import Dependencies
 import PropTypes from "prop-types";
-import { useEffect, useState } from "react";
 
 // ----------------------------------------------------------------------
 
-export function PreviewImg({ file, src, alt, ...rest }) {
-  const [previewUrl, setPreviewUrl] = useState(null);
+export function PreviewImg({ file, alt, className }) {
 
-  useEffect(() => {
-    if (!file) {
-      setPreviewUrl(null);
-      return;
-    }
+  // Si es string, es una URL real
+  if (typeof file === "string") {
+    return <img src={file} alt={alt} className={className} />;
+  }
 
-    try {
-      setPreviewUrl(URL.createObjectURL(file));
-    } catch (err) {
-      console.error(err);
-      setPreviewUrl(null);
-    }
+  // Si tiene preview, úsalo (viene de una URL o dropzone)
+  if (file?.preview) {
+    return <img src={file.preview} alt={alt} className={className} />;
+  }
 
-    return () => {
-      URL.revokeObjectURL(previewUrl);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [file]);
+  // Si es un File real → crear URL
+  if (file instanceof File || file instanceof Blob) {
+    const url = URL.createObjectURL(file);
+    return <img src={url} alt={alt} className={className} />;
+  }
 
-  return (
-    <img
-      src={previewUrl || src}
-      onLoad={() => URL.revokeObjectURL(previewUrl)}
-      alt={alt}
-      {...rest}
-    />
-  );
+  // Si llega algo inesperado → no crashea
+  console.warn("PreviewImg recibió un archivo inválido:", file);
+  return null;
 }
+
 
 PreviewImg.propTypes = {
   file: PropTypes.object,

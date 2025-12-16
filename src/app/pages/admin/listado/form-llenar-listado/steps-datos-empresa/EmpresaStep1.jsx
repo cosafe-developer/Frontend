@@ -35,7 +35,6 @@ const EmpresaStep1 = ({
         businessName: companyInfoCtx?.businessName ?? empresa?.tradeName,
         email: companyInfoCtx?.email ?? empresa?.email,
         logoUrl: companyInfoCtx?.logoUrl ?? empresa?.logoUrl,
-        phone: companyInfoCtx?.phone ?? empresa?.phone,
         rfc: companyInfoCtx?.rfc ?? empresa?.rfc,
       });
     }
@@ -73,7 +72,7 @@ const EmpresaStep1 = ({
             control={control}
             render={({ field }) => (
               <CoverImageUpload
-                label=""
+                label="Logotipo"
                 classNames={{ box: "mt-1.5" }}
                 error={errors?.logoUrl?.message}
                 {...field}
