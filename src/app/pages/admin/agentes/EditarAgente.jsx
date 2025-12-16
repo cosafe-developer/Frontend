@@ -97,10 +97,9 @@ const EditarAgente = () => {
         }
       }
 
-      //Add Image
+
       if (data?.foto_url) {
         const file = data?.foto_url;
-
         const firmaResp = await getFirmaUploadImage({
           fileName: file.name,
           fileType: file.type,
