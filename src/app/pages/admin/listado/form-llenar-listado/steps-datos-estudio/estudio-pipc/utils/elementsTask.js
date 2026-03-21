@@ -1,3 +1,21 @@
+//? Riesgos Generales Internos (EmpresaStep3)
+export const internalGeneralRisksElements = [
+  "Pisos resbalosos o en mal estado",
+  "Escaleras sin pasamanos o en mal estado",
+  "Falta de señalización de seguridad",
+  "Instalaciones eléctricas expuestas",
+  "Almacenamiento inadecuado de materiales",
+  "Falta de ventilación adecuada",
+  "Falta de iluminación adecuada",
+  "Obstrucción de pasillos y áreas de circulación",
+  "Falta de equipo de protección personal",
+  "Maquinaria o equipo sin protección",
+  "Materiales inflamables sin resguardo adecuado",
+  "Falta de extintores o equipo contra incendio",
+  "Salidas de emergencia bloqueadas o inexistentes",
+  "Otro"
+]
+
 //? Step 1
 export const fallingObjects = [
   "Ventanas de vidrio",
@@ -177,7 +195,9 @@ export const volcanismElements = [
 export const fireAgentElements = [
   "Incendio Forestal",
   "Incendio Rural",
-  "Incendio Industrial"
+  "Incendio Industrial",
+  "Incendio Residencial",
+  "Otro"
 ]
 
 export const chemicalSpillElements = [
@@ -227,7 +247,7 @@ export const plagueElements = [
 ]
 
 export const agentElements = [
-  "Entrenamiento",
+  "Agente perturbador sanitario",
 ]
 
 //? Step 8 

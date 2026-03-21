@@ -109,7 +109,7 @@ const EstudioStep3 = ({ onNext, onPrev, listado }) => {
         : buildDefaultSection(section.elements);
   });
 
-  const { control, handleSubmit, watch, reset } = useForm({ defaultValues });
+  const { control, handleSubmit, watch, reset, setValue } = useForm({ defaultValues });
 
   useEffect(() => {
     if (listado && serviceInstallationsCtx) {
@@ -126,6 +126,8 @@ const EstudioStep3 = ({ onNext, onPrev, listado }) => {
       const currentArray = watch(sectionKey) || [];
       const updatedArray = [...currentArray];
       updatedArray[rowIndex] = { ...updatedArray[rowIndex], ...changedFields };
+
+      setValue(sectionKey, updatedArray);
 
       const newServiceInstallations = {
         ...serviceInstallationsCtx,

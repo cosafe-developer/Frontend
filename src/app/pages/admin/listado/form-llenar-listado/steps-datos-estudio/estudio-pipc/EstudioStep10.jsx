@@ -1,6 +1,6 @@
 // EstudioStep1.jsx
 import { useForm, Controller } from "react-hook-form";
-import { Button, Table, THead, TBody, Th, Tr, Td, Upload } from "components/ui";
+import { Button, Table, THead, TBody, Th, Tr, Td, Upload, Checkbox } from "components/ui";
 import { PlusIcon } from "@heroicons/react/20/solid";
 import { useLlenarListadoFormContext } from "../../contexts/LlenarListadoFormContext";
 import { Listbox } from "components/shared/form/Listbox";
@@ -30,6 +30,7 @@ const filterForBackend = (item) => {
   const out = { element: item.element };
   if (item.evidenceUrl) out.evidenceUrl = item.evidenceUrl;
   if (item.riskLevel) out.riskLevel = item.riskLevel;
+  if (typeof item.no_aplica !== "undefined") out.no_aplica = item.no_aplica;
   return out;
 };
 
@@ -71,7 +72,7 @@ const EstudioStep10 = ({ onNext, onPrev, listado }) => {
   });
 
 
-  const { control, handleSubmit, watch, reset } = useForm({
+  const { control, handleSubmit, watch, reset, setValue } = useForm({
     defaultValues,
   });
 
@@ -92,8 +93,10 @@ const EstudioStep10 = ({ onNext, onPrev, listado }) => {
       const updatedArray = [...currentArray];
       updatedArray[rowIndex] = { ...updatedArray[rowIndex], ...changedFields };
 
+      setValue(sectionKey, updatedArray);
+
       const newDamageEvaluation = {
-        ...nonStructuralRisksCtx,
+        ...damageEvaluationCtx,
         [sectionKey]: updatedArray,
       };
 
@@ -160,6 +163,7 @@ const EstudioStep10 = ({ onNext, onPrev, listado }) => {
                     <Th className="w-[5%] text-center">#</Th>
                     <Th className="w-[45%] min-w-[250px] break-words">Elemento a Evaluar</Th>
                     <Th className="w-[20%] text-center">Evidencia</Th>
+                    <Th className="w-[10%] text-center">N/A</Th>
                     <Th className="w-[20%] text-center">Grado de Riesgo</Th>
                   </Tr>
                 </THead>
@@ -191,6 +195,25 @@ const EstudioStep10 = ({ onNext, onPrev, listado }) => {
                             <a className="underline" href={row.evidenceUrl} target="_blank" rel="noreferrer">Ver evidencia</a>
                           </div>
                         ) : null}
+                      </Td>
+
+                      {/* N/A */}
+                      <Td className="text-center">
+                        <Controller
+                          name={`${section.key}.${rowIndex}.no_aplica`}
+                          control={control}
+                          render={({ field }) => (
+                            <Checkbox
+                              color="warning"
+                              checked={field.value || false}
+                              onChange={(e) => {
+                                const checked = e.target.checked;
+                                field.onChange(checked);
+                                handleFieldChange(section.key, rowIndex, { no_aplica: checked });
+                              }}
+                            />
+                          )}
+                        />
                       </Td>
 
                       {/* RISK LEVEL */}

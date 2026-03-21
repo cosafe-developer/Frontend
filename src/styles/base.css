@@ -124,3 +124,46 @@ input.hide-number-arrow::-webkit-inner-spin-button {
 input[type="number"].hide-number-arrow {
   -moz-appearance: textfield;
 }
+
+/* PWA / Tablet / iPad responsiveness */
+@supports (-webkit-touch-callout: none) {
+  /* Safari-specific: fix 100vh on iOS */
+  .min-h-100vh {
+    min-height: -webkit-fill-available;
+  }
+}
+
+/* Ensure touch targets are at least 44x44px on touch devices */
+@media (pointer: coarse) {
+  button,
+  [role="button"],
+  input[type="checkbox"],
+  input[type="radio"],
+  .switch-toggle {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Make table cells more spacious on tablets */
+  td, th {
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+  }
+}
+
+/* iPad landscape and portrait */
+@media (min-width: 768px) and (max-width: 1024px) {
+  /* Ensure tables don't overflow awkwardly */
+  .overflow-x-auto {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Safe area insets for notch/rounded corner devices */
+@supports (padding: env(safe-area-inset-bottom)) {
+  body {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}

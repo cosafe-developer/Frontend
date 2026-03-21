@@ -12,7 +12,7 @@ import { Spinner } from "components/ui";
 // Local Imports
 import { DatePicker } from "components/shared/form/Datepicker";
 
-import { Button, Input } from "components/ui";
+import { Button, Input, Switch, Table, THead, TBody, Th, Tr, Td, Checkbox } from "components/ui";
 import { informacionRiesgoSchema } from "../contexts/schema";
 import { useLlenarListadoFormContext } from "../contexts/LlenarListadoFormContext";
 
@@ -28,6 +28,8 @@ import { filterUnchangedFields } from "helpers/filterUnchangedFields";
 import updateListado from "api/listados/updateListado";
 import { Listbox } from "components/shared/form/Listbox";
 import { replaceImage } from "helpers/updateImageUpload";
+import { internalGeneralRisksElements } from "../steps-datos-estudio/estudio-pipc/utils/elementsTask";
+import { tiposRiesgosEstudios } from "../utils/types";
 
 
 const EmpresaStep3 = ({
@@ -38,6 +40,7 @@ const EmpresaStep3 = ({
 }) => {
   const [isOpen, { open, close }] = useDisclosure(false);
   const [formDataState, setFormDataState] = useState("[waiting]");
+  const [errorMessage, setErrorMessage] = useState("");
   const llenarListadoFormCtx = useLlenarListadoFormContext();
   const riskInfoCtx = llenarListadoFormCtx?.state?.stepStatus?.riskInfo;
   const addressInfoCtx = llenarListadoFormCtx?.state?.stepStatus?.addressInfo;
@@ -123,6 +126,7 @@ const EmpresaStep3 = ({
         });
 
         if (!listadoUpdated?.ok) {
+          setErrorMessage(listadoUpdated?.message || "Error desconocido al guardar los datos. Verifica los campos e intenta de nuevo.");
           setFormDataState("[error]");
           return;
         }
@@ -131,7 +135,10 @@ const EmpresaStep3 = ({
       }
     };
 
-    sendData();
+    sendData().catch((err) => {
+      setErrorMessage(err?.response?.data?.message || err?.message || "Error de conexion. Verifica tu internet e intenta de nuevo.");
+      setFormDataState("[error]");
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formDataState]);
 
@@ -141,6 +148,8 @@ const EmpresaStep3 = ({
     handleSubmit,
     control,
     reset,
+    watch,
+    setValue,
     formState: { errors },
   } = useForm({
     resolver: yupResolver(informacionRiesgoSchema),
@@ -179,24 +188,54 @@ const EmpresaStep3 = ({
         <div className="grow space-y-8">
 
           {/* 📄 Inventario de recursos materiales */}
-          <div className="flex flex-col gap-y-1.5">
-            <label className="input-label">
-              <span>Inventario de Recursos Materiales (Ubicación y Condición)</span>
-              <span className="ml-2 text-error">*</span>
-            </label>
+          <div className="flex flex-col gap-y-3">
+            <div className="flex items-center gap-x-3">
+              <label className="input-label">
+                <span>Inventario de Recursos Materiales (Ubicación y Condición)</span>
+              </label>
+              <Controller
+                name="materialsInventoryApplies"
+                control={control}
+                render={({ field }) => (
+                  <div className="flex items-center gap-x-2">
+                    <span className="text-sm text-gray-400">
+                      {field.value ? "Sí aplica" : "No aplica"}
+                    </span>
+                    <Switch
+                      checked={field.value || false}
+                      onChange={(e) => {
+                        const checked = e.target.checked;
+                        field.onChange(checked);
+                        llenarListadoFormCtx.dispatch({
+                          type: "SET_STEP_STATUS",
+                          payload: {
+                            riskInfo: {
+                              ...riskInfoCtx,
+                              materialsInventoryApplies: checked,
+                            },
+                          },
+                        });
+                      }}
+                    />
+                  </div>
+                )}
+              />
+            </div>
 
-            <Controller
-              name="materialsInventoryUrl"
-              control={control}
-              render={({ field }) => (
-                <CoverImageUpload
-                  label=""
-                  classNames={{ box: "mt-1.5" }}
-                  error={errors?.materialsInventoryUrl?.message}
-                  {...field}
-                />
-              )}
-            />
+            {watch("materialsInventoryApplies") && (
+              <Controller
+                name="materialsInventoryUrl"
+                control={control}
+                render={({ field }) => (
+                  <CoverImageUpload
+                    label=""
+                    classNames={{ box: "mt-1.5" }}
+                    error={errors?.materialsInventoryUrl?.message}
+                    {...field}
+                  />
+                )}
+              />
+            )}
           </div>
 
           {/* 🏢 Datos de empresa y riesgos */}
@@ -298,12 +337,13 @@ const EmpresaStep3 = ({
               render={({ field }) => (
                 <DatePicker
                   {...field}
-                  /*  options={{
-                     mode: "range",
-                     dateFormat: "Y-m-d",
-                   }} */
+                  options={{
+                    mode: "multiple",
+                    dateFormat: "Y-m-d",
+                    conjunction: ", ",
+                  }}
                   error={errors?.preventionCalendarDate?.message}
-                  placeholder="Seleccionar rango de fechas..."
+                  placeholder="Seleccionar fechas..."
                   onChange={(dates) => {
                     field.onChange(dates);
                     llenarListadoFormCtx.dispatch({
@@ -321,38 +361,85 @@ const EmpresaStep3 = ({
             />
           </div>
 
-          {/* ⚠️ Riesgos generales internos */}
-          <div>
-            <Controller
-              name="internalGeneralRisks"
-              control={control}
-              render={({ field }) => (
-                <Input
-                  {...field}
-                  label="Riesgos Generales Internos"
-                  error={errors?.internalGeneralRisks?.message}
-                  required
-                  placeholder="Escribir los Riesgos Generales Internos..."
-                  onChange={(e) => {
-                    field.onChange(e);
-                    llenarListadoFormCtx.dispatch({
-                      type: "SET_STEP_STATUS",
-                      payload: {
-                        riskInfo: {
-                          ...riskInfoCtx,
-                          internalGeneralRisks: e.target.value,
-                        },
-                      },
-                    });
-                  }}
-                />
-              )}
-            />
+          {/* ⚠️ Riesgos generales internos - Checklist */}
+          <div className="space-y-3">
+            <h4 className="text-lg font-medium text-gray-800 dark:text-dark-100">
+              Riesgos Generales Internos
+            </h4>
+            <div className="overflow-x-auto">
+              <Table className="w-full text-left rtl:text-right">
+                <THead>
+                  <Tr className="border-b border-gray-200 dark:border-dark-500">
+                    <Th className="w-[5%] text-center">#</Th>
+                    <Th className="w-[55%] min-w-[250px] break-words">Elemento a Evaluar</Th>
+                    <Th className="w-[10%] text-center">Sí / No</Th>
+                    <Th className="w-[30%] text-center">Grado de Riesgo</Th>
+                  </Tr>
+                </THead>
+                <TBody>
+                  {internalGeneralRisksElements.map((element, idx) => {
+                    const risksArray = watch("internalGeneralRisks") || [];
+                    const currentItem = risksArray[idx] || { applies: false, riskLevel: null };
+                    return (
+                      <Tr key={idx} className="border-b border-gray-200 dark:border-dark-500">
+                        <Td className="text-center">{idx + 1}</Td>
+                        <Td className="break-words text-[15px]">{element}</Td>
+                        <Td className="text-center">
+                          <Checkbox
+                            color="success"
+                            checked={currentItem.applies || false}
+                            onChange={(e) => {
+                              const checked = e.target.checked;
+                              const current = watch("internalGeneralRisks") || internalGeneralRisksElements.map((el) => ({ element: el, applies: false, riskLevel: null }));
+                              const updated = [...current];
+                              updated[idx] = { ...updated[idx], element, applies: checked };
+                              setValue("internalGeneralRisks", updated);
+                              llenarListadoFormCtx.dispatch({
+                                type: "SET_STEP_STATUS",
+                                payload: {
+                                  riskInfo: {
+                                    ...riskInfoCtx,
+                                    internalGeneralRisks: updated,
+                                  },
+                                },
+                              });
+                            }}
+                          />
+                        </Td>
+                        <Td className="text-center">
+                          <Listbox
+                            placeholder="Seleccione..."
+                            data={tiposRiesgosEstudios}
+                            displayField="label"
+                            value={tiposRiesgosEstudios?.find((r) => r.id === currentItem.riskLevel) || null}
+                            onChange={(val) => {
+                              const current = watch("internalGeneralRisks") || internalGeneralRisksElements.map((el) => ({ element: el, applies: false, riskLevel: null }));
+                              const updated = [...current];
+                              updated[idx] = { ...updated[idx], element, riskLevel: val?.id ?? null };
+                              setValue("internalGeneralRisks", updated);
+                              llenarListadoFormCtx.dispatch({
+                                type: "SET_STEP_STATUS",
+                                payload: {
+                                  riskInfo: {
+                                    ...riskInfoCtx,
+                                    internalGeneralRisks: updated,
+                                  },
+                                },
+                              });
+                            }}
+                          />
+                        </Td>
+                      </Tr>
+                    );
+                  })}
+                </TBody>
+              </Table>
+            </div>
           </div>
         </div>
 
         <div className="mt-4 flex justify-end space-x-3 pb-4">
-          <Button type="submit" className="min-w-[7rem]" onClick={() => {
+          <Button type="button" className="min-w-[7rem]" onClick={() => {
             setCurrentEmpresaStep(1);
             llenarListadoFormCtx.dispatch({
               type: "SET_STEP_STATUS",
@@ -467,6 +554,12 @@ const EmpresaStep3 = ({
                       >
                         Error al intentar guardar los datos
                       </DialogTitle>
+
+                      {errorMessage && (
+                        <p className="mt-2 text-sm text-gray-500 dark:text-dark-300">
+                          {errorMessage}
+                        </p>
+                      )}
 
                       <Button onClick={close} color="error" className="mt-6">
                         Cerrar

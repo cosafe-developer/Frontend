@@ -62,7 +62,7 @@ const EstudioStep6 = ({ onNext, onPrev, listado }) => {
         : buildDefaultSection(section.elements);
   });
 
-  const { control, handleSubmit, watch, reset } = useForm({
+  const { control, handleSubmit, watch, reset, setValue } = useForm({
     defaultValues,
   });
 
@@ -82,6 +82,8 @@ const EstudioStep6 = ({ onNext, onPrev, listado }) => {
       const currentArray = watch(sectionKey) || [];
       const updatedArray = [...currentArray];
       updatedArray[rowIndex] = { ...updatedArray[rowIndex], ...changedFields };
+
+      setValue(sectionKey, updatedArray);
 
       const newPhysicochemicalAgent = {
         ...physicochemicalAgentCtx,

@@ -1,8 +1,10 @@
 import { useForm, Controller } from "react-hook-form";
 import { Button, Switch, Table, THead, TBody, Th, Tr, Td, Upload } from "components/ui";
 import { PlusIcon } from "@heroicons/react/20/solid";
+import { PencilSquareIcon } from "@heroicons/react/24/outline";
 import { useLlenarListadoFormContext } from "../../contexts/LlenarListadoFormContext";
-import { useEffect } from "react";
+import { ObservationModal } from "../../modals/ObservacionesModal";
+import { useEffect, useState } from "react";
 import { resetDataEstudioStep7 } from "./utils/resetDataEstudioStep7";
 import { deepMergeDefaults } from "../../utils/deepMergeDefaultsInfo";
 import { epidemicElements, plagueElements, agentElements } from "./utils/elementsTask";
@@ -22,14 +24,40 @@ const buildDefaultSection = (elements) =>
     element: element,
     evidenceUrl: null,
     applies: false,
+    observations: "",
   }));
 
 const filterForBackend = (item) => {
   const out = { element: item.element };
   if (item.evidenceUrl) out.evidenceUrl = item.evidenceUrl;
   if (typeof item.applies !== "undefined") out.applies = item.applies;
+  if (item.observations) out.observations = item.observations;
   return out;
 };
+
+function ObservationCell({ sectionKey, rowIndex, currentValue, handleFieldChange }) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const saveObservation = (newValue) => {
+    handleFieldChange(sectionKey, rowIndex, { observations: newValue });
+  };
+
+  return (
+    <>
+      <Button onClick={() => setIsOpen(true)}>
+        <PencilSquareIcon className="size-4 mr-1" />
+        Comentar
+      </Button>
+
+      <ObservationModal
+        isOpen={isOpen}
+        onClose={() => setIsOpen(false)}
+        initialValue={currentValue || ""}
+        onSave={saveObservation}
+      />
+    </>
+  );
+}
 
 const EstudioStep7 = ({ onNext, onPrev, listado }) => {
   const llenarListadoFormCtx = useLlenarListadoFormContext();
@@ -62,7 +90,7 @@ const EstudioStep7 = ({ onNext, onPrev, listado }) => {
         : buildDefaultSection(section.elements);
   });
 
-  const { control, handleSubmit, watch, reset } = useForm({
+  const { control, handleSubmit, watch, reset, setValue } = useForm({
     defaultValues,
   });
 
@@ -82,6 +110,8 @@ const EstudioStep7 = ({ onNext, onPrev, listado }) => {
       const currentArray = watch(sectionKey) || [];
       const updatedArray = [...currentArray];
       updatedArray[rowIndex] = { ...updatedArray[rowIndex], ...changedFields };
+
+      setValue(sectionKey, updatedArray);
 
       const newSanitaryAgent = {
         ...sanitaryAgentCtx,
@@ -153,6 +183,7 @@ const EstudioStep7 = ({ onNext, onPrev, listado }) => {
                     <Th className="w-[45%] min-w-[250px] break-words">Elemento a Evaluar</Th>
                     <Th className="w-[20%] text-center">Evidencia</Th>
                     <Th className="w-[10%] text-center">No / Sí</Th>
+                    <Th className="w-[20%] text-center">Observaciones</Th>
                   </Tr>
                 </THead>
 
@@ -203,6 +234,15 @@ const EstudioStep7 = ({ onNext, onPrev, listado }) => {
                         />
                       </Td>
 
+                      {/* OBSERVACIONES */}
+                      <Td className="text-center">
+                        <ObservationCell
+                          sectionKey={section.key}
+                          rowIndex={rowIndex}
+                          currentValue={row.observations}
+                          handleFieldChange={handleFieldChange}
+                        />
+                      </Td>
 
                     </Tr>
                   ))}

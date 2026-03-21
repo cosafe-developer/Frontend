@@ -76,7 +76,7 @@ const EstudioStep1 = ({ onNext, listado }) => {
         : buildDefaultSection(section.elements);
   });
 
-  const { control, handleSubmit, watch, reset } = useForm({
+  const { control, handleSubmit, watch, reset, setValue } = useForm({
     defaultValues,
   });
 
@@ -99,6 +99,8 @@ const EstudioStep1 = ({ onNext, listado }) => {
       const currentArray = watch(sectionKey) || [];
       const updatedArray = [...currentArray];
       updatedArray[rowIndex] = { ...updatedArray[rowIndex], ...changedFields };
+
+      setValue(sectionKey, updatedArray);
 
       const newNonStructuralRisks = {
         ...nonStructuralRisksCtx,

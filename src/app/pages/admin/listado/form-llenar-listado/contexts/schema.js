@@ -46,8 +46,7 @@ export const informacionDireccionSchema = Yup.object().shape({
     .required("El cargo del representante legal es obligatorio"),
 
   legalRepresentativeSignatureUrl: Yup.mixed()
-    .nullable()
-    .required("La firma del representante legal es obligatoria"),
+    .nullable(),
   legalRepresentativeIneUrl: Yup.mixed()
     .nullable()
     .required("El INE del representante legal es obligatorio"),
@@ -67,14 +66,30 @@ export const informacionDireccionSchema = Yup.object().shape({
     .typeError("La población flotante debe ser numérica")
     .required("La población flotante es obligatoria"),
 
-  propertyBoundaries: Yup.string()
-    .required("Las colindancias del inmueble son obligatorias"),
+  propertyBoundariesNorth: Yup.string()
+    .trim()
+    .required("La colindancia Norte es obligatoria"),
+  propertyBoundariesSouth: Yup.string()
+    .trim()
+    .required("La colindancia Sur es obligatoria"),
+  propertyBoundariesEast: Yup.string()
+    .trim()
+    .required("La colindancia Este es obligatoria"),
+  propertyBoundariesWest: Yup.string()
+    .trim()
+    .required("La colindancia Oeste es obligatoria"),
+  propertyBoundariesImageUrl: Yup.mixed().nullable(),
 });
 
 export const informacionRiesgoSchema = Yup.object().shape({
+  materialsInventoryApplies: Yup.boolean().nullable(),
   materialsInventoryUrl: Yup.mixed()
     .nullable()
-    .required("El inventario de materiales es obligatorio"),
+    .when('materialsInventoryApplies', {
+      is: (val) => val === true,
+      then: (schema) => schema.required("El inventario de materiales es obligatorio cuando aplica"),
+      otherwise: (schema) => schema.nullable(),
+    }),
 
   companyDescription: Yup.string()
     .trim()
@@ -88,9 +103,7 @@ export const informacionRiesgoSchema = Yup.object().shape({
     .trim()
     .required("Los antecedentes son obligatorios"),
 
-  internalGeneralRisks: Yup.string()
-    .trim()
-    .required("Los riesgos generales internos son obligatorios"),
+  internalGeneralRisks: Yup.mixed().nullable(),
 });
 
 export const estudioSchema = Yup.object().shape({});

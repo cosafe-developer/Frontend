@@ -7,6 +7,7 @@ import { useLlenarListadoFormContext } from "../contexts/LlenarListadoFormContex
 import { informacionDireccionSchema } from "../contexts/schema";
 
 import { CoverImageUpload } from "components/custom-ui/dropzone/CoverImageUpload";
+import SignaturePad from "components/custom-ui/signature/SignaturePad";
 import { useEffect, useState } from "react";
 import { resetDataEmpresaStep2 } from "./utils/resetDataEmpresaStep2";
 
@@ -251,19 +252,28 @@ const EmpresaStep2 = ({
 
             <div className="flex flex-col gap-y-1.5">
               <label className="input-label">
-                <span>Firma del Representante legal</span>
-                <span className="ml-2 text-error">*</span>
+                <span>Firma del Representante legal (opcional)</span>
               </label>
 
               <Controller
                 name="legalRepresentativeSignatureUrl"
                 control={control}
                 render={({ field }) => (
-                  <CoverImageUpload
-                    label=""
-                    classNames={{ box: "mt-1.5" }}
+                  <SignaturePad
+                    value={field.value}
+                    onChange={(val) => {
+                      field.onChange(val);
+                      llenarListadoFormCtx.dispatch({
+                        type: "SET_STEP_STATUS",
+                        payload: {
+                          addressInfo: {
+                            ...addressInfoCtx,
+                            legalRepresentativeSignatureUrl: val,
+                          },
+                        },
+                      });
+                    }}
                     error={errors?.legalRepresentativeSignatureUrl?.message}
-                    {...field}
                   />
                 )}
               />
@@ -405,31 +415,130 @@ const EmpresaStep2 = ({
               )}
             />
 
-            <Controller
-              name="propertyBoundaries"
-              control={control}
-              render={({ field }) => (
-                <Input
-                  {...field}
-                  label="Colindancias del Inmueble"
-                  error={errors?.propertyBoundaries?.message}
-                  required
-                  placeholder="Escribir colindancias del inmueble..."
-                  onChange={(e) => {
-                    field.onChange(e);
-                    llenarListadoFormCtx.dispatch({
-                      type: "SET_STEP_STATUS",
-                      payload: {
-                        addressInfo: {
-                          ...addressInfoCtx,
-                          propertyBoundaries: e.target.value,
-                        },
-                      },
-                    });
-                  }}
+            <div className="sm:col-span-2">
+              <label className="block mb-2 text-sm font-medium text-[#A7AAB4]">
+                Colindancias del Inmueble <span className="text-error">*</span>
+              </label>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <Controller
+                  name="propertyBoundariesNorth"
+                  control={control}
+                  render={({ field }) => (
+                    <Input
+                      {...field}
+                      label="Norte"
+                      error={errors?.propertyBoundariesNorth?.message}
+                      required
+                      placeholder="Colindancia al Norte..."
+                      onChange={(e) => {
+                        field.onChange(e);
+                        llenarListadoFormCtx.dispatch({
+                          type: "SET_STEP_STATUS",
+                          payload: {
+                            addressInfo: {
+                              ...addressInfoCtx,
+                              propertyBoundariesNorth: e.target.value,
+                            },
+                          },
+                        });
+                      }}
+                    />
+                  )}
                 />
-              )}
-            />
+                <Controller
+                  name="propertyBoundariesSouth"
+                  control={control}
+                  render={({ field }) => (
+                    <Input
+                      {...field}
+                      label="Sur"
+                      error={errors?.propertyBoundariesSouth?.message}
+                      required
+                      placeholder="Colindancia al Sur..."
+                      onChange={(e) => {
+                        field.onChange(e);
+                        llenarListadoFormCtx.dispatch({
+                          type: "SET_STEP_STATUS",
+                          payload: {
+                            addressInfo: {
+                              ...addressInfoCtx,
+                              propertyBoundariesSouth: e.target.value,
+                            },
+                          },
+                        });
+                      }}
+                    />
+                  )}
+                />
+                <Controller
+                  name="propertyBoundariesEast"
+                  control={control}
+                  render={({ field }) => (
+                    <Input
+                      {...field}
+                      label="Este"
+                      error={errors?.propertyBoundariesEast?.message}
+                      required
+                      placeholder="Colindancia al Este..."
+                      onChange={(e) => {
+                        field.onChange(e);
+                        llenarListadoFormCtx.dispatch({
+                          type: "SET_STEP_STATUS",
+                          payload: {
+                            addressInfo: {
+                              ...addressInfoCtx,
+                              propertyBoundariesEast: e.target.value,
+                            },
+                          },
+                        });
+                      }}
+                    />
+                  )}
+                />
+                <Controller
+                  name="propertyBoundariesWest"
+                  control={control}
+                  render={({ field }) => (
+                    <Input
+                      {...field}
+                      label="Oeste"
+                      error={errors?.propertyBoundariesWest?.message}
+                      required
+                      placeholder="Colindancia al Oeste..."
+                      onChange={(e) => {
+                        field.onChange(e);
+                        llenarListadoFormCtx.dispatch({
+                          type: "SET_STEP_STATUS",
+                          payload: {
+                            addressInfo: {
+                              ...addressInfoCtx,
+                              propertyBoundariesWest: e.target.value,
+                            },
+                          },
+                        });
+                      }}
+                    />
+                  )}
+                />
+              </div>
+
+              <div className="mt-3">
+                <label className="block mb-2 text-sm font-medium text-[#A7AAB4]">
+                  Imagen de referencia de colindancias (opcional)
+                </label>
+                <Controller
+                  name="propertyBoundariesImageUrl"
+                  control={control}
+                  render={({ field }) => (
+                    <CoverImageUpload
+                      label=""
+                      classNames={{ box: "mt-1.5" }}
+                      {...field}
+                    />
+                  )}
+                />
+              </div>
+            </div>
 
             <Controller
               name="internalAreas"
@@ -534,7 +643,7 @@ const EmpresaStep2 = ({
       </div>
 
       <div className="mt-4 flex justify-end space-x-3 pb-4">
-        <Button type="submit" className="min-w-[7rem]" onClick={() => {
+        <Button type="button" className="min-w-[7rem]" onClick={() => {
           setCurrentEmpresaStep(0);
           llenarListadoFormCtx.dispatch({
             type: "SET_STEP_STATUS",

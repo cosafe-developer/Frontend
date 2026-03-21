@@ -3,10 +3,8 @@ import { useForm, Controller } from "react-hook-form";
 import { Button, Switch, Table, THead, TBody, Th, Tr, Td, Upload } from "components/ui";
 import { PlusIcon } from "@heroicons/react/20/solid";
 import { useLlenarListadoFormContext } from "../../contexts/LlenarListadoFormContext";
-import { Listbox } from "components/shared/form/Listbox";
-import { tiposRiesgosEstudios } from "../../utils/types";
 import { useEffect } from "react";
-import { resetDataEstudioStep1 } from "./utils/resetDataEstudioStep1";
+import { resetDataEstudioStep11 } from "./utils/resetDataEstudioStep11";
 import { deepMergeDefaults } from "../../utils/deepMergeDefaultsInfo";
 import { documentsElements } from "./utils/elementsTask";
 import updateListado from "api/listados/updateListado";
@@ -23,23 +21,17 @@ const buildDefaultSection = (elements) =>
     element: el,
     evidenceUrl: null,
     applies: false,
-    riskLevel: null,
   }));
 
 const filterForBackend = (item) => {
-  // Siempre mandar element para identificar el ítem
   const out = { element: item.element };
-
-  // Incluye solo las propiedades que tienen valor (null/undefined NO se mandan)
   if (typeof item.applies !== "undefined") out.applies = item.applies;
   if (item.evidenceUrl) out.evidenceUrl = item.evidenceUrl;
-  if (item.riskLevel) out.riskLevel = item.riskLevel;
-
   return out;
 };
 
 // onNext
-const EstudioStep11 = ({ onPrev, listado }) => {
+const EstudioStep11 = ({ onNext, onPrev, listado }) => {
   const llenarListadoFormCtx = useLlenarListadoFormContext();
   //? Step 1
   const nonStructuralRisksCtx = llenarListadoFormCtx?.state?.formData?.nonStructuralRisks ?? {};
@@ -85,7 +77,7 @@ const EstudioStep11 = ({ onPrev, listado }) => {
 
   useEffect(() => {
     if (listado && attachmentsCtx) {
-      const newData = resetDataEstudioStep1({ listado, attachmentsCtx });
+      const newData = resetDataEstudioStep11({ listado, attachmentsCtx });
       const merged = deepMergeDefaults(defaultValues, newData);
       reset(merged);
     }
@@ -141,55 +133,33 @@ const EstudioStep11 = ({ onPrev, listado }) => {
     }
   };
 
-  // formValues
   const onSubmit = async () => {
     try {
-      // const backendData = listado?.studyData?.nonStructuralRisks ?? {};
-      // const currentCtx = nonStructuralRisksCtx ?? {};
+      llenarListadoFormCtx.dispatch({
+        type: "SET_FORM_DATA",
+        payload: {
+          attachments: {
+            ...attachmentsCtx,
+            isDone: true,
+          },
+        },
+      });
 
-      // const filteredFormValues = Object.fromEntries(
-      //   Object.entries(formValues).map(([key, arr]) => [
-      //     key,
-      //     Array.isArray(arr) ? arr.map(filterForBackend) : arr,
-      //   ])
-      // );
+      await updateListado({
+        requestBody: {
+          listado_id: listado?._id,
+          studyData: {
+            attachments: {
+              ...attachmentsCtx,
+              isDone: true,
+            },
+          },
+        },
+      });
 
-      // const nonStructuralRisksData = {
-      //   ...backendData,
-      //   ...currentCtx,
-      //   ...filteredFormValues,
-      // };
-
-      // llenarListadoFormCtx.dispatch({
-      //   type: "SET_FORM_DATA",
-      //   payload: {
-      //     nonStructuralRisks: nonStructuralRisksData,
-      //   },
-      // });
-
-
-      // await updateListado({
-      //   requestBody: {
-      //     listado_id: listado?._id,
-      //     studyData: {
-      //       nonStructuralRisks: nonStructuralRisksData,
-      //     },
-      //   },
-      // });
-
-      // llenarListadoFormCtx.dispatch({
-      //   type: "SET_STEP_STATUS",
-      //   payload: {
-      //     nonStructuralRisks: {
-      //       ...nonStructuralRisksData,
-      //       isDone: true,
-      //     },
-      //   },
-      // });
-
-      // onNext();
+      onNext();
     } catch (error) {
-      console.error("Error al enviar estudio paso 1:", error);
+      console.error("Error al enviar estudio paso 11:", error);
     }
   };
 
@@ -209,7 +179,6 @@ const EstudioStep11 = ({ onPrev, listado }) => {
                     <Th className="w-[45%] min-w-[250px] break-words">Elemento a Evaluar</Th>
                     <Th className="w-[20%] text-center">Evidencia</Th>
                     <Th className="w-[10%] text-center">No / Sí</Th>
-                    <Th className="w-[20%] text-center">Grado de Riesgo</Th>
                   </Tr>
                 </THead>
 
@@ -260,25 +229,6 @@ const EstudioStep11 = ({ onPrev, listado }) => {
                         />
                       </Td>
 
-                      {/* RISK LEVEL */}
-                      <Td className="text-center ">
-                        <Controller
-                          name={`${section.key}.${rowIndex}.riskLevel`}
-                          control={control}
-                          render={({ field }) => (
-                            <Listbox
-                              placeholder="Seleccione tipo de riesgo..."
-                              data={tiposRiesgosEstudios}
-                              displayField="label"
-                              value={tiposRiesgosEstudios?.find((r) => r.id === field.value) || null}
-                              onChange={(val) => {
-                                field.onChange(val?.id ?? null);
-                                handleFieldChange(section.key, rowIndex, { riskLevel: val?.id ?? null });
-                              }}
-                            />
-                          )}
-                        />
-                      </Td>
                     </Tr>
                   ))}
                 </TBody>

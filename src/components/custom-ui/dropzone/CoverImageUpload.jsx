@@ -123,11 +123,11 @@ const CoverImageUpload = forwardRef(
                   {...props}
                 >
                   <CloudArrowUpIcon className="pointer-events-none size-12" />
-                  <span className="pointer-events-none mt-2 text-gray-600 dark:text-dark-200">
+                  <span className="pointer-events-none mt-2 text-center text-gray-600 dark:text-dark-200">
                     <span className="text-primary-600 dark:text-primary-400">
-                      Busca
+                      Tomar foto, seleccionar imagen o PDF
                     </span>
-                    <span> o arrastra el archivo aquí</span>
+                    <span className="block text-xs mt-1">Arrastra o haz clic para subir</span>
                   </span>
                 </Button>
               )

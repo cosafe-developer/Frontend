@@ -61,7 +61,7 @@ const EstudioStep5 = ({ onNext, onPrev, listado }) => {
         : buildDefaultSection(section.elements);
   });
 
-  const { control, handleSubmit, watch, reset } = useForm({
+  const { control, handleSubmit, watch, reset, setValue } = useForm({
     defaultValues,
   });
 
@@ -81,6 +81,8 @@ const EstudioStep5 = ({ onNext, onPrev, listado }) => {
       const currentArray = watch(sectionKey) || [];
       const updatedArray = [...currentArray];
       updatedArray[rowIndex] = { ...updatedArray[rowIndex], ...changedFields };
+
+      setValue(sectionKey, updatedArray);
 
       const newGeologicalAgent = {
         ...geologicalAgentCtx,
@@ -102,7 +104,7 @@ const EstudioStep5 = ({ onNext, onPrev, listado }) => {
         ...newGeologicalAgent,
       };
 
-      const geologicalAgentCtx = Object.fromEntries(
+      const geologicalAgentData = Object.fromEntries(
         Object.entries(merged).map(([key, arr]) => [
           key,
           Array.isArray(arr) ? arr.map(filterForBackend) : arr,
@@ -114,7 +116,7 @@ const EstudioStep5 = ({ onNext, onPrev, listado }) => {
           listado_id: listado?._id,
           studyData: {
             geologicalAgent: {
-              ...geologicalAgentCtx,
+              ...geologicalAgentData,
               isDone: true,
             },
           },
