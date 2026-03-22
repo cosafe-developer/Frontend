@@ -1,9 +1,9 @@
-export function resetDataEstudioStep11({ listado, nonStructuralRisksCtx }) {
-  const nonStructuralRisks = listado?.studyData?.nonStructuralRisks ?? {};
+export function resetDataEstudioStep11({ listado, attachmentsCtx }) {
+  const attachments = listado?.studyData?.attachments ?? {};
 
   const mergeSection = (key) => {
-    const ctxData = nonStructuralRisksCtx?.[key];
-    const listData = nonStructuralRisks?.[key];
+    const ctxData = attachmentsCtx?.[key];
+    const listData = attachments?.[key];
 
     // preferimos el del contexto si ya tiene valores, si no, backend, si no, array vacío
     return (Array.isArray(ctxData) && ctxData.length > 0)
@@ -12,10 +12,6 @@ export function resetDataEstudioStep11({ listado, nonStructuralRisksCtx }) {
   };
 
   return {
-    fallingObjects: mergeSection("fallingObjects"),
-    slidingObjects: mergeSection("slidingObjects"),
-    overturningObjects: mergeSection("overturningObjects"),
-    flammableObjects: mergeSection("flammableObjects"),
-    evacuationBlockingObjects: mergeSection("evacuationBlockingObjects"),
+    documents: mergeSection("documents"),
   };
 }

@@ -9,10 +9,10 @@ import {
   Th,
   Tr,
   Td,
-  Upload,
   Checkbox,
 } from "components/ui";
-import { PlusIcon, CheckIcon } from "@heroicons/react/20/solid";
+import { CheckIcon } from "@heroicons/react/20/solid";
+import EvidenceUpload from "components/custom-ui/upload-button/EvidenceUpload.component";
 import { useLlenarListadoFormContext } from "../../contexts/LlenarListadoFormContext";
 import { checkIfSectionIsDone } from "../utils/checkIfSectionIsDone";
 import { deepMergeDefaults } from "../../utils/deepMergeDefaultsInfo";
@@ -44,7 +44,7 @@ const buildDefaultSection = (elements) =>
     evidenceUrl: null,
     applies: false,
     no_aplica: false,
-    distancia_aproximada: null,
+    approxDistance: null,
     observations: "",
   }));
 
@@ -53,7 +53,7 @@ const filterForBackend = (item) => {
   if (typeof item.applies !== "undefined") out.applies = item.applies;
   if (item.evidenceUrl) out.evidenceUrl = item.evidenceUrl;
   if (typeof item.no_aplica !== "undefined") out.no_aplica = item.no_aplica;
-  if (item.distancia_aproximada) out.distancia_aproximada = item.distancia_aproximada;
+  if (item.approxDistance) out.approxDistance = item.approxDistance;
   if (item.observations) out.observations = item.observations;
   return out;
 };
@@ -103,7 +103,7 @@ const EstudioStep3 = ({ onNext, onPrev, listado }) => {
           evidenceUrl: item.evidenceUrl ?? null,
           applies: typeof item.applies === "boolean" ? item.applies : false,
           no_aplica: typeof item.no_aplica === "boolean" ? item.no_aplica : false,
-          distancia_aproximada: item.distancia_aproximada ?? null,
+          approxDistance: item.approxDistance ?? null,
           observations: item.observations ?? "",
         }))
         : buildDefaultSection(section.elements);
@@ -135,7 +135,7 @@ const EstudioStep3 = ({ onNext, onPrev, listado }) => {
       };
 
 
-      const isDoneServiceInstallations = checkIfSectionIsDone(newServiceInstallations, ["observations", "applies", "no_aplica", "distancia_aproximada",], "some");
+      const isDoneServiceInstallations = checkIfSectionIsDone(newServiceInstallations, ["observations", "applies", "no_aplica", "approxDistance",], "some");
       llenarListadoFormCtx.dispatch({
         type: "SET_FORM_DATA",
         payload: {
@@ -212,26 +212,14 @@ const EstudioStep3 = ({ onNext, onPrev, listado }) => {
 
                       {/* === EVIDENCIA === */}
                       <Td className="text-center">
-                        <Upload
+                        <EvidenceUpload
+                          value={row.evidenceUrl}
                           onChange={async (file) => {
                             const url = await uploadImageWithFirma(file);
                             await handleFieldChange(section.key, rowIndex, { evidenceUrl: url });
                           }}
-                        >
-                          {({ ...props }) => (
-                            <Button color="primary" {...props}>
-                              <PlusIcon className="size-5" />
-                              Subir Evidencia
-                            </Button>
-                          )}
-                        </Upload>
-                        {row.evidenceUrl ? (
-                          <div className="mt-1 text-xs">
-                            <a className="underline" href={row.evidenceUrl} target="_blank" rel="noreferrer">
-                              Ver evidencia
-                            </a>
-                          </div>
-                        ) : null}
+                          onRemove={() => handleFieldChange(section.key, rowIndex, { evidenceUrl: null })}
+                        />
                       </Td>
 
                       {/* === SWITCH (applies) === */}
@@ -274,7 +262,7 @@ const EstudioStep3 = ({ onNext, onPrev, listado }) => {
                       <Td className="text-center">
                         {section.key === "externalRisks" ? (
                           <Controller
-                            name={`${section.key}.${rowIndex}.distancia_aproximada`}
+                            name={`${section.key}.${rowIndex}.approxDistance`}
                             control={control}
                             render={({ field }) => {
 
@@ -301,7 +289,7 @@ const EstudioStep3 = ({ onNext, onPrev, listado }) => {
                                       <button
                                         type="button"
                                         onMouseDown={() => {
-                                          handleFieldChange(section.key, rowIndex, { distancia_aproximada: field.value });
+                                          handleFieldChange(section.key, rowIndex, { approxDistance: field.value });
                                         }}
                                         className="text-green-500 hover:text-green-600 cursor-pointer"
                                       >

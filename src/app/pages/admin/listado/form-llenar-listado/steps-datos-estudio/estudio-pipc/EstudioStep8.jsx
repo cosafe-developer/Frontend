@@ -1,6 +1,6 @@
 import { useForm, Controller } from "react-hook-form";
-import { Button, Switch, Table, THead, TBody, Th, Tr, Td, Upload, Checkbox } from "components/ui";
-import { PlusIcon } from "@heroicons/react/20/solid";
+import { Button, Switch, Table, THead, TBody, Th, Tr, Td, Checkbox } from "components/ui";
+import EvidenceUpload from "components/custom-ui/upload-button/EvidenceUpload.component";
 import { useLlenarListadoFormContext } from "../../contexts/LlenarListadoFormContext";
 import { PencilSquareIcon } from "@heroicons/react/24/outline";
 import { ObservationModal } from "../../modals/ObservacionesModal";
@@ -22,16 +22,16 @@ const buildDefaultSection = (elements) =>
     _uid: i,
     element: element,
     evidenceUrl: null,
-    has_riesgo: false,
-    no_aplica: false,
+    applies: false,
+    notApplicable: false,
     observations: "",
   }));
 
 const filterForBackend = (item) => {
   const out = { element: item.element };
   if (item.evidenceUrl) out.evidenceUrl = item.evidenceUrl;
-  if (typeof item.has_riesgo !== "undefined") out.has_riesgo = item.has_riesgo;
-  if (typeof item.no_aplica !== "undefined") out.no_aplica = item.no_aplica;
+  if (typeof item.applies !== "undefined") out.applies = item.applies;
+  if (typeof item.notApplicable !== "undefined") out.notApplicable = item.notApplicable;
   if (item.observations) out.observations = item.observations;
   return out;
 };
@@ -86,8 +86,8 @@ const EstudioStep8 = ({ onNext, onPrev, listado }) => {
           _uid: i,
           element: item.element ?? section.elements[i] ?? `Elemento ${i + 1}`,
           evidenceUrl: item.evidenceUrl ?? null,
-          has_riesgo: typeof item.has_riesgo === "boolean" ? item.has_riesgo : false,
-          no_aplica: typeof item.no_aplica === "boolean" ? item.no_aplica : false,
+          applies: typeof item.applies === "boolean" ? item.applies : false,
+          notApplicable: typeof item.notApplicable === "boolean" ? item.notApplicable : false,
           observations: item.observations ?? "",
         }))
         : buildDefaultSection(section.elements);
@@ -122,7 +122,7 @@ const EstudioStep8 = ({ onNext, onPrev, listado }) => {
       };
 
 
-      const isDoneSurroundingRisks = checkIfSectionIsDone(newSurroundingRisksCtx, ["observations", "has_riesgo", "no_aplica",], "some");
+      const isDoneSurroundingRisks = checkIfSectionIsDone(newSurroundingRisksCtx, ["observations", "applies", "notApplicable",], "some");
       llenarListadoFormCtx.dispatch({
         type: "SET_FORM_DATA",
         payload: {
@@ -198,32 +198,21 @@ const EstudioStep8 = ({ onNext, onPrev, listado }) => {
 
                       {/* EVIDENCIA */}
                       <Td className="text-center">
-                        <Upload
+                        <EvidenceUpload
+                          value={row.evidenceUrl}
                           onChange={async (file) => {
                             const url = await uploadImageWithFirma(file);
                             await handleFieldChange(section.key, rowIndex, { evidenceUrl: url });
                           }}
-                        >
-                          {({ ...props }) => (
-                            <Button color="primary" {...props}>
-                              <PlusIcon className="size-5" />
-                              Subir Evidencia
-                            </Button>
-                          )}
-                        </Upload>
-
-                        {row.evidenceUrl ? (
-                          <div className="mt-1 text-xs">
-                            <a className="underline" href={row.evidenceUrl} target="_blank" rel="noreferrer">Ver evidencia</a>
-                          </div>
-                        ) : null}
+                          onRemove={() => handleFieldChange(section.key, rowIndex, { evidenceUrl: null })}
+                        />
                       </Td>
 
 
-                      {/* SWITCH (has_riesgo) */}
+                      {/* SWITCH (applies) */}
                       <Td className="text-center ">
                         <Controller
-                          name={`${section.key}.${rowIndex}.has_riesgo`}
+                          name={`${section.key}.${rowIndex}.applies`}
                           control={control}
                           render={({ field }) => (
                             <Switch
@@ -231,7 +220,7 @@ const EstudioStep8 = ({ onNext, onPrev, listado }) => {
                               onChange={(event) => {
                                 const isChecked = event.target.checked;
                                 field.onChange(isChecked);
-                                handleFieldChange(section.key, rowIndex, { has_riesgo: isChecked });
+                                handleFieldChange(section.key, rowIndex, { applies: isChecked });
                               }}
                             />
                           )}
@@ -241,7 +230,7 @@ const EstudioStep8 = ({ onNext, onPrev, listado }) => {
                       {/* === N/A === */}
                       <Td className="text-center">
                         <Controller
-                          name={`${section.key}.${rowIndex}.no_aplica`}
+                          name={`${section.key}.${rowIndex}.notApplicable`}
                           control={control}
                           render={({ field }) => (
                             <Checkbox
@@ -250,7 +239,7 @@ const EstudioStep8 = ({ onNext, onPrev, listado }) => {
                               onChange={(e) => {
                                 const checked = e.target.checked;
                                 field.onChange(checked);
-                                handleFieldChange(section.key, rowIndex, { no_aplica: checked });
+                                handleFieldChange(section.key, rowIndex, { notApplicable: checked });
                               }}
                             />
                           )}

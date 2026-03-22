@@ -6,7 +6,13 @@ export function calculateProgressGeneralListado(studyData, strictRiskLevel = fal
   }
 
   const sectionPercents = {};
-  const sectionsList = Object.keys(studyData);
+  const stepApplicability = studyData.stepApplicability ?? {};
+
+  // Excluir stepApplicability de la lista de secciones a evaluar
+  const sectionsList = Object.keys(studyData).filter(
+    (key) => key !== "stepApplicability"
+  );
+
   let totalItemsGlobal = 0;
   let totalCompletedGlobal = 0;
 
@@ -20,6 +26,12 @@ export function calculateProgressGeneralListado(studyData, strictRiskLevel = fal
 
   for (const sectionKey of sectionsList) {
     const section = studyData[sectionKey];
+
+    // Si el step no aplica, contar como 100% completado
+    if (stepApplicability[sectionKey] === false) {
+      sectionPercents[sectionKey] = 100;
+      continue;
+    }
 
     if (alwaysCompleteSections.includes(sectionKey)) {
       sectionPercents[sectionKey] = 100;

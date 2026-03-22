@@ -1,6 +1,6 @@
 import { useForm, Controller } from "react-hook-form";
-import { Button, Switch, Table, THead, TBody, Th, Tr, Td, Upload } from "components/ui";
-import { PlusIcon } from "@heroicons/react/20/solid";
+import { Button, Switch, Table, THead, TBody, Th, Tr, Td } from "components/ui";
+import EvidenceUpload from "components/custom-ui/upload-button/EvidenceUpload.component";
 import { PencilSquareIcon } from "@heroicons/react/24/outline";
 import { useLlenarListadoFormContext } from "../../contexts/LlenarListadoFormContext";
 import { ObservationModal } from "../../modals/ObservacionesModal";
@@ -15,7 +15,7 @@ import uploadImageWithFirma from "api/upload/uploadImageWithFirma.service";
 const sections = [
   { key: "epidemic", label: "Epidemia", elements: epidemicElements },
   { key: "plague", label: "Plaga", elements: plagueElements },
-  { key: "agent", label: "Agente pertubador", elements: agentElements },
+  { key: "sanitaryDisruptor", label: "Agente pertubador", elements: agentElements },
 ];
 
 const buildDefaultSection = (elements) =>
@@ -195,25 +195,14 @@ const EstudioStep7 = ({ onNext, onPrev, listado }) => {
 
                       {/* EVIDENCIA */}
                       <Td className="text-center">
-                        <Upload
+                        <EvidenceUpload
+                          value={row.evidenceUrl}
                           onChange={async (file) => {
                             const url = await uploadImageWithFirma(file);
                             await handleFieldChange(section.key, rowIndex, { evidenceUrl: url });
                           }}
-                        >
-                          {({ ...props }) => (
-                            <Button color="primary" {...props}>
-                              <PlusIcon className="size-5" />
-                              Subir Evidencia
-                            </Button>
-                          )}
-                        </Upload>
-
-                        {row.evidenceUrl ? (
-                          <div className="mt-1 text-xs">
-                            <a className="underline" href={row.evidenceUrl} target="_blank" rel="noreferrer">Ver evidencia</a>
-                          </div>
-                        ) : null}
+                          onRemove={() => handleFieldChange(section.key, rowIndex, { evidenceUrl: null })}
+                        />
                       </Td>
 
                       {/* SWITCH (applies) */}

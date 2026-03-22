@@ -1,6 +1,6 @@
 import { useForm, Controller } from "react-hook-form";
-import { Button, Switch, Table, THead, TBody, Th, Tr, Td, Upload } from "components/ui";
-import { PlusIcon } from "@heroicons/react/20/solid";
+import { Button, Switch, Table, THead, TBody, Th, Tr, Td } from "components/ui";
+import EvidenceUpload from "components/custom-ui/upload-button/EvidenceUpload.component";
 import { useLlenarListadoFormContext } from "../../contexts/LlenarListadoFormContext";
 import { useEffect } from "react";
 import { deepMergeDefaults } from "../../utils/deepMergeDefaultsInfo";
@@ -162,25 +162,14 @@ const EstudioStep4 = ({ onNext, onPrev, listado }) => {
 
                       {/* EVIDENCIA */}
                       <Td className="text-center">
-                        <Upload
+                        <EvidenceUpload
+                          value={row.evidenceUrl}
                           onChange={async (file) => {
                             const url = await uploadImageWithFirma(file);
                             await handleFieldChange(section.key, rowIndex, { evidenceUrl: url });
                           }}
-                        >
-                          {({ ...props }) => (
-                            <Button color="primary" {...props}>
-                              <PlusIcon className="size-5" />
-                              Subir Evidencia
-                            </Button>
-                          )}
-                        </Upload>
-
-                        {row.evidenceUrl ? (
-                          <div className="mt-1 text-xs">
-                            <a className="underline" href={row.evidenceUrl} target="_blank" rel="noreferrer">Ver evidencia</a>
-                          </div>
-                        ) : null}
+                          onRemove={() => handleFieldChange(section.key, rowIndex, { evidenceUrl: null })}
+                        />
                       </Td>
 
                       {/* === SWITCH (applies) === */}

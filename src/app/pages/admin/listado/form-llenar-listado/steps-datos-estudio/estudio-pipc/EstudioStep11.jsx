@@ -1,7 +1,7 @@
 // EstudioStep1.jsx
-import { useForm, Controller } from "react-hook-form";
-import { Button, Switch, Table, THead, TBody, Th, Tr, Td, Upload } from "components/ui";
-import { PlusIcon } from "@heroicons/react/20/solid";
+import { useForm } from "react-hook-form";
+import { Button, Table, THead, TBody, Th, Tr, Td } from "components/ui";
+import EvidenceUpload from "components/custom-ui/upload-button/EvidenceUpload.component";
 import { useLlenarListadoFormContext } from "../../contexts/LlenarListadoFormContext";
 import { useEffect } from "react";
 import { resetDataEstudioStep11 } from "./utils/resetDataEstudioStep11";
@@ -19,14 +19,12 @@ const buildDefaultSection = (elements) =>
   elements.map((el, i) => ({
     _uid: i,
     element: el,
-    evidenceUrl: null,
-    applies: false,
+    fileUrl: null,
   }));
 
 const filterForBackend = (item) => {
   const out = { element: item.element };
-  if (typeof item.applies !== "undefined") out.applies = item.applies;
-  if (item.evidenceUrl) out.evidenceUrl = item.evidenceUrl;
+  if (item.fileUrl) out.fileUrl = item.fileUrl;
   return out;
 };
 
@@ -64,14 +62,12 @@ const EstudioStep11 = ({ onNext, onPrev, listado }) => {
         ? attachmentsCtx[section.key].map((it, i) => ({
           _uid: i,
           element: it.element ?? section.elements[i] ?? `Elemento ${i + 1}`,
-          evidenceUrl: it.evidenceUrl ?? null,
-          applies: typeof it.applies === "boolean" ? it.applies : false,
-          riskLevel: it.riskLevel ?? null,
+          fileUrl: it.fileUrl ?? null,
         }))
         : buildDefaultSection(section.elements);
   });
 
-  const { control, handleSubmit, setValue, watch, reset } = useForm({
+  const { handleSubmit, setValue, watch, reset } = useForm({
     defaultValues,
   });
 
@@ -145,12 +141,21 @@ const EstudioStep11 = ({ onNext, onPrev, listado }) => {
         },
       });
 
+      const backendData = listado?.studyData?.attachments ?? {};
+      const merged = { ...backendData, ...attachmentsCtx };
+      const cleanAttachments = Object.fromEntries(
+        Object.entries(merged).map(([key, arr]) => [
+          key,
+          Array.isArray(arr) ? arr.map(filterForBackend) : arr,
+        ])
+      );
+
       await updateListado({
         requestBody: {
           listado_id: listado?._id,
           studyData: {
             attachments: {
-              ...attachmentsCtx,
+              ...cleanAttachments,
               isDone: true,
             },
           },
@@ -177,8 +182,7 @@ const EstudioStep11 = ({ onNext, onPrev, listado }) => {
                   <Tr className="border-b border-gray-200 dark:border-dark-500">
                     <Th className="w-[5%] text-center">#</Th>
                     <Th className="w-[45%] min-w-[250px] break-words">Elemento a Evaluar</Th>
-                    <Th className="w-[20%] text-center">Evidencia</Th>
-                    <Th className="w-[10%] text-center">No / Sí</Th>
+                    <Th className="w-[30%] text-center">Archivo</Th>
                   </Tr>
                 </THead>
 
@@ -188,44 +192,15 @@ const EstudioStep11 = ({ onNext, onPrev, listado }) => {
                       <Td>{rowIndex + 1}</Td>
                       <Td className="break-words  text-[15px]">{row.element}</Td>
 
-                      {/* EVIDENCIA */}
+                      {/* ARCHIVO */}
                       <Td className="text-center">
-                        <Upload
+                        <EvidenceUpload
+                          value={row.fileUrl}
                           onChange={async (file) => {
                             const url = await uploadImageWithFirma(file);
-                            await handleFieldChange(section.key, rowIndex, { evidenceUrl: url });
+                            await handleFieldChange(section.key, rowIndex, { fileUrl: url });
                           }}
-                        >
-                          {({ ...props }) => (
-                            <Button color="primary" {...props}>
-                              <PlusIcon className="size-5" />
-                              Subir Evidencia
-                            </Button>
-                          )}
-                        </Upload>
-
-                        {row.evidenceUrl ? (
-                          <div className="mt-1 text-xs">
-                            <a className="underline" href={row.evidenceUrl} target="_blank" rel="noreferrer">Ver evidencia</a>
-                          </div>
-                        ) : null}
-                      </Td>
-
-                      {/* SWITCH (applies) */}
-                      <Td className="text-center ">
-                        <Controller
-                          name={`${section.key}.${rowIndex}.applies`}
-                          control={control}
-                          render={({ field }) => (
-                            <Switch
-                              checked={field.value}
-                              onChange={(event) => {
-                                const isChecked = event.target.checked;
-                                field.onChange(isChecked);
-                                handleFieldChange(section.key, rowIndex, { applies: isChecked });
-                              }}
-                            />
-                          )}
+                          onRemove={() => handleFieldChange(section.key, rowIndex, { fileUrl: null })}
                         />
                       </Td>
 

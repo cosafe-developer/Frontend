@@ -13,6 +13,7 @@ export function resetDataEstudioStep7({ listado, sanitaryAgentCtx }) {
 
   return {
     epidemic: mergeSection("epidemic"),
-    plague: mergeSection("plague")
+    plague: mergeSection("plague"),
+    sanitaryDisruptor: mergeSection("sanitaryDisruptor"),
   };
 }

@@ -4,7 +4,9 @@ import { useEffect, useState } from "react";
 import { FaLayerGroup, FaListUl } from "react-icons/fa";
 
 // Local Imports
-import { Avatar, Card } from "components/ui";
+import { Avatar, Button, Card } from "components/ui";
+import { AdjustmentsHorizontalIcon } from "@heroicons/react/24/outline";
+import { ApplicabilityConfigModal } from "../modals/ApplicabilityConfigModal";
 import { Stepper } from "./Stepper";
 import { UnderReview } from "./UnderReview";
 import { Estudio } from "../steps-global/Estudio";
@@ -60,24 +62,40 @@ const EmpresaSteps = ({ currentEmpresaStep, setCurrentEmpresaStep }) => {
   );
 };
 
-const EstudioSteps = ({ currentEstudioStep, setCurrentEstudioStep }) => {
+const EstudioSteps = ({ currentEstudioStep, setCurrentEstudioStep, listado }) => {
   const llenarListadoFormCtx = useLlenarListadoFormContext();
   const stepStatus = llenarListadoFormCtx?.state?.formData;
+  const stepApplicability = llenarListadoFormCtx?.state?.stepApplicability;
+  const [showConfig, setShowConfig] = useState(false);
 
   return (
     <div className="max-w-xl">
+      <div className="flex items-center justify-between mb-3">
+        <span className="text-xs text-gray-400 dark:text-dark-300">Pasos del estudio</span>
+        <Button
+          variant="outlined"
+          className="h-7 px-2 text-xs"
+          onClick={() => setShowConfig(true)}
+        >
+          <AdjustmentsHorizontalIcon className="size-4 mr-1" />
+          Configurar
+        </Button>
+      </div>
       <ol className="steps is-vertical">
         {estudioSteps.map((item, i) => {
           const isActive = stepStatus[item.key]?.isDone;
-          const isClickable = true;
+          const doesNotApply = stepApplicability[item.key] === false;
+          const isClickable = !doesNotApply;
           return (
             <li
               key={i}
               className={clsx(
                 "step pb-6",
-                currentEstudioStep > i
-                  ? "before:bg-primary-500"
-                  : "before:bg-gray-200 dark:before:bg-dark-500",
+                doesNotApply
+                  ? "before:bg-gray-300 dark:before:bg-dark-600 opacity-50"
+                  : currentEstudioStep > i
+                    ? "before:bg-primary-500"
+                    : "before:bg-gray-200 dark:before:bg-dark-500",
               )}
             >
               <button
@@ -86,21 +104,35 @@ const EstudioSteps = ({ currentEstudioStep, setCurrentEstudioStep }) => {
                 className={clsx(
                   "step-header rounded-full outline-hidden dark:text-white",
                   isClickable && "cursor-pointer hover:scale-105 transition-transform",
-                  currentEstudioStep === i && "ring-2 ring-primary-500",
-                  isActive
-                    ? "bg-primary-600 text-white ring-offset-[3px] ring-offset-gray-100 dark:bg-primary-500 dark:ring-offset-dark-900"
-                    : "bg-gray-200 text-gray-950 dark:bg-dark-500",
+                  currentEstudioStep === i && !doesNotApply && "ring-2 ring-primary-500",
+                  doesNotApply
+                    ? "bg-gray-300 text-gray-500 dark:bg-dark-600 dark:text-dark-400"
+                    : isActive
+                      ? "bg-primary-600 text-white ring-offset-[3px] ring-offset-gray-100 dark:bg-primary-500 dark:ring-offset-dark-900"
+                      : "bg-gray-200 text-gray-950 dark:bg-dark-500",
                 )}
               >
-                {i + 1}
+                {doesNotApply ? "—" : i + 1}
               </button>
-              <h3 className="text-gray-600 mt-1.5 ltr:ml-4 rtl:mr-4 text-left dark:text-dark-100">
+              <h3 className={clsx(
+                "mt-1.5 ltr:ml-4 rtl:mr-4 text-left",
+                doesNotApply
+                  ? "text-gray-400 line-through dark:text-dark-400"
+                  : "text-gray-600 dark:text-dark-100",
+              )}>
                 {item.label}
+                {doesNotApply && <span className="text-xs ml-2 text-gray-400">(N/A)</span>}
               </h3>
             </li>
           );
         })}
       </ol>
+
+      <ApplicabilityConfigModal
+        show={showConfig}
+        onClose={() => setShowConfig(false)}
+        listado={listado}
+      />
     </div>
   );
 };
@@ -175,6 +207,14 @@ const LlenarListadoForm = ({ listado, empresa }) => {
       },
     });
 
+    // Cargar applicabilidad de steps desde backend
+    const savedApplicability = listado?.studyData?.stepApplicability;
+    if (savedApplicability) {
+      llenarListadoFormCtx.dispatch({
+        type: "SET_STEP_APPLICABILITY",
+        payload: savedApplicability,
+      });
+    }
 
     if (isDatosGeneralesEmpresaCompleted) {
       setCurrentStep(1);
@@ -291,6 +331,7 @@ const LlenarListadoForm = ({ listado, empresa }) => {
                 <EstudioSteps
                   currentEstudioStep={currentEstudioStep}
                   setCurrentEstudioStep={setCurrentEstudioStep}
+                  listado={listado}
                 />
               </div>
           }

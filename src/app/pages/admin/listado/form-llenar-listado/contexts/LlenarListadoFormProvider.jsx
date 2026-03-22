@@ -9,6 +9,20 @@ import { LlenarListadoFormContextProvider } from "./LlenarListadoFormContext";
 // ----------------------------------------------------------------------
 
 const initialState = {
+  // null = no se ha decidido, true = aplica, false = no aplica
+  stepApplicability: {
+    nonStructuralRisks: null,
+    structuralRisks: null,
+    serviceInstallations: null,
+    socioOrganizationalAgent: null,
+    geologicalAgent: null,
+    physicochemicalAgent: null,
+    sanitaryAgent: null,
+    surroundingRisks: null,
+    securityMeasures: null,
+    damageEvaluation: null,
+    attachments: null,
+  },
   formData: {
     //? Step 1
     nonStructuralRisks: {
@@ -62,8 +76,7 @@ const initialState = {
     sanitaryAgent: {
       epidemic: null,
       plague: null,
-      // TODO: Validar cual es la key del "Agente pertubador"
-      agent: null,
+      sanitaryDisruptor: null,
       isDone: false,
     },
     //? Step 8
@@ -153,6 +166,14 @@ const reducer = (state, action) => {
         ...state,
         stepStatus: {
           ...state.stepStatus,
+          ...action.payload,
+        },
+      };
+    case "SET_STEP_APPLICABILITY":
+      return {
+        ...state,
+        stepApplicability: {
+          ...state.stepApplicability,
           ...action.payload,
         },
       };

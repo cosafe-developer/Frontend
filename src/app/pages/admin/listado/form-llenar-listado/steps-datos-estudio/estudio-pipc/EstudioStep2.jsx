@@ -73,17 +73,17 @@ const buildDefaultSection = (elements) =>
   elements.map((el, i) => ({
     _uid: i,
     element: el,
-    exists: false,
+    existsInPlace: false,
     applies: false,
-    no_aplica: false,
+    notApplicable: false,
     observations: "",
   }));
 
 const filterForBackend = (item) => {
   const out = { element: item.element };
-  if (typeof item.exists !== "undefined") out.exists = item.exists;
+  if (typeof item.existsInPlace !== "undefined") out.existsInPlace = item.existsInPlace;
   if (typeof item.applies !== "undefined") out.applies = item.applies;
-  if (typeof item.no_aplica !== "undefined") out.no_aplica = item.no_aplica;
+  if (typeof item.notApplicable !== "undefined") out.notApplicable = item.notApplicable;
   if (item.observations) out.observations = item.observations;
   return out;
 };
@@ -112,9 +112,9 @@ const EstudioStep2 = ({ onNext, onPrev, listado }) => {
         ? structuralRisksCtx[section.key].map((item, i) => ({
           _uid: i,
           element: item.element ?? section.elements[i] ?? `Elemento ${i + 1}`,
-          exists: typeof item.exists === "boolean" ? item.exists : false,
+          existsInPlace: typeof item.existsInPlace === "boolean" ? item.existsInPlace : false,
           applies: typeof item.applies === "boolean" ? item.applies : false,
-          no_aplica: typeof item.no_aplica === "boolean" ? item.no_aplica : false,
+          notApplicable: typeof item.notApplicable === "boolean" ? item.notApplicable : false,
           observations: item.observations ?? "",
         }))
         : buildDefaultSection(section.elements);
@@ -149,7 +149,7 @@ const EstudioStep2 = ({ onNext, onPrev, listado }) => {
         [sectionKey]: updatedArray,
       };
 
-      const isDoneNonStructural = checkIfSectionIsDone(newStructuralRisks, ["observations", "applies", "exists", "no_aplica"], "some");
+      const isDoneNonStructural = checkIfSectionIsDone(newStructuralRisks, ["observations", "applies", "existsInPlace", "notApplicable"], "some");
 
       llenarListadoFormCtx.dispatch({
         type: "SET_FORM_DATA",
@@ -226,7 +226,7 @@ const EstudioStep2 = ({ onNext, onPrev, listado }) => {
                       {/* EXISTE */}
                       <Td className="text-center">
                         <Controller
-                          name={`${section.key}.${rowIndex}.exists`}
+                          name={`${section.key}.${rowIndex}.existsInPlace`}
                           control={control}
                           render={({ field }) => (
                             <Checkbox
@@ -235,7 +235,7 @@ const EstudioStep2 = ({ onNext, onPrev, listado }) => {
                               onChange={(e) => {
                                 const checked = e.target.checked;
                                 field.onChange(checked);
-                                handleFieldChange(section.key, rowIndex, { exists: checked });
+                                handleFieldChange(section.key, rowIndex, { existsInPlace: checked });
                               }}
                             />
                           )}
@@ -263,7 +263,7 @@ const EstudioStep2 = ({ onNext, onPrev, listado }) => {
                       {/* N/A */}
                       <Td className="text-center">
                         <Controller
-                          name={`${section.key}.${rowIndex}.no_aplica`}
+                          name={`${section.key}.${rowIndex}.notApplicable`}
                           control={control}
                           render={({ field }) => (
                             <Checkbox
@@ -272,7 +272,7 @@ const EstudioStep2 = ({ onNext, onPrev, listado }) => {
                               onChange={(e) => {
                                 const checked = e.target.checked;
                                 field.onChange(checked);
-                                handleFieldChange(section.key, rowIndex, { no_aplica: checked });
+                                handleFieldChange(section.key, rowIndex, { notApplicable: checked });
                               }}
                             />
                           )}
