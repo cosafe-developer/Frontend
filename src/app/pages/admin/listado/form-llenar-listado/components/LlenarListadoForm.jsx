@@ -198,7 +198,8 @@ const LlenarListadoForm = ({ listado, empresa }) => {
         if (excludedKeys.includes(lastDoneKey)) {
           setCurrentEstudioStep(lastDoneIndex);
         } else {
-          setCurrentEstudioStep(lastDoneIndex + 1);
+          const nextStep = lastDoneIndex + 1;
+          setCurrentEstudioStep(Math.min(nextStep, estudioSteps.length - 1));
         }
       } else {
         setCurrentEstudioStep(0);
@@ -218,7 +219,7 @@ const LlenarListadoForm = ({ listado, empresa }) => {
           <h2 className="text-xl font-medium tracking-wide text-gray-800 dark:text-dark-50 lg:text-2xl">
             {currentStep === 0
               ? "Llenar Datos de la Empresa"
-              : estudioSteps[currentEstudioStep].label}
+              : estudioSteps[currentEstudioStep]?.label}
           </h2>
 
 
