@@ -10,8 +10,7 @@ import {
   EllipsisHorizontalIcon,
   EyeIcon,
   PencilIcon,
-  /*   TrashIcon, */
-  /*   ClipboardIcon */
+  ArrowDownTrayIcon,
 } from "@heroicons/react/24/outline";
 /* import { FiBell } from "react-icons/fi";  */
 import clsx from "clsx";
@@ -27,6 +26,8 @@ import { useRightSidebarContext } from "app/contexts/sidebar-right/context";
 import { HeaderPreviewEmpresa } from "components/template/RightSidebar/previewEmpresa/HeaderPreviewEmpresa";
 import { ContentPreviewEmpresa } from "components/template/RightSidebar/previewEmpresa/ContentPreviewEmpresa";
 import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import downloadDocument from "api/listados/downloadDocument";
 
 // ----------------------------------------------------------------------
 
@@ -46,6 +47,8 @@ export function RowActions({ row }) {
   /*   const [deleteSuccess, setDeleteSuccess] = useState(false); */
   /*  const [deleteError, setDeleteError] = useState(false); */
   const { openSidebar } = useRightSidebarContext();
+  const navigate = useNavigate();
+  const [downloading, setDownloading] = useState(false);
 
   const [menuPosition, setMenuPosition] = useState("bottom");
   const menuRef = useRef();
@@ -143,10 +146,7 @@ export function RowActions({ row }) {
               {({ focus }) => (
                 <button
                   onClick={() => {
-                    window.open(
-                      `/admin/listado/llenar/${row?.original?._id}`,
-                      "_blank"
-                    )
+                    navigate(`/admin/listado/llenar/${row?.original?._id}`)
                   }}
                   className={clsx(
                     "flex h-9 w-full hover:cursor-pointer items-center space-x-3 px-3 tracking-wide outline-hidden transition-colors ",
@@ -156,6 +156,36 @@ export function RowActions({ row }) {
                 >
                   <PencilIcon className="size-4.5 stroke-1" />
                   <span>Editar</span>
+                </button>
+              )}
+            </MenuItem>
+            <MenuItem>
+              {({ focus }) => (
+                <button
+                  disabled={downloading}
+                  onClick={async () => {
+                    try {
+                      setDownloading(true);
+                      await downloadDocument(
+                        row?.original?._id,
+                        row?.original?.companyInfo?.businessName
+                      );
+                    } catch (err) {
+                      console.error("Error al descargar:", err);
+                      alert(err.message || "Error al generar el documento");
+                    } finally {
+                      setDownloading(false);
+                    }
+                  }}
+                  className={clsx(
+                    "flex h-9 w-full hover:cursor-pointer items-center space-x-3 px-3 tracking-wide outline-hidden transition-colors ",
+                    focus &&
+                    "bg-gray-100 text-gray-800 dark:bg-dark-600 dark:text-dark-100",
+                    downloading && "opacity-50 cursor-wait",
+                  )}
+                >
+                  <ArrowDownTrayIcon className="size-4.5 stroke-1" />
+                  <span>{downloading ? "Generando..." : "Descargar PIPC"}</span>
                 </button>
               )}
             </MenuItem>

@@ -9,7 +9,7 @@ import { GHOST_ENTRY_PATH, REDIRECT_URL_KEY } from "../constants/app.constant";
 
 export default function AuthGuard() {
   const outlet = useOutlet();
-  const { isAuthenticated, role } = useAuthContext();
+  const { isAuthenticated } = useAuthContext();
 
   const location = useLocation();
 
@@ -22,22 +22,15 @@ export default function AuthGuard() {
     );
   }
 
-  if (role === "admin") {
-    if (!location.pathname.startsWith("/admin")) {
-      return <Navigate to="/admin/listado" />;
-    }
-  }
+  // Todos los roles usan las mismas rutas /admin/* por ahora.
+  // Cuando se creen rutas específicas para agente/empresa, agregar aquí.
+  const allowedPrefixes = ["/admin", "/configuracion"];
+  const isAllowedPath = allowedPrefixes.some((p) =>
+    location.pathname.startsWith(p)
+  );
 
-  if (role === "agente") {
-    if (!location.pathname.startsWith("/agente")) {
-      return <Navigate to="/agente/listado" />;
-    }
-  }
-
-  if (role === "empresa") {
-    if (!location.pathname.startsWith("/empresa")) {
-      return <Navigate to="/empresa/listado" />;
-    }
+  if (!isAllowedPath) {
+    return <Navigate to="/admin/listado" replace />;
   }
 
   return <>{outlet}</>;

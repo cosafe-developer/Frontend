@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { Page } from "components/shared/Page";
-import { useCallback } from "react";
 import { calculateProgressGeneralListado } from "./helpers/calculateProgressGeneralListado";
 
 /* import ListadoCards from "app/pages/admin/listado/header/ListadoCards"; */
@@ -12,6 +12,7 @@ import LoadingErrorComponent from "components/custom-ui/loadings/LoadingError.co
 import getListados from "api/listados/getListados";
 
 const Listado = () => {
+  const navigate = useNavigate();
   const [listados, setListados] = useState(null);
   const [estado, setEstado] = useState(serverStatesFetching.fetching);
 
@@ -65,7 +66,7 @@ const Listado = () => {
       <div className="flex-1 p-6  min-w-0">
         <div className="px-10">
           <ListadoHeader
-            onClick={() => window.open("/admin/listado/crear", "_blank")}
+            onClick={() => navigate("/admin/listado/crear")}
           />
           {/*   <ListadoCards stats={data?.stats} /> */}
 

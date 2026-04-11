@@ -9,7 +9,7 @@ import {
   ArrowLeftStartOnRectangleIcon,
   Cog6ToothIcon,
 } from "@heroicons/react/24/outline";
-import { TbCoins, TbUser } from "react-icons/tb";
+import { TbUser } from "react-icons/tb";
 import { Link } from "react-router";
 
 // Local Imports
@@ -20,25 +20,17 @@ import { Avatar, AvatarDot, Button } from "components/ui";
 const links = [
   {
     id: "1",
-    title: "Profile",
-    description: "Your profile Setting",
-    to: "/settings/general",
+    title: "Perfil",
+    description: "Configuración de perfil",
+    to: "/configuracion/general",
     Icon: TbUser,
     color: "warning",
   },
   {
     id: "2",
-    title: "Billing",
-    description: "Your billing information",
-    to: "/settings/billing",
-    Icon: TbCoins,
-    color: "error",
-  },
-  {
-    id: "3",
-    title: "Settings",
-    description: "Webapp settings",
-    to: "/settings/appearance",
+    title: "Configuración",
+    description: "Ajustes de la aplicación",
+    to: "/configuracion/apariencia",
     Icon: Cog6ToothIcon,
     color: "success",
   },
@@ -81,7 +73,7 @@ export function Profile() {
                 <div>
                   <Link
                     className="hover:text-primary-600 focus:text-primary-600 dark:text-dark-100 dark:hover:text-primary-400 dark:focus:text-primary-400 text-base font-medium text-gray-700"
-                    to="/settings/general"
+                    to="/configuracion/general"
                   >
                     Travis Fuller
                   </Link>

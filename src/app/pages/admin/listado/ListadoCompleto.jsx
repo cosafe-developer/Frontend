@@ -1,9 +1,11 @@
 import getEmpresaById from "api/empresa/getEmpresaById";
 import getListadoById from "api/listados/getListadoById";
+import downloadDocument from "api/listados/downloadDocument";
 import { useToastContext } from "app/contexts/toast-provider/context";
 import LoadingErrorComponent from "components/custom-ui/loadings/LoadingError.component";
 import { Page } from "components/shared/Page";
 import LoadingContent from "components/template/LoadingContent";
+import { ArrowDownTrayIcon } from "@heroicons/react/24/outline";
 import { Avatar, Button, Card } from "components/ui";
 import { useCallback, useEffect, useState } from "react";
 import { FiCheck } from "react-icons/fi";
@@ -112,6 +114,20 @@ const ListadoCompleto = () => {
               </div>
 
               <div className="mt-6 flex justify-end space-x-3 px-3 pt-4">
+                <Button
+                  onClick={async () => {
+                    try {
+                      await downloadDocument(listado?._id, empresa?.tradeName);
+                    } catch (err) {
+                      showToast({ message: err.message || "Error al generar documento", type: "error" });
+                    }
+                  }}
+                  color="info"
+                  className="h-10 text-base font-light"
+                >
+                  <ArrowDownTrayIcon className="size-5 mr-1.5" />
+                  Descargar PIPC
+                </Button>
                 <Button
                   onClick={close}
                   color="success"

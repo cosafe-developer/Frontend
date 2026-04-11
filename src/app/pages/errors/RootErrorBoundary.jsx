@@ -17,12 +17,17 @@ const app = {
 function RootErrorBoundary() {
   const error = useRouteError();
   console.error(error);
+
   if (isRouteErrorResponse(error)) {
-    const Component = Loadable(app[error.status]);
+    const status = app[error.status] ? error.status : 404;
+    const Component = Loadable(app[status]);
     return <Component />;
   }
 
-  return <div>Ha ocurrido un error</div>;
+  // Para errores no-HTTP (chunks fallidos, lazy imports rotos, etc.)
+  // mostramos la página 404 como fallback amigable en vez de "Ha ocurrido un error"
+  const FallbackComponent = Loadable(app[500]);
+  return <FallbackComponent />;
 }
 
 export default RootErrorBoundary;

@@ -17,7 +17,17 @@ const router = createBrowserRouter([
     Component: Root,
     hydrateFallbackElement: <SplashScreen />,
     ErrorBoundary: RootErrorBoundary,
-    children: [protectedRoutes, ghostRoutes, publicRoutes],
+    children: [
+      protectedRoutes,
+      ghostRoutes,
+      publicRoutes,
+      {
+        path: "*",
+        lazy: async () => ({
+          Component: (await import("app/pages/errors/404")).default,
+        }),
+      },
+    ],
   },
 ]);
 

@@ -313,7 +313,7 @@ const EditarEmpresa = () => {
 
                   <div className="flex justify-end space-x-5">
                     <Button
-                      onClick={() => navigate(`/admin/agentes`)}
+                      onClick={() => navigate(`/admin/empresas`)}
                       type="button">
                       Cancelar
                     </Button>
