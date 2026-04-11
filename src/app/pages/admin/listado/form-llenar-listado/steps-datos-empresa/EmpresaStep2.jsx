@@ -2,7 +2,7 @@ import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 
 // Local Imports
-import { Badge, Button, Input } from "components/ui";
+import { Badge, Button, Input, Table, THead, TBody, Th, Tr, Td } from "components/ui";
 import { useLlenarListadoFormContext } from "../contexts/LlenarListadoFormContext";
 import { informacionDireccionSchema } from "../contexts/schema";
 
@@ -524,19 +524,58 @@ const EmpresaStep2 = ({
 
               <div className="mt-3">
                 <label className="block mb-2 text-sm font-medium text-[#A7AAB4]">
-                  Imagen de referencia de colindancias (opcional)
+                  Imagen de referencia de colindancias <span className="text-error">*</span>
                 </label>
-                <Controller
-                  name="propertyBoundariesImageUrl"
-                  control={control}
-                  render={({ field }) => (
-                    <CoverImageUpload
-                      label=""
-                      classNames={{ box: "mt-1.5" }}
-                      {...field}
-                    />
-                  )}
-                />
+                <div className="overflow-x-auto">
+                  <Table className="w-full text-left rtl:text-right">
+                    <THead>
+                      <Tr className="border-b border-gray-200 dark:border-dark-500">
+                        <Th className="w-[5%] text-center">#</Th>
+                        <Th className="w-[40%]">Elementos a evaluar</Th>
+                        <Th className="w-[55%] text-center">Evidencia</Th>
+                      </Tr>
+                    </THead>
+                    <TBody>
+                      {[
+                        { index: 1, label: "Norte", name: "propertyBoundariesImageNorth" },
+                        { index: 2, label: "Sur", name: "propertyBoundariesImageSouth" },
+                        { index: 3, label: "Este", name: "propertyBoundariesImageEast" },
+                        { index: 4, label: "Oeste", name: "propertyBoundariesImageWest" },
+                      ].map((dir) => (
+                        <Tr key={dir.name} className="border-b border-gray-200 dark:border-dark-500">
+                          <Td className="text-center">{dir.index}</Td>
+                          <Td>{dir.label}</Td>
+                          <Td className="text-center">
+                            <Controller
+                              name={dir.name}
+                              control={control}
+                              render={({ field }) => (
+                                <CoverImageUpload
+                                  label=""
+                                  classNames={{ box: "mt-1.5" }}
+                                  {...field}
+                                  onChange={(value) => {
+                                    field.onChange(value);
+                                    llenarListadoFormCtx.dispatch({
+                                      type: "SET_STEP_STATUS",
+                                      payload: {
+                                        addressInfo: {
+                                          ...addressInfoCtx,
+                                          [dir.name]: value,
+                                        },
+                                      },
+                                    });
+                                  }}
+                                  error={errors[dir.name]?.message}
+                                />
+                              )}
+                            />
+                          </Td>
+                        </Tr>
+                      ))}
+                    </TBody>
+                  </Table>
+                </div>
               </div>
             </div>
 
@@ -570,6 +609,7 @@ const EmpresaStep2 = ({
                     type: "SET_STEP_STATUS",
                     payload: {
                       addressInfo: {
+                        ...addressInfoCtx,
                         internalAreas: updated,
                       },
                     },

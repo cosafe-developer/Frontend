@@ -78,7 +78,18 @@ export const informacionDireccionSchema = Yup.object().shape({
   propertyBoundariesWest: Yup.string()
     .trim()
     .required("La colindancia Oeste es obligatoria"),
-  propertyBoundariesImageUrl: Yup.mixed().nullable(),
+  propertyBoundariesImageNorth: Yup.mixed()
+    .nullable()
+    .required("La imagen de referencia Norte es obligatoria"),
+  propertyBoundariesImageSouth: Yup.mixed()
+    .nullable()
+    .required("La imagen de referencia Sur es obligatoria"),
+  propertyBoundariesImageEast: Yup.mixed()
+    .nullable()
+    .required("La imagen de referencia Este es obligatoria"),
+  propertyBoundariesImageWest: Yup.mixed()
+    .nullable()
+    .required("La imagen de referencia Oeste es obligatoria"),
 });
 
 export const informacionRiesgoSchema = Yup.object().shape({

@@ -108,7 +108,7 @@ const EstudioStep2 = ({ onNext, onPrev, listado }) => {
 
   sections.forEach((section) => {
     defaultValues[section.key] =
-      structuralRisksCtx[section.key] && Array.isArray(structuralRisksCtx[section.key])
+      Array.isArray(structuralRisksCtx[section.key]) && structuralRisksCtx[section.key].length > 0
         ? structuralRisksCtx[section.key].map((item, i) => ({
           _uid: i,
           element: item.element ?? section.elements[i] ?? `Elemento ${i + 1}`,

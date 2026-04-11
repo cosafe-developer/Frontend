@@ -70,6 +70,10 @@ const EmpresaStep3 = ({
           payload.addressInfo?.taxCertificateUrl ||
           payload.addressInfo?.legalRepresentativeSignatureUrl ||
           payload.addressInfo?.legalRepresentativeIneUrl ||
+          payload.addressInfo?.propertyBoundariesImageNorth ||
+          payload.addressInfo?.propertyBoundariesImageSouth ||
+          payload.addressInfo?.propertyBoundariesImageEast ||
+          payload.addressInfo?.propertyBoundariesImageWest ||
           payload.riskInfo?.materialsInventoryUrl
         ) {
 
@@ -105,6 +109,42 @@ const EmpresaStep3 = ({
             payload.addressInfo.legalRepresentativeIneUrl = await replaceImage({
               previousUrl: listado.addressInfo?.legalRepresentativeIneUrl,
               newFile: addressInfoCtx.legalRepresentativeIneUrl,
+              folder: `listado-${listado?._id}`
+            });
+          }
+
+          // ADDRESS → Imagen Colindancia Norte
+          if (payload.addressInfo?.propertyBoundariesImageNorth) {
+            payload.addressInfo.propertyBoundariesImageNorth = await replaceImage({
+              previousUrl: listado.addressInfo?.propertyBoundariesImageNorth,
+              newFile: addressInfoCtx.propertyBoundariesImageNorth,
+              folder: `listado-${listado?._id}`
+            });
+          }
+
+          // ADDRESS → Imagen Colindancia Sur
+          if (payload.addressInfo?.propertyBoundariesImageSouth) {
+            payload.addressInfo.propertyBoundariesImageSouth = await replaceImage({
+              previousUrl: listado.addressInfo?.propertyBoundariesImageSouth,
+              newFile: addressInfoCtx.propertyBoundariesImageSouth,
+              folder: `listado-${listado?._id}`
+            });
+          }
+
+          // ADDRESS → Imagen Colindancia Este
+          if (payload.addressInfo?.propertyBoundariesImageEast) {
+            payload.addressInfo.propertyBoundariesImageEast = await replaceImage({
+              previousUrl: listado.addressInfo?.propertyBoundariesImageEast,
+              newFile: addressInfoCtx.propertyBoundariesImageEast,
+              folder: `listado-${listado?._id}`
+            });
+          }
+
+          // ADDRESS → Imagen Colindancia Oeste
+          if (payload.addressInfo?.propertyBoundariesImageWest) {
+            payload.addressInfo.propertyBoundariesImageWest = await replaceImage({
+              previousUrl: listado.addressInfo?.propertyBoundariesImageWest,
+              newFile: addressInfoCtx.propertyBoundariesImageWest,
               folder: `listado-${listado?._id}`
             });
           }

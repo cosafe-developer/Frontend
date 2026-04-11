@@ -32,7 +32,27 @@ export function resetDataEmpresaStep2({ listado, addressInfoCtx }) {
     fixedPopulation: addressInfoCtx?.fixedPopulation ?? addressInfo?.fixedPopulation ?? 0,
     floatingPopulation: addressInfoCtx?.floatingPopulation ?? addressInfo?.floatingPopulation ?? 0,
     propertyBoundaries: addressInfoCtx?.propertyBoundaries ?? addressInfo?.propertyBoundaries ?? "",
-    internalAreas: addressInfoCtx?.internalAreas?.length > 0 ? addressInfoCtx?.internalAreas : addressInfo?.internalAreas,
+    propertyBoundariesImageNorth:
+      addressInfoCtx?.propertyBoundariesImageNorth ??
+      (addressInfo?.propertyBoundariesImageNorth?.length > 0
+        ? addressInfo?.propertyBoundariesImageNorth
+        : ""),
+    propertyBoundariesImageSouth:
+      addressInfoCtx?.propertyBoundariesImageSouth ??
+      (addressInfo?.propertyBoundariesImageSouth?.length > 0
+        ? addressInfo?.propertyBoundariesImageSouth
+        : ""),
+    propertyBoundariesImageEast:
+      addressInfoCtx?.propertyBoundariesImageEast ??
+      (addressInfo?.propertyBoundariesImageEast?.length > 0
+        ? addressInfo?.propertyBoundariesImageEast
+        : ""),
+    propertyBoundariesImageWest:
+      addressInfoCtx?.propertyBoundariesImageWest ??
+      (addressInfo?.propertyBoundariesImageWest?.length > 0
+        ? addressInfo?.propertyBoundariesImageWest
+        : ""),
+    internalAreas: addressInfoCtx?.internalAreas?.length > 0 ? addressInfoCtx?.internalAreas : addressInfo?.internalAreas ?? [],
     isDone: addressInfoCtx?.isDone ?? addressInfo?.isDone ?? false,
   };
 }
