@@ -5,6 +5,7 @@ import LanguageDetector from "i18next-browser-languagedetector";
 
 // Local Imports
 import { defaultTheme } from "configs/theme.config";
+import { safeGetItem } from "utils/safeStorage";
 
 // ----------------------------------------------------------------------
 
@@ -18,7 +19,7 @@ i18n
       lookupSessionStorage: 'i18nextLng',
     },
     fallbackLng: defaultTheme.fallbackLang,
-    lng: localStorage.getItem("i18nextLng") || defaultTheme.defaultLang,
+    lng: safeGetItem("i18nextLng", defaultTheme.defaultLang),
     supportedLngs: ["en", "es", "ar", "zh-cn"],
     ns: ["translations"],
     defaultNS: "translations",

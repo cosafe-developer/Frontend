@@ -1,5 +1,5 @@
 import Cookies from "universal-cookie";
-
+import { safeSetItem } from "utils/safeStorage";
 
 const handleLogin = (data) => {
   const cookies = new Cookies();
@@ -13,8 +13,7 @@ const handleLogin = (data) => {
     rol: data?.role
   };
 
-  //? Save data on localstorage
-  localStorage.setItem("userInfo", JSON.stringify(userInfo));
+  safeSetItem("userInfo", JSON.stringify(userInfo));
 
 };
 

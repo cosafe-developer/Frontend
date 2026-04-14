@@ -115,13 +115,19 @@ export function useLocalStorage(
             initialValue instanceof Function ? initialValue() : initialValue
 
         // Remove the key from local storage
-        window.localStorage.removeItem(key)
+        try {
+            window.localStorage.removeItem(key)
+        } catch (error) {
+            console.warn(`Error removing localStorage key "${key}":`, error)
+        }
 
         // Save state with default value
         setStoredValue(defaultValue)
 
         // We dispatch a custom event so every similar useLocalStorage hook is notified
-        window.dispatchEvent(new StorageEvent('local-storage', { key }))
+        try {
+            window.dispatchEvent(new StorageEvent('local-storage', { key }))
+        } catch { /* Safari PWA */ }
     })
 
     useEffect(() => {

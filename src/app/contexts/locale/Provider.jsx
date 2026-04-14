@@ -9,12 +9,13 @@ import { defaultTheme } from "configs/theme.config";
 import i18n from "i18n/config";
 import { LocaleContext } from "./context";
 import { locales } from "i18n/langs";
+import { safeGetItem } from "utils/safeStorage";
 
 // ----------------------------------------------------------------------
 
 // Set the initial language from i18n or fallback to the default theme language
 const initialLang =
-  localStorage.getItem("i18nextLng") || defaultTheme.defaultLang;
+  safeGetItem("i18nextLng", defaultTheme.defaultLang);
 
 const initialDir = i18n.dir(initialLang);
 
