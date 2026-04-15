@@ -14,9 +14,8 @@ i18n
   .use(initReactI18next)
   .init({
     detection: {
-      order: ["localStorage", "navigator"],
-      lookupLocalStorage: 'i18nextLng',
-      lookupSessionStorage: 'i18nextLng',
+      order: ["navigator"],
+      caches: [],
     },
     fallbackLng: defaultTheme.fallbackLang,
     lng: safeGetItem("i18nextLng", defaultTheme.defaultLang),
