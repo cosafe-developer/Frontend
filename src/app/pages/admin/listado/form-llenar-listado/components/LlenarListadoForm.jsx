@@ -1,12 +1,13 @@
 // Import Dependencies
 import clsx from "clsx";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FaLayerGroup, FaListUl } from "react-icons/fa";
 
 // Local Imports
 import { Avatar, Button, Card } from "components/ui";
 import { AdjustmentsHorizontalIcon } from "@heroicons/react/24/outline";
 import { ApplicabilityConfigModal } from "../modals/ApplicabilityConfigModal";
+import updateListado from "api/listados/updateListado";
 import { Stepper } from "./Stepper";
 import { UnderReview } from "./UnderReview";
 import { Estudio } from "../steps-global/Estudio";
@@ -161,6 +162,55 @@ const LlenarListadoForm = ({ listado, empresa }) => {
   const ActiveForm = steps[currentStep].component;
 
   const llenarListadoFormCtx = useLlenarListadoFormContext();
+
+  // Auto-save silencioso al cambiar de step
+  const prevEmpresaStep = useRef(currentEmpresaStep);
+  const prevEstudioStep = useRef(currentEstudioStep);
+  const prevMainStep = useRef(currentStep);
+
+  useEffect(() => {
+    const changed =
+      prevEmpresaStep.current !== currentEmpresaStep ||
+      prevEstudioStep.current !== currentEstudioStep ||
+      prevMainStep.current !== currentStep;
+
+    if (changed) {
+      // Guardar datos actuales al backend
+      const stepStatus = llenarListadoFormCtx?.state?.stepStatus || {};
+      const formData = llenarListadoFormCtx?.state?.formData || {};
+
+      const payload = { listado_id: listado?._id };
+
+      if (stepStatus.companyInfo) {
+        const { isDone, ...data } = stepStatus.companyInfo;
+        if (Object.keys(data).length > 0) payload.companyInfo = { ...data, isDone: isDone ?? false };
+      }
+      if (stepStatus.addressInfo) {
+        const { isDone, ...data } = stepStatus.addressInfo;
+        if (Object.keys(data).length > 0) payload.addressInfo = { ...data, isDone: isDone ?? false };
+      }
+      if (stepStatus.riskInfo) {
+        const { isDone, ...data } = stepStatus.riskInfo;
+        if (Object.keys(data).length > 0) payload.riskInfo = { ...data, isDone: isDone ?? false };
+      }
+      if (Object.keys(formData).length > 0) {
+        payload.studyData = {};
+        for (const [key, value] of Object.entries(formData)) {
+          if (value && typeof value === "object") payload.studyData[key] = value;
+        }
+      }
+
+      if (listado?._id) {
+        updateListado({ requestBody: payload }).catch((err) =>
+          console.warn("Auto-save falló:", err)
+        );
+      }
+    }
+
+    prevEmpresaStep.current = currentEmpresaStep;
+    prevEstudioStep.current = currentEstudioStep;
+    prevMainStep.current = currentStep;
+  }, [currentEmpresaStep, currentEstudioStep, currentStep, llenarListadoFormCtx, listado]);
 
   useEffect(() => {
     if (!listado) return;

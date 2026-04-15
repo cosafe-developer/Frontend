@@ -1,6 +1,6 @@
 {
-  "name": "COSAFE - Sistema de Proteccion Civil",
-  "short_name": "COSAFE",
+  "name": "coSAFE - Sistema de Proteccion Civil",
+  "short_name": "coSAFE",
   "description": "Sistema de gestion de proteccion civil e inventario de riesgos",
   "start_url": "/",
   "display": "standalone",
