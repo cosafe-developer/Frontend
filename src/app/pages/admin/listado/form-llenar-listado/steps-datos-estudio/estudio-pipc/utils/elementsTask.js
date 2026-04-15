@@ -294,6 +294,37 @@ export const alarmSystemElements = [
   "Cuenta con mantenimiento permanente",
 ]
 
+//? Inventario de Recursos Materiales
+export const resourceInventoryElements = [
+  "Extintores",
+  "Lámparas De Emergencia",
+  "Botiquines",
+  "Departamento Médico",
+  "Palancas De Emergencia",
+  "Detectores De Humo",
+  "Tableros Eléctricos",
+  "Equipos Estructurales",
+  "Alarmas Contra Incendio",
+  "Tabla Rígida",
+  "Silla De Ruedas",
+]
+
+export const conditionOptions = [
+  { value: "buen_estado", label: "Buen Estado" },
+  { value: "mal_estado", label: "Mal Estado" },
+  { value: "regular", label: "Regular" },
+  { value: "operable", label: "Operable" },
+]
+
+//? Categorías de evidencias fotográficas
+export const evidencePhotoCategories = [
+  { key: "signage", label: "Señalizaciones" },
+  { key: "extinguishers", label: "Extintores" },
+  { key: "firstAid", label: "Botiquines" },
+  { key: "emergencyLights", label: "Lámparas De Emergencia" },
+  { key: "smokeDetectors", label: "Detectores De Humo" },
+]
+
 //? Step 10
 export const damageElements = [
   "Paredes del inmueble",

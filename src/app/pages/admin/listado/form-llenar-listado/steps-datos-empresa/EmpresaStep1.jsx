@@ -36,6 +36,8 @@ const EmpresaStep1 = ({
         email: companyInfoCtx?.email ?? empresa?.email,
         logoUrl: companyInfoCtx?.logoUrl ?? empresa?.logoUrl,
         rfc: companyInfoCtx?.rfc ?? empresa?.rfc,
+        city: companyInfoCtx?.city ?? listado?.companyInfo?.city ?? '',
+        state: companyInfoCtx?.state ?? listado?.companyInfo?.state ?? '',
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -213,35 +215,52 @@ const EmpresaStep1 = ({
           )}
         />
 
-        {/* Domicilio para oír notificaciones */}
-        {/* <Controller
-          name="address"
-          control={control}
-          render={({ field }) => (
-            <Input
-              {...field}
-              label="Domicilio para Oir y Recibir Notificaciones"
-              required
-              placeholder="Ingresar Domicilio..."
-              error={errors?.address?.message}
-              onChange={(e) => {
-                field.onChange(e);
-                llenarListadoFormCtx.dispatch({
-                  type: "SET_FORM_DATA",
-                  payload: {
-                    companyInfo: {
-                      ...llenarListadoFormCtx?.state?.formData?.companyInfo,
-                      address: e.target.value,
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Controller
+            name="city"
+            control={control}
+            render={({ field }) => (
+              <Input
+                {...field}
+                label="Ciudad"
+                required
+                placeholder="Ej: Monterrey"
+                error={errors?.city?.message}
+                onChange={(e) => {
+                  field.onChange(e);
+                  llenarListadoFormCtx.dispatch({
+                    type: "SET_STEP_STATUS",
+                    payload: {
+                      companyInfo: { city: e.target.value },
                     },
-                  },
-                });
-              }}
-
-            />
-          )}
-        /> */}
-
-
+                  });
+                }}
+              />
+            )}
+          />
+          <Controller
+            name="state"
+            control={control}
+            render={({ field }) => (
+              <Input
+                {...field}
+                label="Estado"
+                required
+                placeholder="Ej: Nuevo León"
+                error={errors?.state?.message}
+                onChange={(e) => {
+                  field.onChange(e);
+                  llenarListadoFormCtx.dispatch({
+                    type: "SET_STEP_STATUS",
+                    payload: {
+                      companyInfo: { state: e.target.value },
+                    },
+                  });
+                }}
+              />
+            )}
+          />
+        </div>
 
       </div>
       <div className="mt-4 flex justify-end space-x-3 pb-4">

@@ -17,6 +17,12 @@ export const infoEmpresaSchema = Yup.object().shape({
   address: Yup.string()
     .trim()
     .required('Este campo es obligatorio'),
+  city: Yup.string()
+    .trim()
+    .required('La ciudad es obligatoria'),
+  state: Yup.string()
+    .trim()
+    .required('El estado es obligatorio'),
 
 })
 
