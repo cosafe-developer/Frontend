@@ -22,6 +22,8 @@ const initialState = {
     securityMeasures: null,
     damageEvaluation: null,
     attachments: null,
+    resourceInventory: true,
+    evidencePhotos: true,
   },
   formData: {
     //? Step 1
@@ -97,6 +99,20 @@ const initialState = {
     //? Step 11
     attachments: {
       documents: null,
+      isDone: false,
+    },
+    //? Step 12
+    resourceInventory: {
+      items: null,
+      isDone: false,
+    },
+    //? Step 13
+    evidencePhotos: {
+      signage: { applies: true, images: [] },
+      extinguishers: { applies: true, images: [] },
+      firstAid: { applies: true, images: [] },
+      emergencyLights: { applies: true, images: [] },
+      smokeDetectors: { applies: true, images: [] },
       isDone: false,
     },
     estudio: {
