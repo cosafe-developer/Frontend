@@ -107,13 +107,23 @@ const CoverImageUpload = forwardRef(
                     )}
                   </div>
 
-                  <div className="absolute -right-3 -top-4 flex items-center justify-center rounded-full bg-white opacity-0 transition-opacity group-hover:opacity-100 dark:bg-dark-700">
+                  <div className="absolute -right-3 -top-3 flex items-center justify-center rounded-full bg-white shadow-md dark:bg-dark-700">
                     <Button
-                      onClick={onRemove}
-                      className="size-6 shrink-0 rounded-full border p-0 dark:border-dark-450"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        onRemove();
+                      }}
+                      title="Eliminar"
+                      aria-label="Eliminar imagen"
+                      className="size-7 shrink-0 rounded-full border border-gray-300 p-0 text-error hover:bg-error/10 dark:border-dark-450"
                     >
                       <XMarkIcon className="size-4" />
                     </Button>
+                  </div>
+
+                  <div className="absolute inset-x-0 bottom-2 mx-auto w-fit rounded-full bg-black/60 px-3 py-1 text-xs text-white opacity-0 transition-opacity group-hover:opacity-100">
+                    Click para reemplazar
                   </div>
                 </div>
               ) : (
