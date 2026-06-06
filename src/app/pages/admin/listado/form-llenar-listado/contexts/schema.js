@@ -72,6 +72,9 @@ export const informacionDireccionSchema = Yup.object().shape({
     .typeError("La población flotante debe ser numérica")
     .required("La población flotante es obligatoria"),
 
+  levels: Yup.string().trim().nullable(),
+  buildingAge: Yup.string().trim().nullable(),
+
   propertyBoundariesNorth: Yup.string()
     .trim()
     .required("La colindancia Norte es obligatoria"),
@@ -112,11 +115,17 @@ export const informacionRiesgoSchema = Yup.object().shape({
     .trim()
     .required("La descripción de la empresa es obligatoria"),
 
-  riskType: Yup.string()
+  internalRiskType: Yup.string()
     .trim()
-    .required("El tipo de riesgo es obligatorio"),
+    .oneOf(["ordinario", "alto", "critico"], "Tipo de riesgo inválido")
+    .required("El tipo de riesgo interno es obligatorio"),
 
-  antecedents: Yup.string()
+  surroundingRiskType: Yup.string()
+    .trim()
+    .oneOf(["ordinario", "alto", "critico"], "Tipo de riesgo inválido")
+    .required("El tipo de riesgo por entorno es obligatorio"),
+
+  antecedentsRaw: Yup.string()
     .trim()
     .required("Los antecedentes son obligatorios"),
 
