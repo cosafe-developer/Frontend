@@ -12,7 +12,7 @@ import { Spinner } from "components/ui";
 // Local Imports
 import { DatePicker } from "components/shared/form/Datepicker";
 
-import { Button, Input, Switch, Table, THead, TBody, Th, Tr, Td, Checkbox } from "components/ui";
+import { Button, Input, Switch, Textarea, Table, THead, TBody, Th, Tr, Td, Checkbox } from "components/ui";
 import { informacionRiesgoSchema } from "../contexts/schema";
 import { useLlenarListadoFormContext } from "../contexts/LlenarListadoFormContext";
 
@@ -70,10 +70,7 @@ const EmpresaStep3 = ({
           payload.addressInfo?.taxCertificateUrl ||
           payload.addressInfo?.legalRepresentativeSignatureUrl ||
           payload.addressInfo?.legalRepresentativeIneUrl ||
-          payload.addressInfo?.propertyBoundariesImageNorth ||
-          payload.addressInfo?.propertyBoundariesImageSouth ||
-          payload.addressInfo?.propertyBoundariesImageEast ||
-          payload.addressInfo?.propertyBoundariesImageWest ||
+          payload.addressInfo?.propertyBoundaries ||
           payload.riskInfo?.materialsInventoryUrl
         ) {
 
@@ -113,40 +110,30 @@ const EmpresaStep3 = ({
             });
           }
 
-          // ADDRESS → Imagen Colindancia Norte
-          if (payload.addressInfo?.propertyBoundariesImageNorth) {
-            payload.addressInfo.propertyBoundariesImageNorth = await replaceImage({
-              previousUrl: listado.addressInfo?.propertyBoundariesImageNorth,
-              newFile: addressInfoCtx.propertyBoundariesImageNorth,
-              folder: `listado-${listado?._id}`
-            });
-          }
+          // ADDRESS → Imágenes de Colindancias (objeto anidado)
+          if (payload.addressInfo?.propertyBoundaries) {
+            const ctxBoundaries = addressInfoCtx?.propertyBoundaries ?? {};
+            const dbBoundaries = listado?.addressInfo?.propertyBoundaries ?? {};
+            const directions = ["north", "south", "east", "west"];
 
-          // ADDRESS → Imagen Colindancia Sur
-          if (payload.addressInfo?.propertyBoundariesImageSouth) {
-            payload.addressInfo.propertyBoundariesImageSouth = await replaceImage({
-              previousUrl: listado.addressInfo?.propertyBoundariesImageSouth,
-              newFile: addressInfoCtx.propertyBoundariesImageSouth,
-              folder: `listado-${listado?._id}`
-            });
-          }
-
-          // ADDRESS → Imagen Colindancia Este
-          if (payload.addressInfo?.propertyBoundariesImageEast) {
-            payload.addressInfo.propertyBoundariesImageEast = await replaceImage({
-              previousUrl: listado.addressInfo?.propertyBoundariesImageEast,
-              newFile: addressInfoCtx.propertyBoundariesImageEast,
-              folder: `listado-${listado?._id}`
-            });
-          }
-
-          // ADDRESS → Imagen Colindancia Oeste
-          if (payload.addressInfo?.propertyBoundariesImageWest) {
-            payload.addressInfo.propertyBoundariesImageWest = await replaceImage({
-              previousUrl: listado.addressInfo?.propertyBoundariesImageWest,
-              newFile: addressInfoCtx.propertyBoundariesImageWest,
-              folder: `listado-${listado?._id}`
-            });
+            for (const dir of directions) {
+              const ctxImg = ctxBoundaries?.[dir]?.imageUrl;
+              const dbImg = dbBoundaries?.[dir]?.imageUrl;
+              if (ctxImg && typeof ctxImg !== "string") {
+                const newUrl = await replaceImage({
+                  previousUrl: typeof dbImg === "string" ? dbImg : "",
+                  newFile: ctxImg,
+                  folder: `listado-${listado?._id}`,
+                });
+                payload.addressInfo.propertyBoundaries = {
+                  ...payload.addressInfo.propertyBoundaries,
+                  [dir]: {
+                    ...(payload.addressInfo.propertyBoundaries?.[dir] ?? {}),
+                    imageUrl: newUrl,
+                  },
+                };
+              }
+            }
           }
 
           // RISK → Inventario de materiales
@@ -307,13 +294,14 @@ const EmpresaStep3 = ({
                 )}
               />
 
-              {/* Tipo de riesgo interno */}
+              <div /> {/* spacer to keep grid alignment */}
+
               <Controller
-                name="riskType"
+                name="internalRiskType"
                 control={control}
                 render={({ field }) => (
                   <Listbox
-                    label="Tipo de riesgo Interno / Por Entorno *"
+                    label="Tipo de Riesgo Interno *"
                     placeholder="Seleccione tipo de riesgo..."
                     data={tiposRiesgos}
                     displayField="label"
@@ -325,12 +313,39 @@ const EmpresaStep3 = ({
                         payload: {
                           riskInfo: {
                             ...riskInfoCtx,
-                            riskType: val?.id,
+                            internalRiskType: val?.id,
                           },
                         },
                       });
                     }}
-                    error={errors?.riskType?.message}
+                    error={errors?.internalRiskType?.message}
+                  />
+                )}
+              />
+
+              <Controller
+                name="surroundingRiskType"
+                control={control}
+                render={({ field }) => (
+                  <Listbox
+                    label="Tipo de Riesgo por Entorno *"
+                    placeholder="Seleccione tipo de riesgo..."
+                    data={tiposRiesgos}
+                    displayField="label"
+                    value={tiposRiesgos.find((r) => r.id === field.value) || null}
+                    onChange={(val) => {
+                      field.onChange(val?.id);
+                      llenarListadoFormCtx.dispatch({
+                        type: "SET_STEP_STATUS",
+                        payload: {
+                          riskInfo: {
+                            ...riskInfoCtx,
+                            surroundingRiskType: val?.id,
+                          },
+                        },
+                      });
+                    }}
+                    error={errors?.surroundingRiskType?.message}
                   />
                 )}
               />
@@ -338,15 +353,16 @@ const EmpresaStep3 = ({
 
             {/* Antecedentes */}
             <Controller
-              name="antecedents"
+              name="antecedentsRaw"
               control={control}
               render={({ field }) => (
-                <Input
+                <Textarea
                   {...field}
                   label="Antecedentes"
-                  error={errors?.antecedents?.message}
+                  rows={5}
+                  error={errors?.antecedentsRaw?.message}
                   required
-                  placeholder="Escribir Antecedentes..."
+                  placeholder="Describe los antecedentes. Usa dos saltos de línea para separar párrafos."
                   onChange={(e) => {
                     field.onChange(e);
                     llenarListadoFormCtx.dispatch({
@@ -354,7 +370,7 @@ const EmpresaStep3 = ({
                       payload: {
                         riskInfo: {
                           ...riskInfoCtx,
-                          antecedents: e.target.value,
+                          antecedentsRaw: e.target.value,
                         },
                       },
                     });

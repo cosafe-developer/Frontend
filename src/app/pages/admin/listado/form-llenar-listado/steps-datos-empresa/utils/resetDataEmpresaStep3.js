@@ -9,8 +9,25 @@ export function resetDataEmpresaStep3({ listado, riskInfoCtx }) {
         : "https://mybucket.digitaloceanspaces.com/inventario.pdf"),
 
     companyDescription: riskInfoCtx?.companyDescription ?? riskInfo?.companyDescription ?? "",
-    riskType: riskInfoCtx?.riskType ?? riskInfo?.riskType ?? "ordinario",
-    antecedents: riskInfoCtx?.antecedents ?? riskInfo?.antecedents ?? "",
+
+    internalRiskType:
+      riskInfoCtx?.internalRiskType ??
+      riskInfo?.internalRiskType ??
+      riskInfo?.riskType ?? // legacy fallback
+      "ordinario",
+
+    surroundingRiskType:
+      riskInfoCtx?.surroundingRiskType ??
+      riskInfo?.surroundingRiskType ??
+      riskInfo?.riskType ?? // legacy fallback
+      "ordinario",
+
+    antecedentsRaw:
+      riskInfoCtx?.antecedentsRaw ??
+      riskInfo?.antecedentsRaw ??
+      riskInfo?.antecedents ?? // legacy
+      "",
+
     preventionCalendarDate: riskInfoCtx?.preventionCalendarDate ?? riskInfo?.preventionCalendarDate ?? null,
     internalGeneralRisks: riskInfoCtx?.internalGeneralRisks ?? riskInfo?.internalGeneralRisks ?? "",
   };
