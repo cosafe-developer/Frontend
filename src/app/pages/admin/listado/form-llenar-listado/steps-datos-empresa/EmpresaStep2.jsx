@@ -11,6 +11,25 @@ import SignaturePad from "components/custom-ui/signature/SignaturePad";
 import { useEffect, useState } from "react";
 import { resetDataEmpresaStep2 } from "./utils/resetDataEmpresaStep2";
 
+const toNestedBoundaries = (flat) => ({
+  north: {
+    observations: flat.propertyBoundariesNorth ?? "",
+    imageUrl: typeof flat.propertyBoundariesImageNorth === "string" ? flat.propertyBoundariesImageNorth : "",
+  },
+  south: {
+    observations: flat.propertyBoundariesSouth ?? "",
+    imageUrl: typeof flat.propertyBoundariesImageSouth === "string" ? flat.propertyBoundariesImageSouth : "",
+  },
+  east: {
+    observations: flat.propertyBoundariesEast ?? "",
+    imageUrl: typeof flat.propertyBoundariesImageEast === "string" ? flat.propertyBoundariesImageEast : "",
+  },
+  west: {
+    observations: flat.propertyBoundariesWest ?? "",
+    imageUrl: typeof flat.propertyBoundariesImageWest === "string" ? flat.propertyBoundariesImageWest : "",
+  },
+});
+
 const EmpresaStep2 = ({
   setCurrentEmpresaStep,
   listado,
@@ -39,12 +58,33 @@ const EmpresaStep2 = ({
   }, [empresa, reset, listado]);
 
   const onSubmit = (data) => {
+    const {
+      propertyBoundariesNorth: _n,
+      propertyBoundariesSouth: _s,
+      propertyBoundariesEast: _e,
+      propertyBoundariesWest: _w,
+      propertyBoundariesImageNorth: _in,
+      propertyBoundariesImageSouth: _is,
+      propertyBoundariesImageEast: _ie,
+      propertyBoundariesImageWest: _iw,
+      ...rest
+    } = data;
+
     llenarListadoFormCtx.dispatch({
       type: "SET_STEP_STATUS",
       payload: {
         addressInfo: {
-          ...data,
-          isDone: true
+          ...rest,
+          propertyBoundaries: toNestedBoundaries(data),
+          propertyBoundariesNorth: undefined,
+          propertyBoundariesSouth: undefined,
+          propertyBoundariesEast: undefined,
+          propertyBoundariesWest: undefined,
+          propertyBoundariesImageNorth: undefined,
+          propertyBoundariesImageSouth: undefined,
+          propertyBoundariesImageEast: undefined,
+          propertyBoundariesImageWest: undefined,
+          isDone: true,
         },
       },
     });
@@ -415,6 +455,56 @@ const EmpresaStep2 = ({
               )}
             />
 
+            <Controller
+              name="levels"
+              control={control}
+              render={({ field }) => (
+                <Input
+                  {...field}
+                  label="Niveles del Inmueble"
+                  placeholder="Ej: 3 niveles"
+                  error={errors?.levels?.message}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    llenarListadoFormCtx.dispatch({
+                      type: "SET_STEP_STATUS",
+                      payload: {
+                        addressInfo: {
+                          ...addressInfoCtx,
+                          levels: e.target.value,
+                        },
+                      },
+                    });
+                  }}
+                />
+              )}
+            />
+
+            <Controller
+              name="buildingAge"
+              control={control}
+              render={({ field }) => (
+                <Input
+                  {...field}
+                  label="Antigüedad del Inmueble"
+                  placeholder="Ej: 26 años"
+                  error={errors?.buildingAge?.message}
+                  onChange={(e) => {
+                    field.onChange(e);
+                    llenarListadoFormCtx.dispatch({
+                      type: "SET_STEP_STATUS",
+                      payload: {
+                        addressInfo: {
+                          ...addressInfoCtx,
+                          buildingAge: e.target.value,
+                        },
+                      },
+                    });
+                  }}
+                />
+              )}
+            />
+
             <div className="sm:col-span-2">
               <label className="block mb-2 text-sm font-medium text-[#A7AAB4]">
                 Colindancias del Inmueble <span className="text-error">*</span>
@@ -432,12 +522,19 @@ const EmpresaStep2 = ({
                       placeholder="Colindancia al Norte..."
                       onChange={(e) => {
                         field.onChange(e);
+                        const existing = addressInfoCtx?.propertyBoundaries ?? {};
                         llenarListadoFormCtx.dispatch({
                           type: "SET_STEP_STATUS",
                           payload: {
                             addressInfo: {
                               ...addressInfoCtx,
-                              propertyBoundariesNorth: e.target.value,
+                              propertyBoundaries: {
+                                ...existing,
+                                north: {
+                                  ...(existing.north ?? {}),
+                                  observations: e.target.value,
+                                },
+                              },
                             },
                           },
                         });
@@ -457,12 +554,19 @@ const EmpresaStep2 = ({
                       placeholder="Colindancia al Sur..."
                       onChange={(e) => {
                         field.onChange(e);
+                        const existing = addressInfoCtx?.propertyBoundaries ?? {};
                         llenarListadoFormCtx.dispatch({
                           type: "SET_STEP_STATUS",
                           payload: {
                             addressInfo: {
                               ...addressInfoCtx,
-                              propertyBoundariesSouth: e.target.value,
+                              propertyBoundaries: {
+                                ...existing,
+                                south: {
+                                  ...(existing.south ?? {}),
+                                  observations: e.target.value,
+                                },
+                              },
                             },
                           },
                         });
@@ -482,12 +586,19 @@ const EmpresaStep2 = ({
                       placeholder="Colindancia al Este..."
                       onChange={(e) => {
                         field.onChange(e);
+                        const existing = addressInfoCtx?.propertyBoundaries ?? {};
                         llenarListadoFormCtx.dispatch({
                           type: "SET_STEP_STATUS",
                           payload: {
                             addressInfo: {
                               ...addressInfoCtx,
-                              propertyBoundariesEast: e.target.value,
+                              propertyBoundaries: {
+                                ...existing,
+                                east: {
+                                  ...(existing.east ?? {}),
+                                  observations: e.target.value,
+                                },
+                              },
                             },
                           },
                         });
@@ -507,12 +618,19 @@ const EmpresaStep2 = ({
                       placeholder="Colindancia al Oeste..."
                       onChange={(e) => {
                         field.onChange(e);
+                        const existing = addressInfoCtx?.propertyBoundaries ?? {};
                         llenarListadoFormCtx.dispatch({
                           type: "SET_STEP_STATUS",
                           payload: {
                             addressInfo: {
                               ...addressInfoCtx,
-                              propertyBoundariesWest: e.target.value,
+                              propertyBoundaries: {
+                                ...existing,
+                                west: {
+                                  ...(existing.west ?? {}),
+                                  observations: e.target.value,
+                                },
+                              },
                             },
                           },
                         });
@@ -537,10 +655,10 @@ const EmpresaStep2 = ({
                     </THead>
                     <TBody>
                       {[
-                        { index: 1, label: "Norte", name: "propertyBoundariesImageNorth" },
-                        { index: 2, label: "Sur", name: "propertyBoundariesImageSouth" },
-                        { index: 3, label: "Este", name: "propertyBoundariesImageEast" },
-                        { index: 4, label: "Oeste", name: "propertyBoundariesImageWest" },
+                        { index: 1, label: "Norte", name: "propertyBoundariesImageNorth", boundaryKey: "north" },
+                        { index: 2, label: "Sur", name: "propertyBoundariesImageSouth", boundaryKey: "south" },
+                        { index: 3, label: "Este", name: "propertyBoundariesImageEast", boundaryKey: "east" },
+                        { index: 4, label: "Oeste", name: "propertyBoundariesImageWest", boundaryKey: "west" },
                       ].map((dir) => (
                         <Tr key={dir.name} className="border-b border-gray-200 dark:border-dark-500">
                           <Td className="text-center">{dir.index}</Td>
@@ -556,12 +674,19 @@ const EmpresaStep2 = ({
                                   {...field}
                                   onChange={(value) => {
                                     field.onChange(value);
+                                    const existing = addressInfoCtx?.propertyBoundaries ?? {};
                                     llenarListadoFormCtx.dispatch({
                                       type: "SET_STEP_STATUS",
                                       payload: {
                                         addressInfo: {
                                           ...addressInfoCtx,
-                                          [dir.name]: value,
+                                          propertyBoundaries: {
+                                            ...existing,
+                                            [dir.boundaryKey]: {
+                                              ...(existing[dir.boundaryKey] ?? {}),
+                                              imageUrl: typeof value === "string" ? value : (existing[dir.boundaryKey]?.imageUrl ?? ""),
+                                            },
+                                          },
                                         },
                                       },
                                     });

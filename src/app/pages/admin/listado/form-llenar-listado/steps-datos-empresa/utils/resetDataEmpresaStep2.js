@@ -1,5 +1,6 @@
 export function resetDataEmpresaStep2({ listado, addressInfoCtx }) {
   const addressInfo = listado?.addressInfo;
+  const boundaries = addressInfo?.propertyBoundaries ?? {};
 
   return {
     taxCertificateUrl:
@@ -31,27 +32,20 @@ export function resetDataEmpresaStep2({ listado, addressInfoCtx }) {
     builtAreaM2: addressInfoCtx?.builtAreaM2 ?? addressInfo?.builtAreaM2 ?? 0,
     fixedPopulation: addressInfoCtx?.fixedPopulation ?? addressInfo?.fixedPopulation ?? 0,
     floatingPopulation: addressInfoCtx?.floatingPopulation ?? addressInfo?.floatingPopulation ?? 0,
-    propertyBoundaries: addressInfoCtx?.propertyBoundaries ?? addressInfo?.propertyBoundaries ?? "",
-    propertyBoundariesImageNorth:
-      addressInfoCtx?.propertyBoundariesImageNorth ??
-      (addressInfo?.propertyBoundariesImageNorth?.length > 0
-        ? addressInfo?.propertyBoundariesImageNorth
-        : ""),
-    propertyBoundariesImageSouth:
-      addressInfoCtx?.propertyBoundariesImageSouth ??
-      (addressInfo?.propertyBoundariesImageSouth?.length > 0
-        ? addressInfo?.propertyBoundariesImageSouth
-        : ""),
-    propertyBoundariesImageEast:
-      addressInfoCtx?.propertyBoundariesImageEast ??
-      (addressInfo?.propertyBoundariesImageEast?.length > 0
-        ? addressInfo?.propertyBoundariesImageEast
-        : ""),
-    propertyBoundariesImageWest:
-      addressInfoCtx?.propertyBoundariesImageWest ??
-      (addressInfo?.propertyBoundariesImageWest?.length > 0
-        ? addressInfo?.propertyBoundariesImageWest
-        : ""),
+
+    levels: addressInfoCtx?.levels ?? addressInfo?.levels ?? "",
+    buildingAge: addressInfoCtx?.buildingAge ?? addressInfo?.buildingAge ?? "",
+
+    propertyBoundariesNorth: addressInfoCtx?.propertyBoundariesNorth ?? boundaries?.north?.observations ?? "",
+    propertyBoundariesSouth: addressInfoCtx?.propertyBoundariesSouth ?? boundaries?.south?.observations ?? "",
+    propertyBoundariesEast: addressInfoCtx?.propertyBoundariesEast ?? boundaries?.east?.observations ?? "",
+    propertyBoundariesWest: addressInfoCtx?.propertyBoundariesWest ?? boundaries?.west?.observations ?? "",
+
+    propertyBoundariesImageNorth: addressInfoCtx?.propertyBoundariesImageNorth ?? boundaries?.north?.imageUrl ?? "",
+    propertyBoundariesImageSouth: addressInfoCtx?.propertyBoundariesImageSouth ?? boundaries?.south?.imageUrl ?? "",
+    propertyBoundariesImageEast: addressInfoCtx?.propertyBoundariesImageEast ?? boundaries?.east?.imageUrl ?? "",
+    propertyBoundariesImageWest: addressInfoCtx?.propertyBoundariesImageWest ?? boundaries?.west?.imageUrl ?? "",
+
     internalAreas: addressInfoCtx?.internalAreas?.length > 0 ? addressInfoCtx?.internalAreas : addressInfo?.internalAreas ?? [],
     isDone: addressInfoCtx?.isDone ?? addressInfo?.isDone ?? false,
   };
