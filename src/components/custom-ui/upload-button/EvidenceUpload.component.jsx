@@ -135,29 +135,41 @@ const EvidenceUpload = ({ value, onChange, onRemove }) => {
         <>
           <span className="mt-2 text-sm">{internalValue.name}</span>
 
-          <div className="flex space-x-3">
+          <div className="flex flex-wrap items-center gap-3 mt-1">
             {isPdf ? (
               <a
                 href={urlToOpen}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-primary-600 hover:underline mt-1"
+                className="text-primary-600 hover:underline text-sm"
               >
                 Ver PDF
               </a>
             ) : (
               <button
                 type="button"
-                className="text-primary-600 hover:underline mt-1 cursor-pointer"
+                className="text-primary-600 hover:underline text-sm cursor-pointer"
                 onClick={() => setShowPreview(true)}
               >
                 Ver Imagen
               </button>
             )}
 
+            <Upload onChange={handleFileChange}>
+              {(props) => (
+                <button
+                  type="button"
+                  className="text-primary-600 hover:underline text-sm cursor-pointer"
+                  {...props}
+                >
+                  Reemplazar
+                </button>
+              )}
+            </Upload>
+
             <button
               type="button"
-              className="text-xs mt-2 cursor-pointer text-error hover:text-red-400"
+              className="text-sm text-error hover:text-red-400 cursor-pointer"
               onClick={() => setShowConfirmRemove(true)}
             >
               ✖ Eliminar
