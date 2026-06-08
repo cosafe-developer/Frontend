@@ -11,6 +11,17 @@ import SignaturePad from "components/custom-ui/signature/SignaturePad";
 import { useEffect, useState } from "react";
 import { resetDataEmpresaStep2 } from "./utils/resetDataEmpresaStep2";
 
+const FLAT_BOUNDARY_KEYS = [
+  "propertyBoundariesNorth",
+  "propertyBoundariesSouth",
+  "propertyBoundariesEast",
+  "propertyBoundariesWest",
+  "propertyBoundariesImageNorth",
+  "propertyBoundariesImageSouth",
+  "propertyBoundariesImageEast",
+  "propertyBoundariesImageWest",
+];
+
 const toNestedBoundaries = (flat) => ({
   north: {
     observations: flat.propertyBoundariesNorth ?? "",
@@ -58,17 +69,9 @@ const EmpresaStep2 = ({
   }, [empresa, reset, listado]);
 
   const onSubmit = (data) => {
-    const {
-      propertyBoundariesNorth: _n,
-      propertyBoundariesSouth: _s,
-      propertyBoundariesEast: _e,
-      propertyBoundariesWest: _w,
-      propertyBoundariesImageNorth: _in,
-      propertyBoundariesImageSouth: _is,
-      propertyBoundariesImageEast: _ie,
-      propertyBoundariesImageWest: _iw,
-      ...rest
-    } = data;
+    const rest = Object.fromEntries(
+      Object.entries(data).filter(([k]) => !FLAT_BOUNDARY_KEYS.includes(k))
+    );
 
     llenarListadoFormCtx.dispatch({
       type: "SET_STEP_STATUS",
@@ -76,14 +79,6 @@ const EmpresaStep2 = ({
         addressInfo: {
           ...rest,
           propertyBoundaries: toNestedBoundaries(data),
-          propertyBoundariesNorth: undefined,
-          propertyBoundariesSouth: undefined,
-          propertyBoundariesEast: undefined,
-          propertyBoundariesWest: undefined,
-          propertyBoundariesImageNorth: undefined,
-          propertyBoundariesImageSouth: undefined,
-          propertyBoundariesImageEast: undefined,
-          propertyBoundariesImageWest: undefined,
           isDone: true,
         },
       },
