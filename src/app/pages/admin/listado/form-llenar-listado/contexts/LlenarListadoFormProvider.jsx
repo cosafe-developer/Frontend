@@ -157,8 +157,9 @@ const initialState = {
     riskInfo: {
       materialsInventoryUrl: null,
       companyDescription: null,
-      riskType: "ordinario",
-      antecedents: null,
+      internalRiskType: "ordinario",
+      surroundingRiskType: "ordinario",
+      antecedentsRaw: null,
       preventionCalendarDate: null,
       internalGeneralRisks: null,
       isDone: false,

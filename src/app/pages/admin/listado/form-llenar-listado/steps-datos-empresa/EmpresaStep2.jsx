@@ -25,19 +25,19 @@ const FLAT_BOUNDARY_KEYS = [
 const toNestedBoundaries = (flat) => ({
   north: {
     observations: flat.propertyBoundariesNorth ?? "",
-    imageUrl: typeof flat.propertyBoundariesImageNorth === "string" ? flat.propertyBoundariesImageNorth : "",
+    imageUrl: flat.propertyBoundariesImageNorth ?? "",
   },
   south: {
     observations: flat.propertyBoundariesSouth ?? "",
-    imageUrl: typeof flat.propertyBoundariesImageSouth === "string" ? flat.propertyBoundariesImageSouth : "",
+    imageUrl: flat.propertyBoundariesImageSouth ?? "",
   },
   east: {
     observations: flat.propertyBoundariesEast ?? "",
-    imageUrl: typeof flat.propertyBoundariesImageEast === "string" ? flat.propertyBoundariesImageEast : "",
+    imageUrl: flat.propertyBoundariesImageEast ?? "",
   },
   west: {
     observations: flat.propertyBoundariesWest ?? "",
-    imageUrl: typeof flat.propertyBoundariesImageWest === "string" ? flat.propertyBoundariesImageWest : "",
+    imageUrl: flat.propertyBoundariesImageWest ?? "",
   },
 });
 
