@@ -1,19 +1,36 @@
-import { fetchWithCookies } from "helpers/fetch";
+import getFirmaUploadImage from "api/upload/getFirmaUploadImage.service";
 
 /**
- * Registra una empresa usando sesiones/cookies.
- * @param {Object} data - Datos de la empresa
- * @returns {Promise<any>}
+ * Sube una imagen a DigitalOcean Spaces usando URL firmada y regresa la URL pública.
+ * @param {File} file - Archivo a subir
+ * @param {string} [folder] - Carpeta destino en el storage
+ * @returns {Promise<string>} URL pública del archivo subido
  */
-const uploadImageWithFirma = async (data) => {
+const uploadImageWithFirma = async (file, folder = "listado-formulario") => {
   try {
-    const resp = await fetchWithCookies("empresa/register", data, "POST");
+    const { signedUrl, publicUrl } = await getFirmaUploadImage({
+      fileName: file.name,
+      fileType: file.type,
+      folder,
+    });
 
-    const result = await resp.json();
+    const upload = await fetch(signedUrl, {
+      method: "PUT",
+      headers: {
+        "Content-Type": file.type || "application/octet-stream",
+        "x-amz-acl": "public-read",
+        "Cache-Control": "public,max-age=31536000,immutable",
+      },
+      body: file,
+    });
 
-    return result;
+    if (!upload.ok) {
+      throw new Error("Error al subir la imagen al storage");
+    }
+
+    return publicUrl;
   } catch (error) {
-    console.error("Error al registrar empresa:", error);
+    console.error("Error al subir imagen con firma:", error);
     throw error;
   }
 };
