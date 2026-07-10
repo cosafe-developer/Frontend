@@ -1,6 +1,6 @@
 import { useState } from "react";
 import PropTypes from "prop-types";
-import { Checkbox, Switch } from "components/ui";
+import { Checkbox } from "components/ui";
 import { useLlenarListadoFormContext } from "../contexts/LlenarListadoFormContext";
 import { evidencePhotoCategories } from "../steps-datos-estudio/estudio-pipc/utils/elementsTask";
 import EvidenceUpload from "components/custom-ui/upload-button/EvidenceUpload.component";
@@ -11,7 +11,7 @@ const onlyUrls = (images) =>
   (Array.isArray(images) ? images : []).filter((u) => typeof u === "string");
 
 const buildDefaultPhotos = () => {
-  const obj = { applies: true, isDone: false };
+  const obj = { isDone: false };
   evidencePhotoCategories.forEach((cat) => {
     obj[cat.key] = { applies: true, images: [] };
   });
@@ -25,7 +25,6 @@ const EvidencePhotosSection = ({ listado }) => {
 
   const [photos, setPhotos] = useState(() => {
     const defaults = buildDefaultPhotos();
-    defaults.applies = photosCtx?.applies ?? backendPhotos?.applies ?? true;
     evidencePhotoCategories.forEach((cat) => {
       const source = photosCtx?.[cat.key] ?? backendPhotos?.[cat.key];
       if (source) {
@@ -39,11 +38,10 @@ const EvidencePhotosSection = ({ listado }) => {
   });
 
   const persist = async (next) => {
-    const payload = { applies: next.applies, isDone: true };
+    const payload = { isDone: true };
     evidencePhotoCategories.forEach((cat) => {
       payload[cat.key] = {
-        // Con el toggle general apagado, ninguna categoría aplica para el documento
-        applies: next.applies ? (next[cat.key]?.applies ?? true) : false,
+        applies: next[cat.key]?.applies ?? true,
         images: onlyUrls(next[cat.key]?.images),
       };
     });
@@ -63,12 +61,6 @@ const EvidencePhotosSection = ({ listado }) => {
     } catch (err) {
       console.error("Error al guardar evidencias:", err);
     }
-  };
-
-  const handleMasterToggle = (applies) => {
-    const next = { ...photos, applies };
-    setPhotos(next);
-    persist(next);
   };
 
   const handleToggle = (catKey, applies) => {
@@ -105,28 +97,15 @@ const EvidencePhotosSection = ({ listado }) => {
 
   return (
     <div className="flex flex-col gap-y-3">
-      <div className="flex items-center gap-x-3">
-        <label className="input-label">
-          <span>Evidencias Fotográficas</span>
-        </label>
-        <div className="flex items-center gap-x-2">
-          <span className="text-sm text-gray-400">
-            {photos.applies ? "Sí aplica" : "No aplica"}
-          </span>
-          <Switch
-            checked={photos.applies || false}
-            onChange={(e) => handleMasterToggle(e.target.checked)}
-          />
-        </div>
-      </div>
+      <h4 className="text-[15px] font-medium text-gray-800 dark:text-dark-100">
+        Evidencias Fotográficas
+      </h4>
+      <p className="text-sm text-gray-400">
+        Sube imágenes para cada categoría. Cada una puede aplicar o no de forma independiente.
+      </p>
 
-      {photos.applies && (
-        <div className="space-y-6">
-          <p className="text-sm text-gray-400">
-            Sube imágenes para cada categoría. Cada una puede aplicar o no de forma independiente.
-          </p>
-
-          {evidencePhotoCategories.map((cat) => {
+      <div className="space-y-6">
+        {evidencePhotoCategories.map((cat) => {
             const data = photos[cat.key] ?? { applies: true, images: [] };
             return (
               <div
@@ -183,9 +162,8 @@ const EvidencePhotosSection = ({ listado }) => {
                 )}
               </div>
             );
-          })}
-        </div>
-      )}
+        })}
+      </div>
     </div>
   );
 };

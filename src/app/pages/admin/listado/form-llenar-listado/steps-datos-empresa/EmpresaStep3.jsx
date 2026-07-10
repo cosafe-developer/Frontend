@@ -21,7 +21,6 @@ import { useDisclosure } from "hooks";
 import { useState, useEffect } from "react";
 import { CheckCircleIcon, XCircleIcon } from "@heroicons/react/24/outline";
 import { resetDataEmpresaStep3 } from "./utils/resetDataEmpresaStep3";
-import { CoverImageUpload } from "components/custom-ui/dropzone/CoverImageUpload";
 import { filterNullsEmptyObject } from "helpers/filterNullsEmptyObject";
 import { filterUnchangedFields } from "helpers/filterUnchangedFields";
 
@@ -252,26 +251,12 @@ const EmpresaStep3 = ({
             </div>
 
             {watch("materialsInventoryApplies") && (
-              <>
-                <Controller
-                  name="materialsInventoryUrl"
-                  control={control}
-                  render={({ field }) => (
-                    <CoverImageUpload
-                      label=""
-                      classNames={{ box: "mt-1.5" }}
-                      error={errors?.materialsInventoryUrl?.message}
-                      {...field}
-                    />
-                  )}
-                />
+              <div className="space-y-6">
                 <ResourceInventorySection listado={listado} />
-              </>
+                <EvidencePhotosSection listado={listado} />
+              </div>
             )}
           </div>
-
-          {/* 📸 Evidencias fotográficas */}
-          <EvidencePhotosSection listado={listado} />
 
           {/* 🏢 Datos de empresa y riesgos */}
           <div className="flex flex-col gap-y-4">

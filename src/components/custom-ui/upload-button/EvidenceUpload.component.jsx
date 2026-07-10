@@ -132,50 +132,51 @@ const EvidenceUpload = ({ value, onChange, onRemove }) => {
           )}
         </Upload>
       ) : (
-        <>
-          <span className="mt-2 text-sm">{internalValue.name}</span>
-
-          <div className="flex flex-wrap items-center gap-3 mt-1">
-            {isPdf ? (
-              <a
-                href={urlToOpen}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-primary-600 hover:underline text-sm"
-              >
-                Ver PDF
-              </a>
-            ) : (
-              <button
-                type="button"
-                className="text-primary-600 hover:underline text-sm cursor-pointer"
-                onClick={() => setShowPreview(true)}
-              >
-                Ver Imagen
-              </button>
-            )}
-
+        <div className="relative inline-flex flex-col items-center">
+          {isPdf ? (
+            <a
+              href={urlToOpen}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex h-20 w-20 flex-col items-center justify-center gap-1 rounded-lg border border-gray-200 bg-gray-50 text-xs font-medium text-gray-500 hover:border-primary-500 dark:border-dark-500 dark:bg-dark-600 dark:text-dark-200"
+            >
+              PDF
+            </a>
+          ) : (
             <Upload onChange={handleFileChange}>
               {(props) => (
-                <button
-                  type="button"
-                  className="text-primary-600 hover:underline text-sm cursor-pointer"
-                  {...props}
-                >
-                  Reemplazar
-                </button>
+                <div className="group relative h-20 w-20">
+                  <img
+                    src={urlToOpen}
+                    alt={internalValue.name || "Evidencia"}
+                    className="h-20 w-20 cursor-pointer rounded-lg border border-gray-200 object-cover dark:border-dark-500"
+                    onClick={() => setShowPreview(true)}
+                  />
+                  <button
+                    type="button"
+                    className="absolute inset-x-0 bottom-0 hidden rounded-b-lg bg-black/60 py-0.5 text-[11px] text-white group-hover:block cursor-pointer"
+                    {...props}
+                  >
+                    Click para reemplazar
+                  </button>
+                </div>
               )}
             </Upload>
+          )}
 
-            <button
-              type="button"
-              className="text-sm text-error hover:text-red-400 cursor-pointer"
-              onClick={() => setShowConfirmRemove(true)}
-            >
-              ✖ Eliminar
-            </button>
-          </div>
-        </>
+          <button
+            type="button"
+            aria-label="Eliminar imagen"
+            onClick={() => setShowConfirmRemove(true)}
+            className="absolute -top-2 -right-2 z-10 flex h-5 w-5 items-center justify-center rounded-full bg-red-600 text-xs text-white shadow cursor-pointer"
+          >
+            <XMarkIcon className="size-3.5" />
+          </button>
+
+          <span className="mt-1 max-w-24 truncate text-xs" title={internalValue.name}>
+            {internalValue.name}
+          </span>
+        </div>
       )}
 
       {/* Modal de preview de imagen */}
