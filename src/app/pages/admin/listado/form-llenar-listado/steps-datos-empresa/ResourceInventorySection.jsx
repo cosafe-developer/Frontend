@@ -109,11 +109,17 @@ const ResourceInventorySection = ({ listado }) => {
                   <select
                     value={item.condition}
                     onChange={(e) => handleChange(idx, { condition: e.target.value })}
-                    className="h-9 w-full rounded-lg border border-gray-300 bg-transparent px-2 text-sm dark:border-dark-450 dark:text-dark-100"
+                    className="h-9 w-full rounded-lg border border-gray-300 bg-white px-2 text-sm text-gray-800 dark:border-dark-450 dark:bg-dark-700 dark:text-dark-100"
                   >
-                    <option value="">Seleccionar...</option>
+                    <option value="" className="bg-white text-gray-800 dark:bg-dark-700 dark:text-dark-100">
+                      Seleccionar...
+                    </option>
                     {conditionOptions.map((opt) => (
-                      <option key={opt.value} value={opt.value}>
+                      <option
+                        key={opt.value}
+                        value={opt.value}
+                        className="bg-white text-gray-800 dark:bg-dark-700 dark:text-dark-100"
+                      >
                         {opt.label}
                       </option>
                     ))}
