@@ -10,6 +10,10 @@ import updateListado from "api/listados/updateListado";
 const onlyUrls = (images) =>
   (Array.isArray(images) ? images : []).filter((u) => typeof u === "string");
 
+// Solo Señalizaciones se captura aquí; las demás categorías salen de los
+// registros del inventario (extintores, botiquines, lámparas, detectores).
+const visibleCategories = evidencePhotoCategories.filter((c) => c.key === "signage");
+
 const buildDefaultPhotos = () => {
   const obj = { isDone: false };
   evidencePhotoCategories.forEach((cat) => {
@@ -101,11 +105,12 @@ const EvidencePhotosSection = ({ listado }) => {
         Evidencias Fotográficas
       </h4>
       <p className="text-sm text-gray-400">
-        Sube imágenes para cada categoría. Cada una puede aplicar o no de forma independiente.
+        Las fotos de extintores, botiquines, lámparas y detectores se agregan en cada
+        registro del inventario. Aquí solo se suben las señalizaciones.
       </p>
 
       <div className="space-y-6">
-        {evidencePhotoCategories.map((cat) => {
+        {visibleCategories.map((cat) => {
             const data = photos[cat.key] ?? { applies: true, images: [] };
             return (
               <div
