@@ -81,7 +81,8 @@ const CoverImageUpload = forwardRef(
               displayFile ? (
                 <div
                   title={displayFile.name}
-                  className="group relative h-full w-full rounded-lg ring-primary-600 ring-offset-4 ring-offset-white transition-all hover:ring-3 dark:ring-primary-500 dark:ring-offset-dark-700"
+                  {...props}
+                  className="group relative h-full w-full cursor-pointer rounded-lg ring-primary-600 ring-offset-4 ring-offset-white transition-all hover:ring-3 dark:ring-primary-500 dark:ring-offset-dark-700"
                 >
                   <div className="h-full w-full overflow-hidden p-2 flex items-center justify-center">
                     {displayFile.type === "application/pdf" || displayFile.name?.endsWith(".pdf") ? (
@@ -92,6 +93,7 @@ const CoverImageUpload = forwardRef(
                           href={displayFile.preview || (typeof displayFile === "string" ? displayFile : "")}
                           target="_blank"
                           rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
                           className="text-primary-600 hover:underline mt-1"
                         >
                           Ver PDF
