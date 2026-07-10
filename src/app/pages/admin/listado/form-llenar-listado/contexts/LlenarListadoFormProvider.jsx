@@ -22,8 +22,6 @@ const initialState = {
     securityMeasures: null,
     damageEvaluation: null,
     attachments: null,
-    resourceInventory: true,
-    evidencePhotos: true,
   },
   formData: {
     //? Step 1

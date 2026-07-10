@@ -30,6 +30,8 @@ import { Listbox } from "components/shared/form/Listbox";
 import { replaceImage } from "helpers/updateImageUpload";
 import { internalGeneralRisksElements } from "../steps-datos-estudio/estudio-pipc/utils/elementsTask";
 import { tiposRiesgosEstudios } from "../utils/types";
+import ResourceInventorySection from "./ResourceInventorySection";
+import EvidencePhotosSection from "./EvidencePhotosSection";
 
 
 const EmpresaStep3 = ({
@@ -250,20 +252,26 @@ const EmpresaStep3 = ({
             </div>
 
             {watch("materialsInventoryApplies") && (
-              <Controller
-                name="materialsInventoryUrl"
-                control={control}
-                render={({ field }) => (
-                  <CoverImageUpload
-                    label=""
-                    classNames={{ box: "mt-1.5" }}
-                    error={errors?.materialsInventoryUrl?.message}
-                    {...field}
-                  />
-                )}
-              />
+              <>
+                <Controller
+                  name="materialsInventoryUrl"
+                  control={control}
+                  render={({ field }) => (
+                    <CoverImageUpload
+                      label=""
+                      classNames={{ box: "mt-1.5" }}
+                      error={errors?.materialsInventoryUrl?.message}
+                      {...field}
+                    />
+                  )}
+                />
+                <ResourceInventorySection listado={listado} />
+              </>
             )}
           </div>
+
+          {/* 📸 Evidencias fotográficas */}
+          <EvidencePhotosSection listado={listado} />
 
           {/* 🏢 Datos de empresa y riesgos */}
           <div className="flex flex-col gap-y-4">

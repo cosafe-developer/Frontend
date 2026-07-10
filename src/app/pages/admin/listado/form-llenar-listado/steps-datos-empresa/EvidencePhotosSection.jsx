@@ -1,54 +1,50 @@
-import { useEffect, useState } from "react";
-import { Button, Checkbox } from "components/ui";
-import { useLlenarListadoFormContext } from "../../contexts/LlenarListadoFormContext";
-import { evidencePhotoCategories } from "./utils/elementsTask";
+import { useState } from "react";
+import PropTypes from "prop-types";
+import { Checkbox, Switch } from "components/ui";
+import { useLlenarListadoFormContext } from "../contexts/LlenarListadoFormContext";
+import { evidencePhotoCategories } from "../steps-datos-estudio/estudio-pipc/utils/elementsTask";
 import EvidenceUpload from "components/custom-ui/upload-button/EvidenceUpload.component";
 import uploadImageWithFirma from "api/upload/uploadImageWithFirma.service";
 import updateListado from "api/listados/updateListado";
 
+const onlyUrls = (images) =>
+  (Array.isArray(images) ? images : []).filter((u) => typeof u === "string");
+
 const buildDefaultPhotos = () => {
-  const obj = { isDone: false };
+  const obj = { applies: true, isDone: false };
   evidencePhotoCategories.forEach((cat) => {
     obj[cat.key] = { applies: true, images: [] };
   });
   return obj;
 };
 
-const EstudioStep13 = ({ onPrev, setFinished, listado }) => {
+const EvidencePhotosSection = ({ listado }) => {
   const llenarListadoFormCtx = useLlenarListadoFormContext();
   const photosCtx = llenarListadoFormCtx?.state?.formData?.evidencePhotos ?? {};
   const backendPhotos = listado?.studyData?.evidencePhotos || {};
 
   const [photos, setPhotos] = useState(() => {
     const defaults = buildDefaultPhotos();
+    defaults.applies = photosCtx?.applies ?? backendPhotos?.applies ?? true;
     evidencePhotoCategories.forEach((cat) => {
-      const ctxCat = photosCtx?.[cat.key];
-      const dbCat = backendPhotos?.[cat.key];
-      if (ctxCat) {
+      const source = photosCtx?.[cat.key] ?? backendPhotos?.[cat.key];
+      if (source) {
         defaults[cat.key] = {
-          applies: ctxCat.applies ?? true,
-          images: Array.isArray(ctxCat.images) ? ctxCat.images : [],
-        };
-      } else if (dbCat) {
-        defaults[cat.key] = {
-          applies: dbCat.applies ?? true,
-          images: Array.isArray(dbCat.images) ? dbCat.images : [],
+          applies: source.applies ?? true,
+          images: onlyUrls(source.images),
         };
       }
     });
     return defaults;
   });
 
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }, []);
-
   const persist = async (next) => {
-    const payload = { isDone: true };
+    const payload = { applies: next.applies, isDone: true };
     evidencePhotoCategories.forEach((cat) => {
       payload[cat.key] = {
-        applies: next[cat.key]?.applies ?? true,
-        images: next[cat.key]?.images ?? [],
+        // Con el toggle general apagado, ninguna categoría aplica para el documento
+        applies: next.applies ? (next[cat.key]?.applies ?? true) : false,
+        images: onlyUrls(next[cat.key]?.images),
       };
     });
 
@@ -69,6 +65,12 @@ const EstudioStep13 = ({ onPrev, setFinished, listado }) => {
     }
   };
 
+  const handleMasterToggle = (applies) => {
+    const next = { ...photos, applies };
+    setPhotos(next);
+    persist(next);
+  };
+
   const handleToggle = (catKey, applies) => {
     const next = { ...photos, [catKey]: { ...photos[catKey], applies } };
     setPhotos(next);
@@ -77,13 +79,13 @@ const EstudioStep13 = ({ onPrev, setFinished, listado }) => {
 
   const handleUpload = async (catKey, file) => {
     try {
-      const url = await uploadImageWithFirma(file);
-      if (!url) return;
+      const url = await uploadImageWithFirma(file, `listado-${listado?._id}`);
+      if (typeof url !== "string" || !url) return;
       const next = {
         ...photos,
         [catKey]: {
           ...photos[catKey],
-          images: [...(photos[catKey]?.images ?? []), url],
+          images: [...onlyUrls(photos[catKey]?.images), url],
         },
       };
       setPhotos(next);
@@ -94,27 +96,36 @@ const EstudioStep13 = ({ onPrev, setFinished, listado }) => {
   };
 
   const handleRemove = (catKey, idx) => {
-    const images = [...(photos[catKey]?.images ?? [])];
+    const images = onlyUrls(photos[catKey]?.images);
     images.splice(idx, 1);
     const next = { ...photos, [catKey]: { ...photos[catKey], images } };
     setPhotos(next);
     persist(next);
   };
 
-  const handleFinalize = async () => {
-    await persist(photos);
-    setFinished?.(true);
-  };
-
   return (
-    <div className="flex grow flex-col space-y-8">
-      <div className="space-y-3">
-        <h3 className="text-lg font-medium text-white">Evidencias Fotográficas</h3>
-        <p className="text-sm text-gray-400">
-          Sube imágenes para cada categoría. Cada una puede aplicar o no de forma independiente.
-        </p>
+    <div className="flex flex-col gap-y-3">
+      <div className="flex items-center gap-x-3">
+        <label className="input-label">
+          <span>Evidencias Fotográficas</span>
+        </label>
+        <div className="flex items-center gap-x-2">
+          <span className="text-sm text-gray-400">
+            {photos.applies ? "Sí aplica" : "No aplica"}
+          </span>
+          <Switch
+            checked={photos.applies || false}
+            onChange={(e) => handleMasterToggle(e.target.checked)}
+          />
+        </div>
+      </div>
 
+      {photos.applies && (
         <div className="space-y-6">
+          <p className="text-sm text-gray-400">
+            Sube imágenes para cada categoría. Cada una puede aplicar o no de forma independiente.
+          </p>
+
           {evidencePhotoCategories.map((cat) => {
             const data = photos[cat.key] ?? { applies: true, images: [] };
             return (
@@ -123,7 +134,9 @@ const EstudioStep13 = ({ onPrev, setFinished, listado }) => {
                 className="rounded-lg border border-gray-200 p-4 dark:border-dark-500"
               >
                 <div className="flex items-center justify-between mb-3">
-                  <h4 className="text-[15px] font-medium text-white">{cat.label}</h4>
+                  <h4 className="text-[15px] font-medium text-gray-800 dark:text-dark-100">
+                    {cat.label}
+                  </h4>
                   <label className="flex items-center gap-2 text-sm text-gray-400">
                     <Checkbox
                       color="primary"
@@ -143,7 +156,7 @@ const EstudioStep13 = ({ onPrev, setFinished, listado }) => {
                             <img
                               src={url}
                               alt={`${cat.label} ${idx + 1}`}
-                              className="h-24 w-24 object-cover rounded-lg border border-dark-500"
+                              className="h-24 w-24 object-cover rounded-lg border border-gray-200 dark:border-dark-500"
                             />
                             <button
                               type="button"
@@ -159,6 +172,7 @@ const EstudioStep13 = ({ onPrev, setFinished, listado }) => {
                     )}
 
                     <EvidenceUpload
+                      key={`${cat.key}-${data.images.length}`}
                       value={null}
                       onChange={(file) => handleUpload(cat.key, file)}
                       onRemove={() => {}}
@@ -171,16 +185,13 @@ const EstudioStep13 = ({ onPrev, setFinished, listado }) => {
             );
           })}
         </div>
-      </div>
-
-      <div className="flex justify-end pt-4 space-x-3">
-        <Button type="button" className="min-w-[7rem]" onClick={onPrev}>Atrás</Button>
-        <Button type="button" color="primary" className="min-w-[7rem]" onClick={handleFinalize}>
-          Finalizar
-        </Button>
-      </div>
+      )}
     </div>
   );
 };
 
-export default EstudioStep13;
+EvidencePhotosSection.propTypes = {
+  listado: PropTypes.object,
+};
+
+export default EvidencePhotosSection;

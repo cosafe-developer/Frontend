@@ -286,7 +286,7 @@ const EstudioStep11 = ({ onNext, onPrev, listado }) => {
         </Button>
 
         <Button type="submit" color="primary" className="min-w-[7rem]">
-          Siguiente
+          Finalizar
         </Button>
       </div>
     </form>

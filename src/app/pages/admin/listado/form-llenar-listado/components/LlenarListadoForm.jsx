@@ -229,6 +229,16 @@ const LlenarListadoForm = ({ listado, empresa }) => {
       };
     });
 
+    // Secciones que viven en Información de Riesgo pero se guardan en studyData
+    ["resourceInventory", "evidencePhotos"].forEach((key) => {
+      if (listado?.studyData?.[key]) {
+        estudioStepStatus[key] = {
+          ...listado.studyData[key],
+          isDone: listado.studyData[key]?.isDone ?? false,
+        };
+      }
+    });
+
     llenarListadoFormCtx.dispatch({
       type: "SET_STEP_STATUS",
       payload: {

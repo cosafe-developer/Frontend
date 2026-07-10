@@ -11,8 +11,6 @@ import { useLlenarListadoFormContext } from "../contexts/LlenarListadoFormContex
 import { estudioSteps } from "../steps-datos-estudio/estudio-pipc/EstudioSteps";
 import updateListado from "api/listados/updateListado";
 
-const NON_TOGGLEABLE_STEPS = ["resourceInventory", "evidencePhotos"];
-
 export function ApplicabilityConfigModal({ show, onClose, listado }) {
   const llenarListadoFormCtx = useLlenarListadoFormContext();
   const stepApplicability = llenarListadoFormCtx?.state?.stepApplicability;
@@ -113,7 +111,6 @@ export function ApplicabilityConfigModal({ show, onClose, listado }) {
 
         <div className="space-y-3">
           {estudioSteps
-            .filter((step) => !NON_TOGGLEABLE_STEPS.includes(step.key))
             .map((step) => {
               const applies = stepApplicability[step.key] !== false;
               return (
