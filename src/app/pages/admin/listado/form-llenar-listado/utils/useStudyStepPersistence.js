@@ -9,11 +9,11 @@ import { persistStudyStep, pickStepSections } from "./persistStudyStep";
  *
  * - handleFieldChange: actualiza una fila y guarda el paso completo con los
  *   valores actuales del formulario (todas las sub-secciones).
- * - saveAndNext ("Siguiente"): guarda el paso completo con isDone:true y sólo
- *   avanza si el guardado tuvo éxito; si falla muestra un toast.
+ * - saveAndNext ("Siguiente"): guarda el paso completo y sólo avanza si el
+ *   guardado tuvo éxito; si falla muestra un toast.
  *
  * `computeIsDone(sectionsData)` es opcional (por defecto el paso cuenta como
- * hecho al modificarse). Un paso que ya se marcó como hecho no se desmarca.
+ * hecho al guardarse).
  */
 export function useStudyStepPersistence({
   stepKey,
@@ -45,6 +45,11 @@ export function useStudyStepPersistence({
     });
   };
 
+  // Pasos con validación propia (1, 2, 3, 8, 10) sólo cuentan como hechos si
+  // están completos; los demás, al guardarse.
+  const isStepDone = (values) =>
+    computeIsDone ? Boolean(computeIsDone(pickStepSections(sections, values))) : true;
+
   const save = (values, isDone) =>
     persistStudyStep({
       save: updateListado,
@@ -66,10 +71,7 @@ export function useStudyStepPersistence({
 
       // Valores actuales de TODAS las sub-secciones (no la prop listado)
       const values = { ...getValues(), [sectionKey]: updatedArray };
-      const computed = computeIsDone
-        ? computeIsDone(pickStepSections(sections, values))
-        : true;
-      const isDone = Boolean(computed) || stepCtx.isDone === true;
+      const isDone = isStepDone(values);
 
       updateContext(values, isDone);
       await save(values, isDone);
@@ -84,8 +86,9 @@ export function useStudyStepPersistence({
     setIsSaving(true);
     try {
       const values = getValues();
-      await save(values, true);
-      updateContext(values, true);
+      const isDone = isStepDone(values);
+      await save(values, isDone);
+      updateContext(values, isDone);
     } catch (err) {
       console.error(`Error al guardar el paso ${stepKey}:`, err);
       showToast({
