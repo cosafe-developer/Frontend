@@ -79,9 +79,12 @@ test.describe("Llenar Listado completo", () => {
       "Sin incidentes mayores.\n\nÚltima inspección hace 2 años.\n\nNo se han detectado fugas."
     );
 
-    // Calendario (cerrar sin elegir, opcional)
-    await page.getByPlaceholder(/Seleccionar fechas/i).click();
-    await page.keyboard.press("Escape");
+    // Calendario: fecha única y obligatoria (la plantilla tiene un solo campo)
+    await page.getByPlaceholder(/Seleccionar fecha/i).click();
+    await page
+      .locator(".flatpickr-calendar.open .flatpickr-day:not(.prevMonthDay):not(.nextMonthDay)")
+      .first()
+      .click();
 
     await page.getByRole("button", { name: /guardar/i }).click();
     await page.getByRole("button", { name: /continuar/i }).click({ timeout: 30_000 });
