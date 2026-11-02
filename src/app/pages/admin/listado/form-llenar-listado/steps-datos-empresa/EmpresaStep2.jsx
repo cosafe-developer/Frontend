@@ -11,6 +11,10 @@ import SignaturePad from "components/custom-ui/signature/SignaturePad";
 import { useEffect, useState } from "react";
 import { resetDataEmpresaStep2 } from "./utils/resetDataEmpresaStep2";
 import { uploadListadoFile } from "helpers/updateImageUpload";
+import { isDataUrl } from "helpers/listadoData";
+import updateListado from "api/listados/updateListado";
+import { useToastContext } from "app/contexts/toast-provider/context";
+import { progressPercentageOf } from "../../helpers/calculateProgressGeneralListado.js";
 
 const FLAT_BOUNDARY_KEYS = [
   "propertyBoundariesNorth",
@@ -50,12 +54,15 @@ const EmpresaStep2 = ({
   const llenarListadoFormCtx = useLlenarListadoFormContext();
   const addressInfoCtx = llenarListadoFormCtx?.state?.stepStatus?.addressInfo;
   const [inputValue, setInputValue] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
+  const { showToast } = useToastContext();
 
   // control del formulario
   const {
     handleSubmit,
     control,
     reset,
+    setValue,
     formState: { errors },
   } = useForm({
     resolver: yupResolver(informacionDireccionSchema),
@@ -80,7 +87,53 @@ const EmpresaStep2 = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [empresa, reset, listado]);
 
-  const onSubmit = (data) => {
+  /**
+   * La firma del SignaturePad es un dataURL que sólo vivía en el contexto
+   * hasta el guardado del paso 3: si el usuario recargaba o salía antes, se
+   * perdía sin aviso. Al pulsar "Siguiente" se sube a listado-<id>/ y se
+   * guarda su URL en addressInfo.legalRepresentativeSignatureUrl. Si ya es
+   * una URL (o no hay firma) no se sube nada. El paso 3 sigue resolviendo la
+   * firma igual (una URL no se resube).
+   */
+  const persistSignature = async (value) => {
+    if (!isDataUrl(value)) return value;
+    const url = await uploadListadoFile(value, { listadoId: listado?._id, fileName: "firma" });
+    const resp = await updateListado({
+      requestBody: {
+        listado_id: listado?._id,
+        addressInfo: { legalRepresentativeSignatureUrl: url },
+        progressPercentage: progressPercentageOf(
+          llenarListadoFormCtx?.state?.formData ?? {},
+          llenarListadoFormCtx?.state?.stepApplicability,
+        ),
+      },
+    });
+    if (!resp || resp.ok === false) {
+      throw new Error(resp?.message || "No se pudo guardar la firma");
+    }
+    return url;
+  };
+
+  const onSubmit = async (data) => {
+    if (isSaving) return;
+    setIsSaving(true);
+
+    let signatureUrl = data.legalRepresentativeSignatureUrl;
+    try {
+      signatureUrl = await persistSignature(signatureUrl);
+    } catch (err) {
+      console.error("Error al guardar la firma:", err);
+      showToast({
+        message: "No se pudo guardar la firma del representante legal. Revisa tu conexión e intenta de nuevo.",
+        type: "error",
+      });
+      setIsSaving(false);
+      return;
+    }
+    if (signatureUrl !== data.legalRepresentativeSignatureUrl) {
+      setValue("legalRepresentativeSignatureUrl", signatureUrl);
+    }
+
     const rest = Object.fromEntries(
       Object.entries(data).filter(([k]) => !FLAT_BOUNDARY_KEYS.includes(k))
     );
@@ -90,12 +143,14 @@ const EmpresaStep2 = ({
       payload: {
         addressInfo: {
           ...rest,
+          legalRepresentativeSignatureUrl: signatureUrl,
           propertyBoundaries: toNestedBoundaries(data),
           isDone: true,
         },
       },
     });
 
+    setIsSaving(false);
     setCurrentEmpresaStep(2);
   };
 
@@ -835,8 +890,8 @@ const EmpresaStep2 = ({
         }}>
           Atrás
         </Button>
-        <Button type="submit" className="min-w-[7rem]" color="primary">
-          Siguiente
+        <Button type="submit" className="min-w-[7rem]" color="primary" disabled={isSaving}>
+          {isSaving ? "Guardando..." : "Siguiente"}
         </Button>
       </div>
     </form>
