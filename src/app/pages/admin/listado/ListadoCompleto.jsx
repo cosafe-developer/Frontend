@@ -1,6 +1,7 @@
 import getEmpresaById from "api/empresa/getEmpresaById";
 import getListadoById from "api/listados/getListadoById";
 import downloadDocument from "api/listados/downloadDocument";
+import approveListado from "api/listados/approveListado";
 import { useToastContext } from "app/contexts/toast-provider/context";
 import LoadingErrorComponent from "components/custom-ui/loadings/LoadingError.component";
 import { Page } from "components/shared/Page";
@@ -19,6 +20,7 @@ const ListadoCompleto = () => {
   const [listado, setListado] = useState(null);
   const [empresa, setEmpresa] = useState(null);
   const [estado, setEstado] = useState(serverStatesFetching.fetching);
+  const [approving, setApproving] = useState(false);
   const { showToast } = useToastContext();
   const { listado_id } = useParams();
 
@@ -128,13 +130,21 @@ const ListadoCompleto = () => {
                   <ArrowDownTrayIcon className="size-5 mr-1.5" />
                   Descargar PIPC
                 </Button>
-                {/* TODO(aprobar): el backend no expone un endpoint para aprobar
-                    (isApproved). El update genérico de listado no debe usarse para
-                    esto (whitelist de campos). Habilitar cuando exista la ruta. */}
                 <Button
                   type="button"
-                  disabled
-                  title="Aprobación pendiente: el backend aún no expone esta acción"
+                  disabled={listado?.isApproved || approving}
+                  onClick={async () => {
+                    setApproving(true);
+                    try {
+                      await approveListado(listado?._id);
+                      setListado((prev) => ({ ...prev, isApproved: true, status: "completado" }));
+                      showToast({ message: "Listado aprobado", type: "success" });
+                    } catch (err) {
+                      showToast({ message: err.message || "Error al aprobar", type: "error" });
+                    } finally {
+                      setApproving(false);
+                    }
+                  }}
                   color="success"
                   className="h-10 text-base font-light"
                 >
