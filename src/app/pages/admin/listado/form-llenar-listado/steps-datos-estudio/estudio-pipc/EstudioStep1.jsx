@@ -7,7 +7,6 @@ import { useEffect } from "react";
 import { resetDataEstudioStep1 } from "./utils/resetDataEstudioStep1";
 import { deepMergeDefaults } from "../../utils/deepMergeDefaultsInfo";
 import { evacuationBlockingObjects, fallingObjects, flammableObjects, overturningObjects, slidingObjects } from "./utils/elementsTask";
-import { checkIfSectionIsDone } from "../utils/checkIfSectionIsDone";
 import { uploadListadoFile } from "helpers/updateImageUpload";
 
 import { useStudyStepPersistence } from "../../utils/useStudyStepPersistence";
@@ -103,7 +102,6 @@ const EstudioStep1 = ({ onNext, listado }) => {
     setValue,
     listado,
     onNext,
-    computeIsDone: (data) => checkIfSectionIsDone(data, ["riskLevel"]),
   });
 
   const onSubmit = () => saveAndNext();

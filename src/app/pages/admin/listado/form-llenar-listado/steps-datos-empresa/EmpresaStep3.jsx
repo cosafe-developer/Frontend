@@ -30,6 +30,7 @@ import { internalGeneralRisksElements } from "../steps-datos-estudio/estudio-pip
 import { tiposRiesgosEstudios } from "../utils/types";
 import ResourceInventorySection from "./ResourceInventorySection";
 import EvidencePhotosSection from "./EvidencePhotosSection";
+import { progressPercentageOf } from "../../helpers/calculateProgressGeneralListado.js";
 
 
 const EmpresaStep3 = ({
@@ -118,7 +119,15 @@ const EmpresaStep3 = ({
         const payload = sanitizeForBackend({ companyInfo, addressInfo, riskInfo }) ?? {};
 
         const listadoUpdated = await updateListado({
-          requestBody: { ...payload, listado_id: listadoId }
+          requestBody: {
+            ...payload,
+            listado_id: listadoId,
+            // Avance del estudio (mismo cálculo que la lista y el detalle)
+            progressPercentage: progressPercentageOf(
+              llenarListadoFormCtx?.state?.formData ?? {},
+              llenarListadoFormCtx?.state?.stepApplicability,
+            ),
+          }
         });
 
         if (!listadoUpdated?.ok) {

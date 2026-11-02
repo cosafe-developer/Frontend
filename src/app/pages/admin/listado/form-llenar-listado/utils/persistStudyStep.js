@@ -44,9 +44,12 @@ export function buildStudyStepData({ sections, values, filter = (row) => row }) 
   return clean;
 }
 
-/** requestBody para updateListado con el paso completo. */
-export function buildStudyStepPayload({ listadoId, stepKey, sections, values, filter, isDone }) {
-  return {
+/**
+ * requestBody para updateListado con el paso completo. `progressPercentage`
+ * (0-100, ver calculateProgressGeneralListado) se manda sólo si es número.
+ */
+export function buildStudyStepPayload({ listadoId, stepKey, sections, values, filter, isDone, progressPercentage }) {
+  const body = {
     listado_id: listadoId,
     studyData: {
       [stepKey]: {
@@ -55,6 +58,10 @@ export function buildStudyStepPayload({ listadoId, stepKey, sections, values, fi
       },
     },
   };
+  if (typeof progressPercentage === "number" && Number.isFinite(progressPercentage)) {
+    body.progressPercentage = Math.max(0, Math.min(100, Math.round(progressPercentage)));
+  }
+  return body;
 }
 
 /**
@@ -71,11 +78,20 @@ export async function persistStudyStep({
   filter,
   isDone,
   stepApplicability,
+  progressPercentage,
 }) {
   if (stepApplicability?.[stepKey] === false) return { skipped: true };
   if (!listadoId) throw new Error("No se encontró el id del listado");
 
-  const requestBody = buildStudyStepPayload({ listadoId, stepKey, sections, values, filter, isDone });
+  const requestBody = buildStudyStepPayload({
+    listadoId,
+    stepKey,
+    sections,
+    values,
+    filter,
+    isDone,
+    progressPercentage,
+  });
   const result = await save({ requestBody });
   if (!result || result.ok === false) {
     throw new Error(result?.message || "Error al guardar el paso del estudio");

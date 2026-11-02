@@ -14,7 +14,6 @@ import {
 import { CheckIcon } from "@heroicons/react/20/solid";
 import EvidenceUpload from "components/custom-ui/upload-button/EvidenceUpload.component";
 import { useLlenarListadoFormContext } from "../../contexts/LlenarListadoFormContext";
-import { checkIfSectionIsDone } from "../utils/checkIfSectionIsDone";
 import { deepMergeDefaults } from "../../utils/deepMergeDefaultsInfo";
 import { resetDataEstudioStep3 } from "./utils/resetDataEstudioStep3";
 import {
@@ -141,7 +140,6 @@ const EstudioStep3 = ({ onNext, onPrev, listado }) => {
     setValue,
     listado,
     onNext,
-    computeIsDone: (data) => checkIfSectionIsDone(data, ["observations", "applies", "no_aplica", "approxDistance"], "some"),
   });
 
   const onSubmit = () => saveAndNext();

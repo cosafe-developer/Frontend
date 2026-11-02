@@ -10,7 +10,7 @@ const cols = ["CHECKLIST", "PROGRESO"];
 export function ContentPreviewEmpresa({ close, data }) {
   const [redirect, setRedirect] = useState(false);
 
-  const taskScores = Object.entries(data?.progressSections).map(([key, value]) => {
+  const taskScores = Object.entries(data?.progressSections ?? {}).map(([key, value]) => {
     return {
       key: key,
       label: estudioSectionLabel(key),

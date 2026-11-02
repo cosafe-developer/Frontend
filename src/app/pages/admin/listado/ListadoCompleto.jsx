@@ -43,7 +43,7 @@ const ListadoCompleto = () => {
 
     const studyData = listadoData?.studyData ?? {};
     const { globalPercent, totalGlobal, completadosGlobal, progressSections } =
-      calculateProgressGeneralListado(studyData, true);
+      calculateProgressGeneralListado(studyData);
 
 
     const listadoConProgreso = {

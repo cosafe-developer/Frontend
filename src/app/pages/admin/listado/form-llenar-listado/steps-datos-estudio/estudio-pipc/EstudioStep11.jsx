@@ -9,6 +9,7 @@ import { deepMergeDefaults } from "../../utils/deepMergeDefaultsInfo";
 import { documentsElements } from "./utils/elementsTask";
 import updateListado from "api/listados/updateListado";
 import uploadImageWithFirma from "api/upload/uploadImageWithFirma.service";
+import { progressPercentageOf } from "../../../helpers/calculateProgressGeneralListado.js";
 
 
 const sections = [
@@ -133,6 +134,14 @@ const EstudioStep11 = ({ onNext, onPrev, listado }) => {
       await updateListado({
         requestBody: {
           listado_id: listado?._id,
+          // Avance con el mismo cálculo que el detalle y la lista
+          progressPercentage: progressPercentageOf(
+            {
+              ...(llenarListadoFormCtx?.state?.formData ?? {}),
+              attachments: { ...attachmentsCtx, isDone: true },
+            },
+            llenarListadoFormCtx?.state?.stepApplicability,
+          ),
           studyData: {
             attachments: {
               ...cleanAttachments,

@@ -3,17 +3,23 @@ import updateListado from "api/listados/updateListado";
 import { useToastContext } from "app/contexts/toast-provider/context";
 import { useLlenarListadoFormContext } from "../contexts/LlenarListadoFormContext";
 import { persistStudyStep, pickStepSections } from "./persistStudyStep";
+import { getStudyStepIssues } from "../../helpers/studyStepRules.js";
+import { progressPercentageOf } from "../../helpers/calculateProgressGeneralListado.js";
 
 /**
  * Guardado de un paso del estudio PIPC (EstudioStep1..10).
  *
  * - handleFieldChange: actualiza una fila y guarda el paso completo con los
- *   valores actuales del formulario (todas las sub-secciones).
+ *   valores actuales del formulario (todas las sub-secciones). No marca el
+ *   paso como terminado: conserva isDone sólo si ya lo estaba y sigue válido.
  * - saveAndNext ("Siguiente"): guarda el paso completo y sólo avanza si el
- *   guardado tuvo éxito; si falla muestra un toast.
+ *   guardado tuvo éxito; si falla muestra un toast. El paso queda terminado
+ *   (isDone) si cumple las reglas de helpers/studyStepRules.js (p.ej. grado de
+ *   riesgo en filas "Sí" del paso 1); si no, se guarda igual, se avanza y se
+ *   avisa qué falta.
  *
- * `computeIsDone(sectionsData)` es opcional (por defecto el paso cuenta como
- * hecho al guardarse).
+ * Cada guardado manda también progressPercentage, calculado con
+ * calculateProgressGeneralListado sobre el estudio en el contexto.
  */
 export function useStudyStepPersistence({
   stepKey,
@@ -23,32 +29,29 @@ export function useStudyStepPersistence({
   setValue,
   listado,
   onNext,
-  computeIsDone,
 }) {
   const llenarListadoFormCtx = useLlenarListadoFormContext();
   const { showToast } = useToastContext();
   const [isSaving, setIsSaving] = useState(false);
 
-  const stepCtx = llenarListadoFormCtx?.state?.formData?.[stepKey] ?? {};
+  const formData = llenarListadoFormCtx?.state?.formData ?? {};
+  const stepCtx = formData?.[stepKey] ?? {};
   const stepApplicability = llenarListadoFormCtx?.state?.stepApplicability;
+
+  const stepData = (values, isDone) => ({
+    ...stepCtx,
+    ...pickStepSections(sections, values),
+    isDone,
+  });
 
   const updateContext = (values, isDone) => {
     llenarListadoFormCtx.dispatch({
       type: "SET_FORM_DATA",
-      payload: {
-        [stepKey]: {
-          ...stepCtx,
-          ...pickStepSections(sections, values),
-          isDone,
-        },
-      },
+      payload: { [stepKey]: stepData(values, isDone) },
     });
   };
 
-  // Pasos con validación propia (1, 2, 3, 8, 10) sólo cuentan como hechos si
-  // están completos; los demás, al guardarse.
-  const isStepDone = (values) =>
-    computeIsDone ? Boolean(computeIsDone(pickStepSections(sections, values))) : true;
+  const issuesOf = (values) => getStudyStepIssues(stepKey, pickStepSections(sections, values));
 
   const save = (values, isDone) =>
     persistStudyStep({
@@ -60,6 +63,10 @@ export function useStudyStepPersistence({
       filter,
       isDone,
       stepApplicability,
+      progressPercentage: progressPercentageOf(
+        { ...formData, [stepKey]: stepData(values, isDone) },
+        stepApplicability,
+      ),
     });
 
   const handleFieldChange = async (sectionKey, rowIndex, changedFields) => {
@@ -71,7 +78,7 @@ export function useStudyStepPersistence({
 
       // Valores actuales de TODAS las sub-secciones (no la prop listado)
       const values = { ...getValues(), [sectionKey]: updatedArray };
-      const isDone = isStepDone(values);
+      const isDone = stepCtx.isDone === true && issuesOf(values).length === 0;
 
       updateContext(values, isDone);
       await save(values, isDone);
@@ -84,9 +91,10 @@ export function useStudyStepPersistence({
   const saveAndNext = async () => {
     if (isSaving) return;
     setIsSaving(true);
+    const values = getValues();
+    const issues = issuesOf(values);
+    const isDone = issues.length === 0;
     try {
-      const values = getValues();
-      const isDone = isStepDone(values);
       await save(values, isDone);
       updateContext(values, isDone);
     } catch (err) {
@@ -97,6 +105,13 @@ export function useStudyStepPersistence({
       });
       setIsSaving(false);
       return;
+    }
+    if (!isDone) {
+      showToast({
+        message: `Se guardó, pero el paso queda pendiente: ${issues.join(" ")}`,
+        type: "warning",
+        duration: 7000,
+      });
     }
     setIsSaving(false);
     onNext();

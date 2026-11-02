@@ -16,7 +16,6 @@ import { useEffect, useState } from "react";
 import { resetDataEstudioStep2 } from "./utils/resetDataEstudioStep2";
 import { deepMergeDefaults } from "../../utils/deepMergeDefaultsInfo";
 import { ObservationModal } from "../../modals/ObservacionesModal";
-import { checkIfSectionIsDone } from "../utils/checkIfSectionIsDone";
 
 import {
   elementTaskStructuralDamage,
@@ -143,7 +142,6 @@ const EstudioStep2 = ({ onNext, onPrev, listado }) => {
     setValue,
     listado,
     onNext,
-    computeIsDone: (data) => checkIfSectionIsDone(data, ["observations", "applies", "existsInPlace", "notApplicable"], "some"),
   });
 
   const onSubmit = () => saveAndNext();

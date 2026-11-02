@@ -4,7 +4,6 @@ import EvidenceUpload from "components/custom-ui/upload-button/EvidenceUpload.co
 import { useLlenarListadoFormContext } from "../../contexts/LlenarListadoFormContext";
 import { PencilSquareIcon } from "@heroicons/react/24/outline";
 import { ObservationModal } from "../../modals/ObservacionesModal";
-import { checkIfSectionIsDone } from "../utils/checkIfSectionIsDone";
 import { useEffect, useState } from "react";
 import { resetDataEstudioStep8 } from "./utils/resetDataEstudioStep8";
 import { deepMergeDefaults } from "../../utils/deepMergeDefaultsInfo";
@@ -110,7 +109,6 @@ const EstudioStep8 = ({ onNext, onPrev, listado }) => {
     setValue,
     listado,
     onNext,
-    computeIsDone: (data) => checkIfSectionIsDone(data, ["observations", "applies", "notApplicable"], "some"),
   });
 
   const onSubmit = () => saveAndNext();

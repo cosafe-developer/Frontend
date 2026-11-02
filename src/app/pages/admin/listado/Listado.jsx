@@ -24,14 +24,18 @@ const Listado = () => {
       let listadosData = response?.data?.listados ?? [];
 
       const listadosConProgreso = listadosData.map((listado) => {
-        const studyData = listado?.studyData ?? {};
-
+        // Mismo cálculo que se guarda en progressPercentage al guardar cada
+        // paso; si el listado no trae studyData se usa el valor guardado.
+        const studyData = listado?.studyData;
         const { globalPercent, totalGlobal, completadosGlobal, progressSections } =
-          calculateProgressGeneralListado(studyData, true);
+          calculateProgressGeneralListado(studyData ?? {});
+        const stored = Number(listado?.progressPercentage);
 
         return {
           ...listado,
-          progressPercentage: Math.round(globalPercent),
+          progressPercentage: studyData
+            ? Math.round(globalPercent)
+            : Number.isFinite(stored) ? Math.round(stored) : 0,
           progressSections,
           progressMeta: { totalItems: totalGlobal, completedItems: completadosGlobal },
         };

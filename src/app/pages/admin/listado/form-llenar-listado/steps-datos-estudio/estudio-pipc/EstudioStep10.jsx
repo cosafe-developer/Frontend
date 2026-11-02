@@ -9,7 +9,6 @@ import { useEffect } from "react";
 import { deepMergeDefaults } from "../../utils/deepMergeDefaultsInfo";
 import { resetDataEstudioStep10 } from "./utils/resetDataEstudioStep10";
 import { damageElements } from "./utils/elementsTask";
-import { checkIfSectionIsDone } from "../utils/checkIfSectionIsDone";
 
 import { useStudyStepPersistence } from "../../utils/useStudyStepPersistence";
 import uploadImageWithFirma from "api/upload/uploadImageWithFirma.service";
@@ -88,7 +87,6 @@ const EstudioStep10 = ({ onNext, onPrev, listado }) => {
     setValue,
     listado,
     onNext,
-    computeIsDone: (data) => checkIfSectionIsDone(data, ["riskLevel"]),
   });
 
   const onSubmit = () => saveAndNext();
