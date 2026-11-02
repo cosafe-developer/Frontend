@@ -15,6 +15,7 @@ import { DatosGenerales } from "../steps-global/DatosGenerales";
 import { estudioSteps } from "../steps-datos-estudio/estudio-pipc/EstudioSteps";
 import { empresaSteps } from "../steps-datos-empresa/EmpresaSteps";
 import { useLlenarListadoFormContext } from "../contexts/LlenarListadoFormContext";
+import { buildAutosavePayload } from "helpers/listadoData";
 
 // ----------------------------------------------------------------------
 
@@ -175,30 +176,15 @@ const LlenarListadoForm = ({ listado, empresa }) => {
       prevMainStep.current !== currentStep;
 
     if (changed) {
-      // Guardar datos actuales al backend
-      const stepStatus = llenarListadoFormCtx?.state?.stepStatus || {};
-      const formData = llenarListadoFormCtx?.state?.formData || {};
-
-      const payload = { listado_id: listado?._id };
-
-      if (stepStatus.companyInfo) {
-        const { isDone, ...data } = stepStatus.companyInfo;
-        if (Object.keys(data).length > 0) payload.companyInfo = { ...data, isDone: isDone ?? false };
-      }
-      if (stepStatus.addressInfo) {
-        const { isDone, ...data } = stepStatus.addressInfo;
-        if (Object.keys(data).length > 0) payload.addressInfo = { ...data, isDone: isDone ?? false };
-      }
-      if (stepStatus.riskInfo) {
-        const { isDone, ...data } = stepStatus.riskInfo;
-        if (Object.keys(data).length > 0) payload.riskInfo = { ...data, isDone: isDone ?? false };
-      }
-      if (Object.keys(formData).length > 0) {
-        payload.studyData = {};
-        for (const [key, value] of Object.entries(formData)) {
-          if (value && typeof value === "object") payload.studyData[key] = value;
-        }
-      }
+      // Guardar datos actuales al backend. El payload se sanitiza: nunca se
+      // mandan File/Blob (serializan a {}), dataURLs, _uid/localPreview,
+      // objetos vacíos ni studyData.estudio; las claves omitidas conservan
+      // lo que ya está guardado (merge del backend).
+      const payload = buildAutosavePayload({
+        stepStatus: llenarListadoFormCtx?.state?.stepStatus || {},
+        formData: llenarListadoFormCtx?.state?.formData || {},
+        listadoId: listado?._id,
+      });
 
       if (listado?._id) {
         updateListado({ requestBody: payload }).catch((err) =>

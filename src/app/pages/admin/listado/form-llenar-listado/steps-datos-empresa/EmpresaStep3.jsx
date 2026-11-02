@@ -21,12 +21,11 @@ import { useDisclosure } from "hooks";
 import { useState, useEffect } from "react";
 import { CheckCircleIcon, XCircleIcon } from "@heroicons/react/24/outline";
 import { resetDataEmpresaStep3 } from "./utils/resetDataEmpresaStep3";
-import { filterNullsEmptyObject } from "helpers/filterNullsEmptyObject";
-import { filterUnchangedFields } from "helpers/filterUnchangedFields";
+import { isUsableUrl, sanitizeForBackend, toSingleDate } from "helpers/listadoData";
 
 import updateListado from "api/listados/updateListado";
 import { Listbox } from "components/shared/form/Listbox";
-import { replaceImage } from "helpers/updateImageUpload";
+import { deleteListadoFile, replaceImage } from "helpers/updateImageUpload";
 import { internalGeneralRisksElements } from "../steps-datos-estudio/estudio-pipc/utils/elementsTask";
 import { tiposRiesgosEstudios } from "../utils/types";
 import ResourceInventorySection from "./ResourceInventorySection";
@@ -50,7 +49,7 @@ const EmpresaStep3 = ({
   const tiposRiesgos = [
     { id: "ordinario", label: "Ordinario" },
     { id: "alto", label: "Alto" },
-    { id: "critico", label: "Critico" },
+    { id: "critico", label: "Crítico" },
   ]
 
 
@@ -58,99 +57,68 @@ const EmpresaStep3 = ({
     const sendData = async () => {
       if (formDataState === "[send-data]") {
 
-        const payloadUnchangedFields = {
-          companyInfo: filterUnchangedFields(companyInfoCtx, listado.companyInfo),
-          addressInfo: filterUnchangedFields(addressInfoCtx, listado.addressInfo),
-          riskInfo: filterUnchangedFields(riskInfoCtx, listado.riskInfo),
+        const listadoId = listado?._id;
+        const db = listado ?? {};
+
+        // 1) Resolver TODOS los archivos a URL string ANTES de persistir.
+        //    - URL existente => se conserva (no se resube)
+        //    - File / dataURL (firma) => se sube a listado-<id>/
+        //    - El archivo anterior se borra sólo si es propio del listado
+        //      (nunca el logo heredado de la empresa).
+        const companyInfo = { ...companyInfoCtx };
+        const addressInfo = {
+          ...addressInfoCtx,
+          propertyBoundaries: { ...(addressInfoCtx?.propertyBoundaries ?? {}) },
+        };
+        const riskInfo = {
+          ...riskInfoCtx,
+          preventionCalendarDate: toSingleDate(riskInfoCtx?.preventionCalendarDate),
         };
 
-        const payload = filterNullsEmptyObject(payloadUnchangedFields);
+        // Los archivos reemplazados se borran DESPUÉS de guardar con éxito
+        const replacedUrls = [];
+        const resolveFile = async (previousUrl, newFile, fileName) => {
+          const url = await replaceImage({
+            previousUrl,
+            newFile,
+            listadoId,
+            fileName,
+            deletePrevious: false,
+          });
+          if (isUsableUrl(previousUrl) && previousUrl !== url) replacedUrls.push(previousUrl);
+          return url;
+        };
 
-        if (
-          payload.companyInfo?.logoUrl ||
-          payload.addressInfo?.taxCertificateUrl ||
-          payload.addressInfo?.legalRepresentativeSignatureUrl ||
-          payload.addressInfo?.legalRepresentativeIneUrl ||
-          payload.addressInfo?.propertyBoundaries ||
-          payload.riskInfo?.materialsInventoryUrl
-        ) {
+        companyInfo.logoUrl = await resolveFile(db.companyInfo?.logoUrl, companyInfoCtx?.logoUrl, "logo");
 
-          // COMPANY → Logo
-          if (payload.companyInfo?.logoUrl) {
-            payload.companyInfo.logoUrl = await replaceImage({
-              previousUrl: listado.companyInfo?.logoUrl,
-              newFile: companyInfoCtx.logoUrl,
-              folder: "empresa"
-            });
-          }
-
-          // ADDRESS → Tax Certificate
-          if (payload.addressInfo?.taxCertificateUrl) {
-            payload.addressInfo.taxCertificateUrl = await replaceImage({
-              previousUrl: listado.addressInfo?.taxCertificateUrl,
-              newFile: addressInfoCtx.taxCertificateUrl,
-              folder: `listado-${listado?._id}`
-            });
-          }
-
-          // ADDRESS → Firma
-          if (payload.addressInfo?.legalRepresentativeSignatureUrl) {
-            payload.addressInfo.legalRepresentativeSignatureUrl = await replaceImage({
-              previousUrl: listado.addressInfo?.legalRepresentativeSignatureUrl,
-              newFile: addressInfoCtx.legalRepresentativeSignatureUrl,
-              folder: `listado-${listado?._id}`
-            });
-          }
-
-          // ADDRESS → INE
-          if (payload.addressInfo?.legalRepresentativeIneUrl) {
-            payload.addressInfo.legalRepresentativeIneUrl = await replaceImage({
-              previousUrl: listado.addressInfo?.legalRepresentativeIneUrl,
-              newFile: addressInfoCtx.legalRepresentativeIneUrl,
-              folder: `listado-${listado?._id}`
-            });
-          }
-
-          // ADDRESS → Imágenes de Colindancias (objeto anidado)
-          if (payload.addressInfo?.propertyBoundaries) {
-            const ctxBoundaries = addressInfoCtx?.propertyBoundaries ?? {};
-            const dbBoundaries = listado?.addressInfo?.propertyBoundaries ?? {};
-            const directions = ["north", "south", "east", "west"];
-
-            for (const dir of directions) {
-              const ctxImg = ctxBoundaries?.[dir]?.imageUrl;
-              const dbImg = dbBoundaries?.[dir]?.imageUrl;
-              if (ctxImg && typeof ctxImg !== "string") {
-                const newUrl = await replaceImage({
-                  previousUrl: typeof dbImg === "string" ? dbImg : "",
-                  newFile: ctxImg,
-                  folder: `listado-${listado?._id}`,
-                });
-                payload.addressInfo.propertyBoundaries = {
-                  ...payload.addressInfo.propertyBoundaries,
-                  [dir]: {
-                    ...(payload.addressInfo.propertyBoundaries?.[dir] ?? {}),
-                    imageUrl: newUrl,
-                  },
-                };
-              }
-            }
-          }
-
-          // RISK → Inventario de materiales
-          if (payload.riskInfo?.materialsInventoryUrl) {
-            payload.riskInfo.materialsInventoryUrl = await replaceImage({
-              previousUrl: listado.riskInfo?.materialsInventoryUrl,
-              newFile: riskInfoCtx.materialsInventoryUrl,
-              folder: `listado-${listado?._id}`
-            });
-          }
+        for (const [key, fileName] of [
+          ["taxCertificateUrl", "constancia-fiscal"],
+          ["legalRepresentativeSignatureUrl", "firma"],
+          ["legalRepresentativeIneUrl", "ine"],
+        ]) {
+          addressInfo[key] = await resolveFile(db.addressInfo?.[key], addressInfoCtx?.[key], fileName);
         }
 
+        for (const dir of ["north", "south", "east", "west"]) {
+          const current = addressInfo.propertyBoundaries[dir] ?? {};
+          addressInfo.propertyBoundaries[dir] = {
+            observations: current.observations ?? "",
+            imageUrl: await resolveFile(
+              db.addressInfo?.propertyBoundaries?.[dir]?.imageUrl,
+              current.imageUrl,
+              `colindancia-${dir}`,
+            ),
+          };
+        }
 
-        // ⬇️ Aquí ya el payload tiene las URLs públicas nuevas
+        // 2) Sanitizar: sin File/Blob, dataURL, _uid, objetos vacíos.
+        //    Se mandan las secciones completas (no diffs): el merge del
+        //    backend es superficial y un propertyBoundaries parcial borraba
+        //    las demás colindancias.
+        const payload = sanitizeForBackend({ companyInfo, addressInfo, riskInfo }) ?? {};
+
         const listadoUpdated = await updateListado({
-          requestBody: { ...payload, listado_id: listado?._id }
+          requestBody: { ...payload, listado_id: listadoId }
         });
 
         if (!listadoUpdated?.ok) {
@@ -158,6 +126,25 @@ const EmpresaStep3 = ({
           setFormDataState("[error]");
           return;
         }
+
+        // Sólo archivos propios de este listado (deleteListadoFile lo verifica)
+        await Promise.all(replacedUrls.map((url) => deleteListadoFile(url, listadoId)));
+
+        // 3) El contexto queda con las URLs subidas (no con File/dataURL),
+        //    así el auto-guardado y "Continuar" no pisan nada.
+        llenarListadoFormCtx.dispatch({
+          type: "MERGE_STEP_STATUS",
+          payload: {
+            companyInfo: { logoUrl: companyInfo.logoUrl },
+            addressInfo: {
+              taxCertificateUrl: addressInfo.taxCertificateUrl,
+              legalRepresentativeSignatureUrl: addressInfo.legalRepresentativeSignatureUrl,
+              legalRepresentativeIneUrl: addressInfo.legalRepresentativeIneUrl,
+              propertyBoundaries: addressInfo.propertyBoundaries,
+            },
+            riskInfo: { preventionCalendarDate: riskInfo.preventionCalendarDate },
+          },
+        });
 
         setFormDataState("[success]");
       }
@@ -193,7 +180,7 @@ const EmpresaStep3 = ({
 
   const onSubmit = async (data) => {
     llenarListadoFormCtx.dispatch({
-      type: "SET_STEP_STATUS",
+      type: "MERGE_STEP_STATUS",
       payload: {
         riskInfo: {
           ...data,
@@ -235,7 +222,7 @@ const EmpresaStep3 = ({
                         const checked = e.target.checked;
                         field.onChange(checked);
                         llenarListadoFormCtx.dispatch({
-                          type: "SET_STEP_STATUS",
+                          type: "MERGE_STEP_STATUS",
                           payload: {
                             riskInfo: {
                               ...riskInfoCtx,
@@ -274,7 +261,7 @@ const EmpresaStep3 = ({
                     onChange={(e) => {
                       field.onChange(e);
                       llenarListadoFormCtx.dispatch({
-                        type: "SET_STEP_STATUS",
+                        type: "MERGE_STEP_STATUS",
                         payload: {
                           riskInfo: {
                             ...riskInfoCtx,
@@ -302,7 +289,7 @@ const EmpresaStep3 = ({
                     onChange={(val) => {
                       field.onChange(val?.id);
                       llenarListadoFormCtx.dispatch({
-                        type: "SET_STEP_STATUS",
+                        type: "MERGE_STEP_STATUS",
                         payload: {
                           riskInfo: {
                             ...riskInfoCtx,
@@ -329,7 +316,7 @@ const EmpresaStep3 = ({
                     onChange={(val) => {
                       field.onChange(val?.id);
                       llenarListadoFormCtx.dispatch({
-                        type: "SET_STEP_STATUS",
+                        type: "MERGE_STEP_STATUS",
                         payload: {
                           riskInfo: {
                             ...riskInfoCtx,
@@ -359,7 +346,7 @@ const EmpresaStep3 = ({
                   onChange={(e) => {
                     field.onChange(e);
                     llenarListadoFormCtx.dispatch({
-                      type: "SET_STEP_STATUS",
+                      type: "MERGE_STEP_STATUS",
                       payload: {
                         riskInfo: {
                           ...riskInfoCtx,
@@ -384,23 +371,24 @@ const EmpresaStep3 = ({
               name="preventionCalendarDate"
               control={control}
               render={({ field }) => (
+                // La plantilla tiene un solo [{preventionCalendarDate}]:
+                // fecha única (antes mode "multiple" mandaba un array).
                 <DatePicker
                   {...field}
+                  value={toSingleDate(field.value) ?? ""}
                   options={{
-                    mode: "multiple",
                     dateFormat: "Y-m-d",
-                    conjunction: ", ",
                   }}
                   error={errors?.preventionCalendarDate?.message}
-                  placeholder="Seleccionar fechas..."
+                  placeholder="Seleccionar fecha..."
                   onChange={(dates) => {
-                    field.onChange(dates);
+                    const date = toSingleDate(dates);
+                    field.onChange(date);
                     llenarListadoFormCtx.dispatch({
-                      type: "SET_STEP_STATUS",
+                      type: "MERGE_STEP_STATUS",
                       payload: {
                         riskInfo: {
-                          ...riskInfoCtx,
-                          preventionCalendarDate: dates,
+                          preventionCalendarDate: date,
                         },
                       },
                     });
@@ -444,7 +432,7 @@ const EmpresaStep3 = ({
                               updated[idx] = { ...updated[idx], element, applies: checked };
                               setValue("internalGeneralRisks", updated);
                               llenarListadoFormCtx.dispatch({
-                                type: "SET_STEP_STATUS",
+                                type: "MERGE_STEP_STATUS",
                                 payload: {
                                   riskInfo: {
                                     ...riskInfoCtx,
@@ -467,7 +455,7 @@ const EmpresaStep3 = ({
                               updated[idx] = { ...updated[idx], element, riskLevel: val?.id ?? null };
                               setValue("internalGeneralRisks", updated);
                               llenarListadoFormCtx.dispatch({
-                                type: "SET_STEP_STATUS",
+                                type: "MERGE_STEP_STATUS",
                                 payload: {
                                   riskInfo: {
                                     ...riskInfoCtx,

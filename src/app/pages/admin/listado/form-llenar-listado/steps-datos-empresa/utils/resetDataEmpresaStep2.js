@@ -1,13 +1,29 @@
+import { normalizeUploadValue } from "helpers/listadoData";
+
+// Primer archivo válido (contexto > BD). `{}`, "" o placeholders => null, para
+// que la validación pida volver a subirlo.
+const pickUpload = (...values) => {
+  for (const value of values) {
+    const normalized = normalizeUploadValue(value);
+    if (normalized !== null) return normalized;
+  }
+  return null;
+};
+
 export function resetDataEmpresaStep2({ listado, addressInfoCtx }) {
   const addressInfo = listado?.addressInfo;
-  const boundaries = addressInfo?.propertyBoundaries ?? {};
+  const dbBoundaries = addressInfo?.propertyBoundaries ?? {};
+  // El contexto guarda las colindancias ANIDADAS (propertyBoundaries.north...),
+  // igual que la BD. Leer claves planas del contexto perdía las ediciones.
+  const ctxBoundaries = addressInfoCtx?.propertyBoundaries ?? {};
+
+  const boundaryText = (dir) =>
+    ctxBoundaries?.[dir]?.observations ?? dbBoundaries?.[dir]?.observations ?? "";
+  const boundaryImage = (dir) =>
+    pickUpload(ctxBoundaries?.[dir]?.imageUrl, dbBoundaries?.[dir]?.imageUrl);
 
   return {
-    taxCertificateUrl:
-      addressInfoCtx?.taxCertificateUrl ??
-      (addressInfo?.taxCertificateUrl?.length > 0
-        ? addressInfo?.taxCertificateUrl
-        : "https://mybucket.digitaloceanspaces.com/constancia.pdf"),
+    taxCertificateUrl: pickUpload(addressInfoCtx?.taxCertificateUrl, addressInfo?.taxCertificateUrl),
 
     activities: addressInfoCtx?.activities ?? addressInfo?.activities ?? "",
     businessTurn: addressInfoCtx?.businessTurn ?? addressInfo?.businessTurn ?? "",
@@ -16,17 +32,16 @@ export function resetDataEmpresaStep2({ listado, addressInfoCtx }) {
     legalRepresentativeName: addressInfoCtx?.legalRepresentativeName ?? addressInfo?.legalRepresentativeName ?? "",
     legalRepresentativePosition: addressInfoCtx?.legalRepresentativePosition ?? addressInfo?.legalRepresentativePosition ?? "",
 
-    legalRepresentativeSignatureUrl:
-      addressInfoCtx?.legalRepresentativeSignatureUrl ??
-      (addressInfo?.legalRepresentativeSignatureUrl?.length > 0
-        ? addressInfo?.legalRepresentativeSignatureUrl
-        : "https://mybucket.digitaloceanspaces.com/firma.png"),
+    // Firma opcional: URL guardada o dataURL aún no subido; si no hay, null
+    legalRepresentativeSignatureUrl: pickUpload(
+      addressInfoCtx?.legalRepresentativeSignatureUrl,
+      addressInfo?.legalRepresentativeSignatureUrl,
+    ),
 
-    legalRepresentativeIneUrl:
-      addressInfoCtx?.legalRepresentativeIneUrl ??
-      (addressInfo?.legalRepresentativeIneUrl?.length > 0
-        ? addressInfo?.legalRepresentativeIneUrl
-        : "https://mybucket.digitaloceanspaces.com/ine.pdf"),
+    legalRepresentativeIneUrl: pickUpload(
+      addressInfoCtx?.legalRepresentativeIneUrl,
+      addressInfo?.legalRepresentativeIneUrl,
+    ),
 
     landAreaM2: addressInfoCtx?.landAreaM2 ?? addressInfo?.landAreaM2 ?? 0,
     builtAreaM2: addressInfoCtx?.builtAreaM2 ?? addressInfo?.builtAreaM2 ?? 0,
@@ -36,15 +51,15 @@ export function resetDataEmpresaStep2({ listado, addressInfoCtx }) {
     levels: addressInfoCtx?.levels ?? addressInfo?.levels ?? "",
     buildingAge: addressInfoCtx?.buildingAge ?? addressInfo?.buildingAge ?? "",
 
-    propertyBoundariesNorth: addressInfoCtx?.propertyBoundariesNorth ?? boundaries?.north?.observations ?? "",
-    propertyBoundariesSouth: addressInfoCtx?.propertyBoundariesSouth ?? boundaries?.south?.observations ?? "",
-    propertyBoundariesEast: addressInfoCtx?.propertyBoundariesEast ?? boundaries?.east?.observations ?? "",
-    propertyBoundariesWest: addressInfoCtx?.propertyBoundariesWest ?? boundaries?.west?.observations ?? "",
+    propertyBoundariesNorth: boundaryText("north"),
+    propertyBoundariesSouth: boundaryText("south"),
+    propertyBoundariesEast: boundaryText("east"),
+    propertyBoundariesWest: boundaryText("west"),
 
-    propertyBoundariesImageNorth: addressInfoCtx?.propertyBoundariesImageNorth ?? boundaries?.north?.imageUrl ?? "",
-    propertyBoundariesImageSouth: addressInfoCtx?.propertyBoundariesImageSouth ?? boundaries?.south?.imageUrl ?? "",
-    propertyBoundariesImageEast: addressInfoCtx?.propertyBoundariesImageEast ?? boundaries?.east?.imageUrl ?? "",
-    propertyBoundariesImageWest: addressInfoCtx?.propertyBoundariesImageWest ?? boundaries?.west?.imageUrl ?? "",
+    propertyBoundariesImageNorth: boundaryImage("north"),
+    propertyBoundariesImageSouth: boundaryImage("south"),
+    propertyBoundariesImageEast: boundaryImage("east"),
+    propertyBoundariesImageWest: boundaryImage("west"),
 
     internalAreas: addressInfoCtx?.internalAreas?.length > 0 ? addressInfoCtx?.internalAreas : addressInfo?.internalAreas ?? [],
     isDone: addressInfoCtx?.isDone ?? addressInfo?.isDone ?? false,

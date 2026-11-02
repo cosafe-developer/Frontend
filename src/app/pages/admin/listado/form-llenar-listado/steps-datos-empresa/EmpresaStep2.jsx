@@ -10,6 +10,7 @@ import { CoverImageUpload } from "components/custom-ui/dropzone/CoverImageUpload
 import SignaturePad from "components/custom-ui/signature/SignaturePad";
 import { useEffect, useState } from "react";
 import { resetDataEmpresaStep2 } from "./utils/resetDataEmpresaStep2";
+import { uploadListadoFile } from "helpers/updateImageUpload";
 
 const FLAT_BOUNDARY_KEYS = [
   "propertyBoundariesNorth",
@@ -61,6 +62,17 @@ const EmpresaStep2 = ({
     defaultValues: addressInfoCtx
   });
 
+  // Los archivos se suben al seleccionarlos; al formulario/contexto sólo
+  // llega la URL pública (nunca el File, que serializa a {}).
+  const uploadFor = (fileName) => (file) =>
+    uploadListadoFile(file, { listadoId: listado?._id, fileName });
+
+  const mergeAddressInfo = (fields) =>
+    llenarListadoFormCtx.dispatch({
+      type: "MERGE_STEP_STATUS",
+      payload: { addressInfo: fields },
+    });
+
   useEffect(() => {
     if (empresa && listado && addressInfoCtx) {
       reset(resetDataEmpresaStep2({ listado, empresa, addressInfoCtx }));
@@ -110,6 +122,11 @@ const EmpresaStep2 = ({
                 classNames={{ box: "mt-1.5" }}
                 error={errors?.taxCertificateUrl?.message}
                 {...field}
+                upload={uploadFor("constancia-fiscal")}
+                onChange={(url) => {
+                  field.onChange(url);
+                  mergeAddressInfo({ taxCertificateUrl: url ?? "" });
+                }}
               />
             )}
           />
@@ -134,7 +151,7 @@ const EmpresaStep2 = ({
                   onChange={(e) => {
                     field.onChange(e);
                     llenarListadoFormCtx.dispatch({
-                      type: "SET_STEP_STATUS",
+                      type: "MERGE_STEP_STATUS",
                       payload: {
                         addressInfo: {
                           ...addressInfoCtx,
@@ -160,7 +177,7 @@ const EmpresaStep2 = ({
                   onChange={(e) => {
                     field.onChange(e);
                     llenarListadoFormCtx.dispatch({
-                      type: "SET_STEP_STATUS",
+                      type: "MERGE_STEP_STATUS",
                       payload: {
                         addressInfo: {
                           ...addressInfoCtx,
@@ -186,7 +203,7 @@ const EmpresaStep2 = ({
                   onChange={(e) => {
                     field.onChange(e);
                     llenarListadoFormCtx.dispatch({
-                      type: "SET_STEP_STATUS",
+                      type: "MERGE_STEP_STATUS",
                       payload: {
                         addressInfo: {
                           ...addressInfoCtx,
@@ -212,7 +229,7 @@ const EmpresaStep2 = ({
                   onChange={(e) => {
                     field.onChange(e);
                     llenarListadoFormCtx.dispatch({
-                      type: "SET_STEP_STATUS",
+                      type: "MERGE_STEP_STATUS",
                       payload: {
                         addressInfo: {
                           ...addressInfoCtx,
@@ -246,7 +263,7 @@ const EmpresaStep2 = ({
                   onChange={(e) => {
                     field.onChange(e);
                     llenarListadoFormCtx.dispatch({
-                      type: "SET_STEP_STATUS",
+                      type: "MERGE_STEP_STATUS",
                       payload: {
                         addressInfo: {
                           ...addressInfoCtx,
@@ -272,7 +289,7 @@ const EmpresaStep2 = ({
                   onChange={(e) => {
                     field.onChange(e);
                     llenarListadoFormCtx.dispatch({
-                      type: "SET_STEP_STATUS",
+                      type: "MERGE_STEP_STATUS",
                       payload: {
                         addressInfo: {
                           ...addressInfoCtx,
@@ -299,7 +316,7 @@ const EmpresaStep2 = ({
                     onChange={(val) => {
                       field.onChange(val);
                       llenarListadoFormCtx.dispatch({
-                        type: "SET_STEP_STATUS",
+                        type: "MERGE_STEP_STATUS",
                         payload: {
                           addressInfo: {
                             ...addressInfoCtx,
@@ -329,6 +346,11 @@ const EmpresaStep2 = ({
                     classNames={{ box: "mt-1.5" }}
                     error={errors?.legalRepresentativeIneUrl?.message}
                     {...field}
+                    upload={uploadFor("ine")}
+                    onChange={(url) => {
+                      field.onChange(url);
+                      mergeAddressInfo({ legalRepresentativeIneUrl: url ?? "" });
+                    }}
                   />
                 )}
               />
@@ -356,7 +378,7 @@ const EmpresaStep2 = ({
                   onChange={(e) => {
                     field.onChange(e);
                     llenarListadoFormCtx.dispatch({
-                      type: "SET_STEP_STATUS",
+                      type: "MERGE_STEP_STATUS",
                       payload: {
                         addressInfo: {
                           ...addressInfoCtx,
@@ -383,7 +405,7 @@ const EmpresaStep2 = ({
                   onChange={(e) => {
                     field.onChange(e);
                     llenarListadoFormCtx.dispatch({
-                      type: "SET_STEP_STATUS",
+                      type: "MERGE_STEP_STATUS",
                       payload: {
                         addressInfo: {
                           ...addressInfoCtx,
@@ -410,7 +432,7 @@ const EmpresaStep2 = ({
                   onChange={(e) => {
                     field.onChange(e);
                     llenarListadoFormCtx.dispatch({
-                      type: "SET_STEP_STATUS",
+                      type: "MERGE_STEP_STATUS",
                       payload: {
                         addressInfo: {
                           ...addressInfoCtx,
@@ -437,7 +459,7 @@ const EmpresaStep2 = ({
                   onChange={(e) => {
                     field.onChange(e);
                     llenarListadoFormCtx.dispatch({
-                      type: "SET_STEP_STATUS",
+                      type: "MERGE_STEP_STATUS",
                       payload: {
                         addressInfo: {
                           ...addressInfoCtx,
@@ -462,7 +484,7 @@ const EmpresaStep2 = ({
                   onChange={(e) => {
                     field.onChange(e);
                     llenarListadoFormCtx.dispatch({
-                      type: "SET_STEP_STATUS",
+                      type: "MERGE_STEP_STATUS",
                       payload: {
                         addressInfo: {
                           ...addressInfoCtx,
@@ -487,7 +509,7 @@ const EmpresaStep2 = ({
                   onChange={(e) => {
                     field.onChange(e);
                     llenarListadoFormCtx.dispatch({
-                      type: "SET_STEP_STATUS",
+                      type: "MERGE_STEP_STATUS",
                       payload: {
                         addressInfo: {
                           ...addressInfoCtx,
@@ -519,7 +541,7 @@ const EmpresaStep2 = ({
                         field.onChange(e);
                         const existing = addressInfoCtx?.propertyBoundaries ?? {};
                         llenarListadoFormCtx.dispatch({
-                          type: "SET_STEP_STATUS",
+                          type: "MERGE_STEP_STATUS",
                           payload: {
                             addressInfo: {
                               ...addressInfoCtx,
@@ -551,7 +573,7 @@ const EmpresaStep2 = ({
                         field.onChange(e);
                         const existing = addressInfoCtx?.propertyBoundaries ?? {};
                         llenarListadoFormCtx.dispatch({
-                          type: "SET_STEP_STATUS",
+                          type: "MERGE_STEP_STATUS",
                           payload: {
                             addressInfo: {
                               ...addressInfoCtx,
@@ -583,7 +605,7 @@ const EmpresaStep2 = ({
                         field.onChange(e);
                         const existing = addressInfoCtx?.propertyBoundaries ?? {};
                         llenarListadoFormCtx.dispatch({
-                          type: "SET_STEP_STATUS",
+                          type: "MERGE_STEP_STATUS",
                           payload: {
                             addressInfo: {
                               ...addressInfoCtx,
@@ -615,7 +637,7 @@ const EmpresaStep2 = ({
                         field.onChange(e);
                         const existing = addressInfoCtx?.propertyBoundaries ?? {};
                         llenarListadoFormCtx.dispatch({
-                          type: "SET_STEP_STATUS",
+                          type: "MERGE_STEP_STATUS",
                           payload: {
                             addressInfo: {
                               ...addressInfoCtx,
@@ -667,21 +689,17 @@ const EmpresaStep2 = ({
                                   label=""
                                   classNames={{ box: "mt-1.5" }}
                                   {...field}
-                                  onChange={(value) => {
-                                    field.onChange(value);
+                                  upload={uploadFor(`colindancia-${dir.boundaryKey}`)}
+                                  onChange={(url) => {
+                                    // `url` ya es la URL subida (o null al quitarla)
+                                    field.onChange(url);
                                     const existing = addressInfoCtx?.propertyBoundaries ?? {};
-                                    llenarListadoFormCtx.dispatch({
-                                      type: "SET_STEP_STATUS",
-                                      payload: {
-                                        addressInfo: {
-                                          ...addressInfoCtx,
-                                          propertyBoundaries: {
-                                            ...existing,
-                                            [dir.boundaryKey]: {
-                                              ...(existing[dir.boundaryKey] ?? {}),
-                                              imageUrl: typeof value === "string" ? value : (existing[dir.boundaryKey]?.imageUrl ?? ""),
-                                            },
-                                          },
+                                    mergeAddressInfo({
+                                      propertyBoundaries: {
+                                        ...existing,
+                                        [dir.boundaryKey]: {
+                                          ...(existing[dir.boundaryKey] ?? {}),
+                                          imageUrl: typeof url === "string" ? url : "",
                                         },
                                       },
                                     });
@@ -712,7 +730,7 @@ const EmpresaStep2 = ({
                   field.onChange([...field.value, trimmed]);
                   setInputValue("");
                   llenarListadoFormCtx.dispatch({
-                    type: "SET_STEP_STATUS",
+                    type: "MERGE_STEP_STATUS",
                     payload: {
                       addressInfo: {
                         ...addressInfoCtx,
@@ -726,7 +744,7 @@ const EmpresaStep2 = ({
                   const updated = field.value.filter((a) => a !== area);
                   field.onChange(updated);
                   llenarListadoFormCtx.dispatch({
-                    type: "SET_STEP_STATUS",
+                    type: "MERGE_STEP_STATUS",
                     payload: {
                       addressInfo: {
                         ...addressInfoCtx,
@@ -806,7 +824,7 @@ const EmpresaStep2 = ({
         <Button type="button" className="min-w-[7rem]" onClick={() => {
           setCurrentEmpresaStep(0);
           llenarListadoFormCtx.dispatch({
-            type: "SET_STEP_STATUS",
+            type: "MERGE_STEP_STATUS",
             payload: {
               addressInfo: {
                 ...addressInfoCtx,

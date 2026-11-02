@@ -8,6 +8,8 @@ import { infoEmpresaSchema } from "../contexts/schema";
 
 import { useEffect } from "react";
 import { CoverImageUpload } from "components/custom-ui/dropzone/CoverImageUpload";
+import { normalizeUploadValue } from "helpers/listadoData";
+import { uploadListadoFile } from "helpers/updateImageUpload";
 
 const EmpresaStep1 = ({
   setCurrentEmpresaStep,
@@ -34,7 +36,12 @@ const EmpresaStep1 = ({
         address: companyInfoCtx?.address ?? listado?.companyInfo?.address,
         businessName: companyInfoCtx?.businessName ?? empresa?.tradeName,
         email: companyInfoCtx?.email ?? empresa?.email,
-        logoUrl: companyInfoCtx?.logoUrl ?? empresa?.logoUrl,
+        // `{}`/""/placeholder no cuentan como logo: se hereda el de la empresa
+        logoUrl:
+          normalizeUploadValue(companyInfoCtx?.logoUrl) ??
+          normalizeUploadValue(listado?.companyInfo?.logoUrl) ??
+          normalizeUploadValue(empresa?.logoUrl),
+        phone: companyInfoCtx?.phone ?? listado?.companyInfo?.phone ?? empresa?.phone ?? "",
         rfc: companyInfoCtx?.rfc ?? empresa?.rfc,
         city: companyInfoCtx?.city ?? listado?.companyInfo?.city ?? '',
         state: companyInfoCtx?.state ?? listado?.companyInfo?.state ?? '',
@@ -45,7 +52,7 @@ const EmpresaStep1 = ({
 
   const onSubmit = (data) => {
     llenarListadoFormCtx.dispatch({
-      type: "SET_STEP_STATUS",
+      type: "MERGE_STEP_STATUS",
       payload: {
         companyInfo: {
           ...data,
@@ -78,6 +85,16 @@ const EmpresaStep1 = ({
                 classNames={{ box: "mt-1.5" }}
                 error={errors?.logoUrl?.message}
                 {...field}
+                upload={(file) =>
+                  uploadListadoFile(file, { listadoId: listado?._id, fileName: "logo" })
+                }
+                onChange={(url) => {
+                  field.onChange(url);
+                  llenarListadoFormCtx.dispatch({
+                    type: "MERGE_STEP_STATUS",
+                    payload: { companyInfo: { logoUrl: url ?? "" } },
+                  });
+                }}
               />
             )}
           />
@@ -96,7 +113,7 @@ const EmpresaStep1 = ({
               onChange={(e) => {
                 field.onChange(e);
                 llenarListadoFormCtx.dispatch({
-                  type: "SET_STEP_STATUS",
+                  type: "MERGE_STEP_STATUS",
                   payload: {
                     companyInfo: {
                       businessName: e.target.value,
@@ -123,7 +140,7 @@ const EmpresaStep1 = ({
               onChange={(e) => {
                 field.onChange(e);
                 llenarListadoFormCtx.dispatch({
-                  type: "SET_STEP_STATUS",
+                  type: "MERGE_STEP_STATUS",
                   payload: {
                     companyInfo: {
                       rfc: e.target.value,
@@ -151,7 +168,7 @@ const EmpresaStep1 = ({
                 onChange={(e) => {
                   field.onChange(e);
                   llenarListadoFormCtx.dispatch({
-                    type: "SET_STEP_STATUS",
+                    type: "MERGE_STEP_STATUS",
                     payload: {
                       companyInfo: {
                         email: e.target.value,
@@ -175,7 +192,7 @@ const EmpresaStep1 = ({
                 onChange={(e) => {
                   field.onChange(e);
                   llenarListadoFormCtx.dispatch({
-                    type: "SET_STEP_STATUS",
+                    type: "MERGE_STEP_STATUS",
                     payload: {
                       companyInfo: {
                         phone: e.target.value,
@@ -202,7 +219,7 @@ const EmpresaStep1 = ({
               onChange={(e) => {
                 field.onChange(e);
                 llenarListadoFormCtx.dispatch({
-                  type: "SET_STEP_STATUS",
+                  type: "MERGE_STEP_STATUS",
                   payload: {
                     companyInfo: {
                       address: e.target.value,
@@ -229,7 +246,7 @@ const EmpresaStep1 = ({
                 onChange={(e) => {
                   field.onChange(e);
                   llenarListadoFormCtx.dispatch({
-                    type: "SET_STEP_STATUS",
+                    type: "MERGE_STEP_STATUS",
                     payload: {
                       companyInfo: { city: e.target.value },
                     },
@@ -251,7 +268,7 @@ const EmpresaStep1 = ({
                 onChange={(e) => {
                   field.onChange(e);
                   llenarListadoFormCtx.dispatch({
-                    type: "SET_STEP_STATUS",
+                    type: "MERGE_STEP_STATUS",
                     payload: {
                       companyInfo: { state: e.target.value },
                     },

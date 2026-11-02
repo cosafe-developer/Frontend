@@ -1,10 +1,14 @@
 // Import Dependencies
 import * as Yup from 'yup'
+import { hasUploadValue, toSingleDate } from 'helpers/listadoData'
+
+// Archivo obligatorio: sólo cuenta un File, dataURL o URL real. `{}` (File
+// serializado guardado por el bug), "" y placeholders NO cumplen.
+const requiredUpload = (message) =>
+  Yup.mixed().nullable().test('archivo-requerido', message, (value) => hasUploadValue(value))
 
 export const infoEmpresaSchema = Yup.object().shape({
-  logoUrl: Yup.mixed()
-    .nullable()
-    .required('El logotipo es obligatorio'),
+  logoUrl: requiredUpload('El logotipo es obligatorio'),
   businessName: Yup.string()
     .trim()
     .required('Este campo es obligatorio'),
@@ -27,9 +31,7 @@ export const infoEmpresaSchema = Yup.object().shape({
 })
 
 export const informacionDireccionSchema = Yup.object().shape({
-  taxCertificateUrl: Yup.mixed()
-    .nullable()
-    .required("La constancia fiscal es obligatoria"),
+  taxCertificateUrl: requiredUpload("La constancia fiscal es obligatoria"),
 
   activities: Yup.string().trim().required("Las actividades son obligatorias"),
 
@@ -53,9 +55,7 @@ export const informacionDireccionSchema = Yup.object().shape({
 
   legalRepresentativeSignatureUrl: Yup.mixed()
     .nullable(),
-  legalRepresentativeIneUrl: Yup.mixed()
-    .nullable()
-    .required("El INE del representante legal es obligatorio"),
+  legalRepresentativeIneUrl: requiredUpload("El INE del representante legal es obligatorio"),
   landAreaM2: Yup.number()
     .typeError("La superficie del terreno debe ser numérica")
     .required("La superficie del terreno es obligatoria"),
@@ -87,29 +87,18 @@ export const informacionDireccionSchema = Yup.object().shape({
   propertyBoundariesWest: Yup.string()
     .trim()
     .required("La colindancia Oeste es obligatoria"),
-  propertyBoundariesImageNorth: Yup.mixed()
-    .nullable()
-    .required("La imagen de referencia Norte es obligatoria"),
-  propertyBoundariesImageSouth: Yup.mixed()
-    .nullable()
-    .required("La imagen de referencia Sur es obligatoria"),
-  propertyBoundariesImageEast: Yup.mixed()
-    .nullable()
-    .required("La imagen de referencia Este es obligatoria"),
-  propertyBoundariesImageWest: Yup.mixed()
-    .nullable()
-    .required("La imagen de referencia Oeste es obligatoria"),
+  propertyBoundariesImageNorth: requiredUpload("La imagen de referencia Norte es obligatoria"),
+  propertyBoundariesImageSouth: requiredUpload("La imagen de referencia Sur es obligatoria"),
+  propertyBoundariesImageEast: requiredUpload("La imagen de referencia Este es obligatoria"),
+  propertyBoundariesImageWest: requiredUpload("La imagen de referencia Oeste es obligatoria"),
 });
 
 export const informacionRiesgoSchema = Yup.object().shape({
   materialsInventoryApplies: Yup.boolean().nullable(),
-  materialsInventoryUrl: Yup.mixed()
-    .nullable()
-    .when('materialsInventoryApplies', {
-      is: (val) => val === true,
-      then: (schema) => schema.required("El inventario de materiales es obligatorio cuando aplica"),
-      otherwise: (schema) => schema.nullable(),
-    }),
+  // El inventario ya no es un archivo: se captura en ResourceInventorySection
+  // (studyData.resourceInventory). Antes este "required" sólo se cumplía con
+  // el placeholder falso de mybucket; ya no hay campo de archivo en la UI.
+  materialsInventoryUrl: Yup.mixed().nullable(),
 
   companyDescription: Yup.string()
     .trim()
@@ -128,6 +117,13 @@ export const informacionRiesgoSchema = Yup.object().shape({
   antecedentsRaw: Yup.string()
     .trim()
     .required("Los antecedentes son obligatorios"),
+
+  // La plantilla tiene un solo [{preventionCalendarDate}] => fecha única
+  preventionCalendarDate: Yup.mixed().test(
+    "fecha-calendario",
+    "La fecha del calendario de prevención es obligatoria",
+    (value) => toSingleDate(value) !== null,
+  ),
 
   internalGeneralRisks: Yup.mixed().nullable(),
 });

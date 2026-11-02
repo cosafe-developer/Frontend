@@ -9,6 +9,7 @@ import getListadoById from "api/listados/getListadoById";
 import LoadingContent from "components/template/LoadingContent";
 import LoadingErrorComponent from "components/custom-ui/loadings/LoadingError.component";
 import getEmpresaById from "api/empresa/getEmpresaById";
+import { cleanLoadedListado } from "helpers/listadoData";
 
 
 const LlenarListado = () => {
@@ -29,7 +30,9 @@ const LlenarListado = () => {
         return;
       }
 
-      const listadoData = response?.data;
+      // Normaliza datos viejos: `{}` guardados en campos de archivo por el bug
+      // de serialización de File, placeholders y archivos basura => vacío.
+      const listadoData = cleanLoadedListado(response?.data);
 
       if (listadoData?.companyId?._id) {
         const responseEmpresa = await getEmpresaById({ requestBody: { empresa_id: listadoData?.companyId?._id } });

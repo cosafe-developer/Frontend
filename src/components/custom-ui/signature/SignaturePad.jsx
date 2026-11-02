@@ -1,30 +1,47 @@
-import { useRef, useState, forwardRef, useImperativeHandle } from "react";
+import { useEffect, useRef, useState, forwardRef, useImperativeHandle } from "react";
 import SignatureCanvas from "react-signature-canvas";
 
 const SignaturePad = forwardRef(({ value, onChange, error }, ref) => {
   const sigRef = useRef(null);
+  // Último dataURL emitido por este canvas (para no recargarlo sobre sí mismo)
+  const lastEmittedRef = useRef(null);
   const [hasSignature, setHasSignature] = useState(!!value);
+
+  const isDataUrl = typeof value === "string" && value.startsWith("data:");
+  const isUrl = typeof value === "string" && (value.startsWith("http") || value.startsWith("/"));
+
+  const handleClear = () => {
+    sigRef.current?.clear();
+    lastEmittedRef.current = null;
+    setHasSignature(false);
+    onChange?.(null);
+  };
 
   useImperativeHandle(ref, () => ({
     clear: handleClear,
   }));
 
+  // Al reabrir el paso con una firma aún no subida (dataURL) se dibuja en el
+  // canvas; antes se mostraba vacío aunque el valor existía.
+  useEffect(() => {
+    if (!isDataUrl || value === lastEmittedRef.current || !sigRef.current) return;
+    try {
+      sigRef.current.fromDataURL(value);
+      lastEmittedRef.current = value;
+      setHasSignature(true);
+    } catch (err) {
+      console.warn("No se pudo mostrar la firma guardada:", err);
+    }
+  }, [value, isDataUrl]);
+
   const handleEnd = () => {
     if (sigRef.current && !sigRef.current.isEmpty()) {
       const dataUrl = sigRef.current.getTrimmedCanvas().toDataURL("image/png");
+      lastEmittedRef.current = dataUrl;
       setHasSignature(true);
       onChange?.(dataUrl);
     }
   };
-
-  const handleClear = () => {
-    sigRef.current?.clear();
-    setHasSignature(false);
-    onChange?.(null);
-  };
-
-  const isDataUrl = typeof value === "string" && value.startsWith("data:");
-  const isUrl = typeof value === "string" && (value.startsWith("http") || value.startsWith("/"));
 
   return (
     <div className="flex flex-col gap-y-2">
