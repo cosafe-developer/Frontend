@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import PropTypes from "prop-types";
 import { Button, Input } from "components/ui";
 import { PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
@@ -48,25 +48,46 @@ const ResourceInventorySection = ({ listado }) => {
     normalizeItems(Array.isArray(ctxItems) && ctxItems.length ? ctxItems : dbItems),
   );
 
-  const persist = async (next) => {
+  // Guardado remoto con debounce: escribir la ubicación ya no manda un
+  // request por tecla. El contexto se actualiza al instante.
+  const pendingRef = useRef(null);
+  const timerRef = useRef(null);
+  const listadoIdRef = useRef(listado?._id);
+  listadoIdRef.current = listado?._id;
+
+  const flush = useCallback(() => {
+    clearTimeout(timerRef.current);
+    timerRef.current = null;
+    const payload = pendingRef.current;
+    pendingRef.current = null;
+    if (!payload || !listadoIdRef.current) return;
+    updateListado({
+      requestBody: {
+        listado_id: listadoIdRef.current,
+        studyData: { resourceInventory: payload },
+      },
+    }).catch((err) => console.error("Error al guardar inventario:", err));
+  }, []);
+
+  // Al desmontar (cambiar de paso) se manda lo pendiente
+  useEffect(() => flush, [flush]);
+
+  const persist = (next, { debounce = false } = {}) => {
     const payload = { isDone: true, items: next };
     llenarListadoFormCtx.dispatch({
       type: "SET_FORM_DATA",
       payload: { resourceInventory: payload },
     });
-    try {
-      await updateListado({
-        requestBody: {
-          listado_id: listado?._id,
-          studyData: { resourceInventory: payload },
-        },
-      });
-    } catch (err) {
-      console.error("Error al guardar inventario:", err);
+    pendingRef.current = payload;
+    clearTimeout(timerRef.current);
+    if (debounce) {
+      timerRef.current = setTimeout(flush, 700);
+    } else {
+      flush();
     }
   };
 
-  const updateEntry = (elIdx, entryIdx, changed) => {
+  const updateEntry = (elIdx, entryIdx, changed, options) => {
     const next = items.map((it, i) =>
       i !== elIdx
         ? it
@@ -76,7 +97,7 @@ const ResourceInventorySection = ({ listado }) => {
           },
     );
     setItems(next);
-    persist(next);
+    persist(next, options);
   };
 
   const addEntry = (elIdx) => {
@@ -158,7 +179,10 @@ const ResourceInventorySection = ({ listado }) => {
                       label="Ubicación"
                       placeholder="Ej. Data Center, Nivel -1..."
                       className="h-9 text-sm"
-                      onChange={(e) => updateEntry(elIdx, entryIdx, { location: e.target.value })}
+                      onChange={(e) =>
+                        updateEntry(elIdx, entryIdx, { location: e.target.value }, { debounce: true })
+                      }
+                      onBlur={flush}
                     />
                   </div>
                   <div className="w-44">
