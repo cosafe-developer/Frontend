@@ -742,7 +742,8 @@ const EmpresaStep2 = ({
                               render={({ field }) => (
                                 <CoverImageUpload
                                   label=""
-                                  classNames={{ box: "mt-1.5" }}
+                                  // Vista previa baja (h-40, object-contain): la tabla no se alarga
+                                  classNames={{ box: "mt-1.5", height: "h-40" }}
                                   {...field}
                                   upload={uploadFor(`colindancia-${dir.boundaryKey}`)}
                                   onChange={(url) => {

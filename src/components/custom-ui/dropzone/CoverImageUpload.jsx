@@ -83,7 +83,9 @@ const CoverImageUpload = forwardRef(
         )}
         <div
           className={clsx(
-            "h-72 w-full rounded-lg border-2 border-dashed border-current",
+            // Alto configurable (classNames.height); por defecto h-72
+            classNames?.height ?? "h-72",
+            "w-full rounded-lg border-2 border-dashed border-current",
             !isDragAccept &&
             (isDragReject || error) &&
             "text-error dark:text-error-light",
