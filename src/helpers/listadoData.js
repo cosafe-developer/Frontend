@@ -59,7 +59,56 @@ const isUrlKey = (key) => /Url$/.test(key);
  * - arrays `images` => sólo URLs usables
  * Devuelve una copia; no modifica el original.
  */
+const BOUNDARY_SIDES = [
+  ["north", "North", "Norte"],
+  ["south", "South", "Sur"],
+  ["east", "East", "Este"],
+  ["west", "West", "Oeste"],
+];
+
+function parseBoundaryString(s) {
+  const out = {};
+  if (typeof s !== "string") return out;
+  const re = /(Norte|Sur|Este|Oeste)\s*:\s*([^]*?)(?=,?\s*(?:Norte|Sur|Este|Oeste)\s*:|$)/gi;
+  let m;
+  while ((m = re.exec(s))) {
+    const side = BOUNDARY_SIDES.find(([, , es]) => es.toLowerCase() === m[1].toLowerCase());
+    if (side) out[side[0]] = m[2].trim().replace(/,$/, "").trim();
+  }
+  return out;
+}
+
+/**
+ * Las colindancias viejas pueden venir como claves planas
+ * (propertyBoundariesNorth / propertyBoundariesImageNorth) o como texto
+ * "Norte: ..., Sur: ...". Se pasan a la forma anidada actual para que el
+ * formulario las muestre y un guardado no las pierda. Mismo criterio que
+ * normalizeBoundaries en el backend (buildContext.js).
+ */
+export function normalizeBoundaries(addressInfo) {
+  if (!isPlainObject(addressInfo)) return addressInfo;
+  const pb = addressInfo.propertyBoundaries;
+  const nested = isPlainObject(pb) ? pb : {};
+  const legacy = parseBoundaryString(pb);
+  const text = (v) => (typeof v === "string" ? v.trim() : "");
+  const url = (v) => (isUsableUrl(v) ? v : "");
+  const out = { ...addressInfo, propertyBoundaries: {} };
+  for (const [side, Side] of BOUNDARY_SIDES) {
+    const n = isPlainObject(nested[side]) ? nested[side] : {};
+    out.propertyBoundaries[side] = {
+      ...n,
+      observations:
+        text(n.observations) || legacy[side] || text(addressInfo[`propertyBoundaries${Side}`]),
+      imageUrl: url(n.imageUrl) || url(addressInfo[`propertyBoundariesImage${Side}`]),
+    };
+  }
+  return out;
+}
+
 export function cleanLoadedListado(value, key = "") {
+  if (key === "addressInfo" && isPlainObject(value)) {
+    value = normalizeBoundaries(value);
+  }
   if (isUrlKey(key)) {
     return isUsableUrl(value) ? value : "";
   }
