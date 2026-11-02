@@ -87,8 +87,17 @@ const ResourceInventorySection = ({ listado }) => {
     }
   };
 
+  // Última versión de los registros: una subida de foto termina después de
+  // otros cambios (otra foto, la ubicación) y no debe partir de un render viejo.
+  const itemsRef = useRef(items);
+  const commit = (next, options) => {
+    itemsRef.current = next;
+    setItems(next);
+    persist(next, options);
+  };
+
   const updateEntry = (elIdx, entryIdx, changed, options) => {
-    const next = items.map((it, i) =>
+    const next = itemsRef.current.map((it, i) =>
       i !== elIdx
         ? it
         : {
@@ -96,24 +105,21 @@ const ResourceInventorySection = ({ listado }) => {
             entries: it.entries.map((e, j) => (j === entryIdx ? { ...e, ...changed } : e)),
           },
     );
-    setItems(next);
-    persist(next, options);
+    commit(next, options);
   };
 
   const addEntry = (elIdx) => {
-    const next = items.map((it, i) =>
+    const next = itemsRef.current.map((it, i) =>
       i !== elIdx ? it : { ...it, entries: [...it.entries, emptyEntry()] },
     );
-    setItems(next);
-    persist(next);
+    commit(next);
   };
 
   const removeEntry = (elIdx, entryIdx) => {
-    const next = items.map((it, i) =>
+    const next = itemsRef.current.map((it, i) =>
       i !== elIdx ? it : { ...it, entries: it.entries.filter((_, j) => j !== entryIdx) },
     );
-    setItems(next);
-    persist(next);
+    commit(next);
   };
 
   const handleUpload = async (elIdx, entryIdx, file) => {
@@ -171,6 +177,7 @@ const ResourceInventorySection = ({ listado }) => {
                       value={entry.imageUrl || null}
                       onChange={(file) => handleUpload(elIdx, entryIdx, file)}
                       onRemove={() => updateEntry(elIdx, entryIdx, { imageUrl: "" })}
+                      compact
                     />
                   </div>
                   <div className="min-w-40 flex-1">

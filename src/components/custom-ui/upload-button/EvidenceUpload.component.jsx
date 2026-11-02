@@ -70,7 +70,7 @@ ImagePreviewModal.propTypes = {
 };
 
 // ── Componente principal ──
-const EvidenceUpload = ({ value, onChange, onRemove }) => {
+const EvidenceUpload = ({ value, onChange, onRemove, compact = false }) => {
   const [internalValue, setInternalValue] = useState(null);
   const [showPreview, setShowPreview] = useState(false);
   const [showConfirmRemove, setShowConfirmRemove] = useState(false);
@@ -124,12 +124,24 @@ const EvidenceUpload = ({ value, onChange, onRemove }) => {
     <div className="flex flex-col items-center text-gray-600 dark:text-dark-200">
       {!internalValue ? (
         <Upload onChange={handleFileChange}>
-          {(props) => (
-            <Button color="primary" {...props}>
-              <PlusIcon className="size-5" />
-              Subir Evidencia
-            </Button>
-          )}
+          {(props) =>
+            compact ? (
+              // Mismo tamaño que la miniatura (80x80): la fila no salta al subir la foto
+              <button
+                type="button"
+                {...props}
+                className="flex h-20 w-20 cursor-pointer flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed border-primary-400 text-xs font-medium text-primary-500 hover:bg-primary-500/10 dark:border-primary-500 dark:text-primary-400"
+              >
+                <PlusIcon className="size-5" />
+                Foto
+              </button>
+            ) : (
+              <Button color="primary" {...props}>
+                <PlusIcon className="size-5" />
+                Subir Evidencia
+              </Button>
+            )
+          }
         </Upload>
       ) : (
         <div className="relative inline-flex flex-col items-center">
@@ -212,6 +224,7 @@ EvidenceUpload.propTypes = {
   value: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
   onChange: PropTypes.func,
   onRemove: PropTypes.func,
+  compact: PropTypes.bool,
 };
 
 export default EvidenceUpload;

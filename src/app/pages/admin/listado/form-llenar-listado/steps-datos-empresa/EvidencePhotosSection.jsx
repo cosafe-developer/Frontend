@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import PropTypes from "prop-types";
 import { Checkbox } from "components/ui";
 import { useLlenarListadoFormContext } from "../contexts/LlenarListadoFormContext";
@@ -67,36 +67,41 @@ const EvidencePhotosSection = ({ listado }) => {
     }
   };
 
-  const handleToggle = (catKey, applies) => {
-    const next = { ...photos, [catKey]: { ...photos[catKey], applies } };
+  // Última versión: varias fotos subidas seguidas no deben pisarse entre sí
+  const photosRef = useRef(photos);
+  const commit = (next) => {
+    photosRef.current = next;
     setPhotos(next);
     persist(next);
+  };
+
+  const handleToggle = (catKey, applies) => {
+    const cur = photosRef.current;
+    commit({ ...cur, [catKey]: { ...cur[catKey], applies } });
   };
 
   const handleUpload = async (catKey, file) => {
     try {
       const url = await uploadImageWithFirma(file, `listado-${listado?._id}`);
       if (typeof url !== "string" || !url) return;
-      const next = {
-        ...photos,
+      const cur = photosRef.current;
+      commit({
+        ...cur,
         [catKey]: {
-          ...photos[catKey],
-          images: [...onlyUrls(photos[catKey]?.images), url],
+          ...cur[catKey],
+          images: [...onlyUrls(cur[catKey]?.images), url],
         },
-      };
-      setPhotos(next);
-      persist(next);
+      });
     } catch (err) {
       console.error("Error al subir evidencia:", err);
     }
   };
 
   const handleRemove = (catKey, idx) => {
-    const images = onlyUrls(photos[catKey]?.images);
+    const cur = photosRef.current;
+    const images = onlyUrls(cur[catKey]?.images);
     images.splice(idx, 1);
-    const next = { ...photos, [catKey]: { ...photos[catKey], images } };
-    setPhotos(next);
-    persist(next);
+    commit({ ...cur, [catKey]: { ...cur[catKey], images } });
   };
 
   return (
