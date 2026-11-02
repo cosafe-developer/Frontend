@@ -128,12 +128,17 @@ const ListadoCompleto = () => {
                   <ArrowDownTrayIcon className="size-5 mr-1.5" />
                   Descargar PIPC
                 </Button>
+                {/* TODO(aprobar): el backend no expone un endpoint para aprobar
+                    (isApproved). El update genérico de listado no debe usarse para
+                    esto (whitelist de campos). Habilitar cuando exista la ruta. */}
                 <Button
-                  onClick={close}
+                  type="button"
+                  disabled
+                  title="Aprobación pendiente: el backend aún no expone esta acción"
                   color="success"
                   className="h-10 text-base font-light"
                 >
-                  Aprobar
+                  {listado?.isApproved ? "Aprobado" : "Aprobar"}
                 </Button>
               </div>
             </Card>

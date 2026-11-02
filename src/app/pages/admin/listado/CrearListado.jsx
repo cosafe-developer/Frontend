@@ -265,7 +265,7 @@ const CrearListado = () => {
 
 
                 <div className="flex justify-end space-x-5">
-                  <Button type="submit">
+                  <Button type="button" onClick={() => navigate("/admin/listado")}>
                     Cancelar
                   </Button>
 
