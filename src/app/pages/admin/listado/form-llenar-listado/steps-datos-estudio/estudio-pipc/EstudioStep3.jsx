@@ -69,7 +69,7 @@ function ObservationCell({ sectionKey, rowIndex, currentValue, handleFieldChange
 
   return (
     <>
-      <Button onClick={() => setIsOpen(true)}>
+      <Button onClick={() => setIsOpen(true)} className="h-8 gap-1 whitespace-nowrap px-2.5 text-xs">
         <PencilSquareIcon className="size-4 mr-1" />
         Comentar
       </Button>
@@ -152,15 +152,15 @@ const EstudioStep3 = ({ onNext, onPrev, listado }) => {
           <div key={section.key} className="space-y-3">
             <h3 className="text-lg font-medium text-white">{section.label}</h3>
             <div className="overflow-x-auto">
-              <Table className="w-full text-left rtl:text-right">
+              <Table dense className="w-full text-left rtl:text-right [&_td]:whitespace-normal [&_th]:whitespace-normal">
                 <THead>
                   <Tr className="border-b border-gray-200 dark:border-dark-500">
-                    <Th className="w-[5%] text-center">#</Th>
-                    <Th className="w-[45%] min-w-[250px] break-words">Elemento a Evaluar</Th>
-                    <Th className="w-[20%] text-center">Evidencia</Th>
-                    <Th className="w-[5%] text-center">No / Sí</Th>
-                    <Th className="w-[5%] text-center">N/A</Th>
-                    <Th className="w-[20%] text-center">
+                    <Th className="w-10 text-center">#</Th>
+                    <Th className="w-full min-w-[10rem]">Elemento a Evaluar</Th>
+                    <Th className="w-px text-center">Evidencia</Th>
+                    <Th className="w-px text-center">No / Sí</Th>
+                    <Th className="w-px text-center">N/A</Th>
+                    <Th className="w-px text-center">
                       {section.key === "externalRisks" ? "Distancia aproximada" : "Observaciones"}
                     </Th>
                   </Tr>
@@ -175,6 +175,7 @@ const EstudioStep3 = ({ onNext, onPrev, listado }) => {
                       {/* === EVIDENCIA === */}
                       <Td className="text-center">
                         <EvidenceUpload
+                          size="sm"
                           value={row.evidenceUrl}
                           onChange={async (file) => {
                             const url = await uploadImageWithFirma(file, `listado-${listado?._id}`);
@@ -247,11 +248,13 @@ const EstudioStep3 = ({ onNext, onPrev, listado }) => {
                               };
 
                               return (
-                                <div className="flex items-center text-center justify-center space-x-1">
+                                <div className="flex items-center justify-center gap-1 text-center">
                                   <input
                                     type="number"
                                     min={0}
-                                    className="w-20 rounded-full border border-[#2A2C32] px-3 py-1 text-center text-sm focus:ring-2 focus:ring-primary-400 outline-none"
+                                    // Más ancho y sin flechas del number: tapaban el valor
+                                    inputMode="decimal"
+                                    className="w-24 rounded-full border border-[#2A2C32] px-2 py-1 text-center text-sm outline-none focus:ring-2 focus:ring-primary-400 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                                     value={field.value ?? ""}
                                     onChange={(e) => field.onChange(e.target.value)}
                                     onFocus={() => setFocusedInput({ section: section.key, row: rowIndex })}
@@ -266,9 +269,11 @@ const EstudioStep3 = ({ onNext, onPrev, listado }) => {
                                       }
                                     }}
                                   />
-                                  <div className="space-x-2 items-center flex justify-center ml-1">
-                                    <span className="text-sm text-gray-400">metros</span>
+                                  <div className="flex items-center justify-center gap-1">
+                                    <span className="whitespace-nowrap text-sm text-gray-400">metros</span>
 
+                                    {/* Hueco fijo para el ✓: la columna no cambia de ancho al enfocar */}
+                                    <span className="inline-flex w-5 justify-center">
                                     {isFocused && (
                                       <button
                                         type="button"
@@ -283,6 +288,7 @@ const EstudioStep3 = ({ onNext, onPrev, listado }) => {
                                         <CheckIcon className="h-5 w-5" />
                                       </button>
                                     )}
+                                    </span>
                                   </div>
 
                                 </div>

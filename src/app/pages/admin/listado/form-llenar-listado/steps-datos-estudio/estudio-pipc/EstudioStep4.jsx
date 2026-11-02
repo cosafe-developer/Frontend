@@ -93,13 +93,13 @@ const EstudioStep4 = ({ onNext, onPrev, listado }) => {
           <div key={section.key} className="space-y-3">
             <h3 className="text-lg font-medium text-white">{section.label}</h3>
             <div className="overflow-x-auto">
-              <Table className="w-full text-left rtl:text-right">
+              <Table dense className="w-full text-left rtl:text-right [&_td]:whitespace-normal [&_th]:whitespace-normal">
                 <THead>
                   <Tr className="border-b border-gray-200 dark:border-dark-500">
-                    <Th className="w-[5%] text-center">#</Th>
-                    <Th className="w-[45%] min-w-[250px] break-words">Elemento a Evaluar</Th>
-                    <Th className="w-[20%] text-center">Evidencia</Th>
-                    <Th className="w-[10%] text-center">No / Sí</Th>
+                    <Th className="w-10 text-center">#</Th>
+                    <Th className="w-full min-w-[10rem]">Elemento a Evaluar</Th>
+                    <Th className="w-px text-center">Evidencia</Th>
+                    <Th className="w-px text-center">No / Sí</Th>
                   </Tr>
                 </THead>
 
@@ -107,11 +107,12 @@ const EstudioStep4 = ({ onNext, onPrev, listado }) => {
                   {rows.map((row, rowIndex) => (
                     <Tr key={row._uid ?? rowIndex} className="border-b border-gray-200 dark:border-dark-500">
                       <Td>{rowIndex + 1}</Td>
-                      <Td className="break-words  text-[15px]">{row.element}</Td>
+                      <Td className="break-words text-[15px]">{row.element}</Td>
 
                       {/* EVIDENCIA */}
                       <Td className="text-center">
                         <EvidenceUpload
+                          size="sm"
                           value={row.evidenceUrl}
                           onChange={async (file) => {
                             const url = await uploadImageWithFirma(file, `listado-${listado?._id}`);

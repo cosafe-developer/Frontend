@@ -35,7 +35,7 @@ function ObservationCell({ sectionKey, rowIndex, currentValue, handleFieldChange
 
   return (
     <>
-      <Button onClick={() => setIsOpen(true)}>
+      <Button onClick={() => setIsOpen(true)} className="h-8 gap-1 whitespace-nowrap px-2.5 text-xs">
         <PencilSquareIcon className="size-4 mr-1" />
         Comentar
       </Button>
@@ -154,15 +154,15 @@ const EstudioStep2 = ({ onNext, onPrev, listado }) => {
           <div key={section.key} className="space-y-3">
             <h3 className="text-lg font-medium text-white">{section.label}</h3>
             <div className="overflow-x-auto">
-              <Table className="w-full text-left rtl:text-right">
+              <Table dense className="w-full text-left rtl:text-right [&_td]:whitespace-normal [&_th]:whitespace-normal">
                 <THead>
                   <Tr className="border-b border-gray-200 dark:border-dark-500">
-                    <Th className="w-[5%] text-center">#</Th>
-                    <Th className="w-[45%] min-w-[250px] break-words">Elemento a Evaluar</Th>
-                    <Th className="w-[10%] text-center">Existe</Th>
-                    <Th className="w-[10%] text-center">Sí / No</Th>
-                    <Th className="w-[10%] text-center">N/A</Th>
-                    <Th className="w-[20%] text-center">Observaciones</Th>
+                    <Th className="w-10 text-center">#</Th>
+                    <Th className="w-full min-w-[10rem]">Elemento a Evaluar</Th>
+                    <Th className="w-px text-center">Existe</Th>
+                    <Th className="w-px text-center">Sí / No</Th>
+                    <Th className="w-px text-center">N/A</Th>
+                    <Th className="w-px text-center">Observaciones</Th>
                   </Tr>
                 </THead>
 
