@@ -7,7 +7,7 @@ import { deepMergeDefaults } from "../../utils/deepMergeDefaultsInfo";
 import { criminalActsElements, majorAccidentsElements, socialDisturbancesElements } from "./utils/elementsTask";
 import { resetDataEstudioStep4 } from "./utils/resetDataEstudioStep4";
 
-import updateListado from "api/listados/updateListado";
+import { useStudyStepPersistence } from "../../utils/useStudyStepPersistence";
 import uploadImageWithFirma from "api/upload/uploadImageWithFirma.service";
 
 const sections = [
@@ -56,7 +56,7 @@ const EstudioStep4 = ({ onNext, onPrev, listado }) => {
         : buildDefaultSection(section.elements);
   });
 
-  const { control, handleSubmit, watch, reset, setValue } = useForm({
+  const { control, handleSubmit, watch, reset, setValue, getValues } = useForm({
     defaultValues,
   });
 
@@ -71,67 +71,19 @@ const EstudioStep4 = ({ onNext, onPrev, listado }) => {
   }, [reset, listado]);
 
 
-  const handleFieldChange = async (sectionKey, rowIndex, changedFields) => {
-    try {
-      const backendData = listado?.studyData?.socioOrganizationalAgent ?? {};
-      const currentArray = watch(sectionKey) || [];
-      const updatedArray = [...currentArray];
-      updatedArray[rowIndex] = { ...updatedArray[rowIndex], ...changedFields };
+  // Guarda el paso completo (todas las sub-secciones) con los valores actuales
+  // del formulario; "Siguiente" guarda con isDone:true antes de avanzar.
+  const { handleFieldChange, saveAndNext, isSaving } = useStudyStepPersistence({
+    stepKey: "socioOrganizationalAgent",
+    sections,
+    filter: filterForBackend,
+    getValues,
+    setValue,
+    listado,
+    onNext,
+  });
 
-      setValue(sectionKey, updatedArray);
-
-      const newServiceSocioOrganizational = {
-        ...socioOrganizationalAgentCtx,
-        [sectionKey]: updatedArray,
-      };
-
-
-
-      llenarListadoFormCtx.dispatch({
-        type: "SET_FORM_DATA",
-        payload: {
-          socioOrganizationalAgent: {
-            ...newServiceSocioOrganizational,
-            isDone: true,
-          },
-        },
-      });
-
-      const merged = {
-        ...backendData,
-        ...newServiceSocioOrganizational,
-      };
-
-      const socioOrganizational = Object.fromEntries(
-        Object.entries(merged).map(([key, arr]) => [
-          key,
-          Array.isArray(arr) ? arr.map(filterForBackend) : arr,
-        ])
-      );
-
-      await updateListado({
-        requestBody: {
-          listado_id: listado?._id,
-          studyData: {
-            socioOrganizationalAgent: {
-              ...socioOrganizational,
-              isDone: true,
-            },
-          },
-        },
-      });
-    } catch (err) {
-      console.error("Error al actualizar campo de estudio:", err);
-    }
-  };
-
-  const onSubmit = async () => {
-    try {
-      onNext();
-    } catch (error) {
-      console.error("Error al enviar estudio paso 1:", error);
-    }
-  };
+  const onSubmit = () => saveAndNext();
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex grow flex-col space-y-8">
@@ -209,7 +161,7 @@ const EstudioStep4 = ({ onNext, onPrev, listado }) => {
           Atrás
         </Button>
 
-        <Button type="submit" color="primary" className="min-w-[7rem]">
+        <Button type="submit" color="primary" className="min-w-[7rem]" disabled={isSaving}>
           Siguiente
         </Button>
       </div>

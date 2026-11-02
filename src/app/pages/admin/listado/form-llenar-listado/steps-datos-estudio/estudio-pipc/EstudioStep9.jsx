@@ -6,7 +6,7 @@ import { useEffect } from "react";
 import { resetDataEstudioStep9 } from "./utils/resetDataEstudioStep9";
 import { deepMergeDefaults } from "../../utils/deepMergeDefaultsInfo";
 import { alarmSystemElements } from "./utils/elementsTask";
-import updateListado from "api/listados/updateListado";
+import { useStudyStepPersistence } from "../../utils/useStudyStepPersistence";
 import uploadImageWithFirma from "api/upload/uploadImageWithFirma.service";
 
 const alarmSections = [
@@ -49,7 +49,7 @@ const EstudioStep9 = ({ onNext, onPrev, listado }) => {
         : buildDefaultAlarm(section.elements);
   });
 
-  const { control, handleSubmit, watch, reset, setValue } = useForm({ defaultValues });
+  const { control, handleSubmit, watch, reset, setValue, getValues } = useForm({ defaultValues });
 
   useEffect(() => {
     if (listado && securityMeasuresCtx) {
@@ -60,41 +60,19 @@ const EstudioStep9 = ({ onNext, onPrev, listado }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reset, listado]);
 
-  const handleAlarmChange = async (sectionKey, rowIndex, changedFields) => {
-    try {
-      const currentArray = watch(sectionKey) || [];
-      const updatedArray = [...currentArray];
-      updatedArray[rowIndex] = { ...updatedArray[rowIndex], ...changedFields };
-      setValue(sectionKey, updatedArray);
+  // Guarda el paso completo (todas las sub-secciones) con los valores actuales
+  // del formulario; "Siguiente" guarda con isDone:true antes de avanzar.
+  const { handleFieldChange: handleAlarmChange, saveAndNext, isSaving } = useStudyStepPersistence({
+    stepKey: "securityMeasures",
+    sections: alarmSections,
+    filter: filterAlarmForBackend,
+    getValues,
+    setValue,
+    listado,
+    onNext,
+  });
 
-      const newSecurityMeasures = { ...securityMeasuresCtx, [sectionKey]: updatedArray };
-
-      llenarListadoFormCtx.dispatch({
-        type: "SET_FORM_DATA",
-        payload: { securityMeasures: { ...newSecurityMeasures, isDone: true } },
-      });
-
-      const backendData = listado?.studyData?.securityMeasures ?? {};
-      const merged = { ...backendData, ...newSecurityMeasures };
-      const cleaned = Object.fromEntries(
-        Object.entries(merged).map(([key, arr]) => [
-          key,
-          Array.isArray(arr) ? arr.map(filterAlarmForBackend) : arr,
-        ])
-      );
-
-      await updateListado({
-        requestBody: {
-          listado_id: listado?._id,
-          studyData: { securityMeasures: { ...cleaned, isDone: true } },
-        },
-      });
-    } catch (err) {
-      console.error("Error al actualizar alarma:", err);
-    }
-  };
-
-  const onSubmit = async () => { onNext(); };
+  const onSubmit = () => saveAndNext();
 
   const handlePrev = () => {
     // Atrás sólo navega: antes metía claves de formData en stepStatus
@@ -161,7 +139,7 @@ const EstudioStep9 = ({ onNext, onPrev, listado }) => {
 
       <div className="flex justify-end pt-4 space-x-3">
         <Button type="button" className="min-w-[7rem]" onClick={handlePrev}>Atrás</Button>
-        <Button type="submit" color="primary" className="min-w-[7rem]">Siguiente</Button>
+        <Button type="submit" color="primary" className="min-w-[7rem]" disabled={isSaving}>Siguiente</Button>
       </div>
     </form>
   );

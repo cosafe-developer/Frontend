@@ -11,7 +11,7 @@ import { resetDataEstudioStep10 } from "./utils/resetDataEstudioStep10";
 import { damageElements } from "./utils/elementsTask";
 import { checkIfSectionIsDone } from "../utils/checkIfSectionIsDone";
 
-import updateListado from "api/listados/updateListado";
+import { useStudyStepPersistence } from "../../utils/useStudyStepPersistence";
 import uploadImageWithFirma from "api/upload/uploadImageWithFirma.service";
 
 const sections = [
@@ -24,6 +24,7 @@ const buildDefaultSection = (elements) =>
     element: el,
     evidenceUrl: null,
     riskLevel: null,
+    no_aplica: false,
   }));
 
 const filterForBackend = (item) => {
@@ -63,7 +64,7 @@ const EstudioStep10 = ({ onNext, onPrev, listado }) => {
   });
 
 
-  const { control, handleSubmit, watch, reset, setValue } = useForm({
+  const { control, handleSubmit, watch, reset, setValue, getValues } = useForm({
     defaultValues,
   });
 
@@ -77,67 +78,20 @@ const EstudioStep10 = ({ onNext, onPrev, listado }) => {
   }, [reset, listado]);
 
 
-  const handleFieldChange = async (sectionKey, rowIndex, changedFields) => {
-    try {
-      const backendData = listado?.studyData?.damageEvaluation ?? {};
-      const currentArray = watch(sectionKey) || [];
-      const updatedArray = [...currentArray];
-      updatedArray[rowIndex] = { ...updatedArray[rowIndex], ...changedFields };
+  // Guarda el paso completo (todas las sub-secciones) con los valores actuales
+  // del formulario; "Siguiente" guarda con isDone:true antes de avanzar.
+  const { handleFieldChange, saveAndNext, isSaving } = useStudyStepPersistence({
+    stepKey: "damageEvaluation",
+    sections,
+    filter: filterForBackend,
+    getValues,
+    setValue,
+    listado,
+    onNext,
+    computeIsDone: (data) => checkIfSectionIsDone(data, ["riskLevel"]),
+  });
 
-      setValue(sectionKey, updatedArray);
-
-      const newDamageEvaluation = {
-        ...damageEvaluationCtx,
-        [sectionKey]: updatedArray,
-      };
-
-      const isDoneDamageEvaluation = checkIfSectionIsDone(newDamageEvaluation, ["riskLevel"]);
-      llenarListadoFormCtx.dispatch({
-        type: "SET_FORM_DATA",
-        payload: {
-          damageEvaluation: {
-            ...newDamageEvaluation,
-            isDone: isDoneDamageEvaluation,
-          },
-        },
-      });
-
-      const merged = {
-        ...backendData,
-        ...newDamageEvaluation,
-      };
-
-      const damageEvaluation = Object.fromEntries(
-        Object.entries(merged).map(([key, arr]) => [
-          key,
-          Array.isArray(arr) ? arr.map(filterForBackend) : arr,
-        ])
-      );
-
-      await updateListado({
-        requestBody: {
-          listado_id: listado?._id,
-          studyData: {
-            damageEvaluation: {
-              ...damageEvaluation,
-              isDone: isDoneDamageEvaluation,
-            },
-          },
-        },
-      });
-    } catch (err) {
-      console.error("Error al actualizar campo de estudio:", err);
-    }
-  };
-
-  // formValues
-  const onSubmit = async () => {
-    try {
-      onNext();
-    } catch (error) {
-      console.error("Error al enviar estudio paso 1:", error);
-    }
-  };
+  const onSubmit = () => saveAndNext();
 
 
   return (
@@ -237,7 +191,7 @@ const EstudioStep10 = ({ onNext, onPrev, listado }) => {
           Atrás
         </Button>
 
-        <Button type="submit" color="primary" className="min-w-[7rem]">
+        <Button type="submit" color="primary" className="min-w-[7rem]" disabled={isSaving}>
           Siguiente
         </Button>
       </div>

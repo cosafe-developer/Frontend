@@ -7,7 +7,7 @@ import { resetDataEstudioStep6 } from "./utils/resetDataEstudioStep6";
 import { deepMergeDefaults } from "../../utils/deepMergeDefaultsInfo";
 import { fireAgentElements, chemicalSpillElements, explosionAgentElements, contaminationElements, floodingElements } from "./utils/elementsTask";
 
-import updateListado from "api/listados/updateListado";
+import { useStudyStepPersistence } from "../../utils/useStudyStepPersistence";
 import uploadImageWithFirma from "api/upload/uploadImageWithFirma.service";
 
 const sections = [
@@ -57,7 +57,7 @@ const EstudioStep6 = ({ onNext, onPrev, listado }) => {
         : buildDefaultSection(section.elements);
   });
 
-  const { control, handleSubmit, watch, reset, setValue } = useForm({
+  const { control, handleSubmit, watch, reset, setValue, getValues } = useForm({
     defaultValues,
   });
 
@@ -71,65 +71,19 @@ const EstudioStep6 = ({ onNext, onPrev, listado }) => {
   }, [reset, listado]);
 
 
-  const handleFieldChange = async (sectionKey, rowIndex, changedFields) => {
-    try {
-      const backendData = listado?.studyData?.physicochemicalAgent ?? {};
-      const currentArray = watch(sectionKey) || [];
-      const updatedArray = [...currentArray];
-      updatedArray[rowIndex] = { ...updatedArray[rowIndex], ...changedFields };
+  // Guarda el paso completo (todas las sub-secciones) con los valores actuales
+  // del formulario; "Siguiente" guarda con isDone:true antes de avanzar.
+  const { handleFieldChange, saveAndNext, isSaving } = useStudyStepPersistence({
+    stepKey: "physicochemicalAgent",
+    sections,
+    filter: filterForBackend,
+    getValues,
+    setValue,
+    listado,
+    onNext,
+  });
 
-      setValue(sectionKey, updatedArray);
-
-      const newPhysicochemicalAgent = {
-        ...physicochemicalAgentCtx,
-        [sectionKey]: updatedArray,
-      };
-
-      llenarListadoFormCtx.dispatch({
-        type: "SET_FORM_DATA",
-        payload: {
-          physicochemicalAgent: {
-            ...newPhysicochemicalAgent,
-            isDone: true,
-          },
-        },
-      });
-
-      const merged = {
-        ...backendData,
-        ...newPhysicochemicalAgent,
-      };
-
-      const socioOrganizational = Object.fromEntries(
-        Object.entries(merged).map(([key, arr]) => [
-          key,
-          Array.isArray(arr) ? arr.map(filterForBackend) : arr,
-        ])
-      );
-
-      await updateListado({
-        requestBody: {
-          listado_id: listado?._id,
-          studyData: {
-            physicochemicalAgent: {
-              ...socioOrganizational,
-              isDone: true,
-            },
-          },
-        },
-      });
-    } catch (err) {
-      console.error("Error al actualizar campo de estudio:", err);
-    }
-  };
-
-  const onSubmit = async () => {
-    try {
-      onNext();
-    } catch (error) {
-      console.error("Error al enviar estudio paso 1:", error);
-    }
-  };
+  const onSubmit = () => saveAndNext();
 
 
   return (
@@ -209,7 +163,7 @@ const EstudioStep6 = ({ onNext, onPrev, listado }) => {
           Atrás
         </Button>
 
-        <Button type="submit" color="primary" className="min-w-[7rem]">
+        <Button type="submit" color="primary" className="min-w-[7rem]" disabled={isSaving}>
           Siguiente
         </Button>
       </div>

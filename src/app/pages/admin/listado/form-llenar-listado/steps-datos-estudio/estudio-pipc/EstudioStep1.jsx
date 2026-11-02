@@ -10,7 +10,7 @@ import { evacuationBlockingObjects, fallingObjects, flammableObjects, overturnin
 import { checkIfSectionIsDone } from "../utils/checkIfSectionIsDone";
 import { uploadListadoFile } from "helpers/updateImageUpload";
 
-import updateListado from "api/listados/updateListado";
+import { useStudyStepPersistence } from "../../utils/useStudyStepPersistence";
 import EvidenceUpload from "components/custom-ui/upload-button/EvidenceUpload.component";
 
 
@@ -76,7 +76,7 @@ const EstudioStep1 = ({ onNext, listado }) => {
         : buildDefaultSection(section.elements);
   });
 
-  const { control, handleSubmit, watch, reset, setValue } = useForm({
+  const { control, handleSubmit, watch, reset, setValue, getValues } = useForm({
     defaultValues,
   });
 
@@ -93,68 +93,20 @@ const EstudioStep1 = ({ onNext, listado }) => {
   }, [listado, reset]);
 
 
-  const handleFieldChange = async (sectionKey, rowIndex, changedFields) => {
-    try {
-      const backendData = listado?.studyData?.nonStructuralRisks ?? {};
-      const currentArray = watch(sectionKey) || [];
-      const updatedArray = [...currentArray];
-      updatedArray[rowIndex] = { ...updatedArray[rowIndex], ...changedFields };
+  // Guarda el paso completo (todas las sub-secciones) con los valores actuales
+  // del formulario; "Siguiente" guarda con isDone:true antes de avanzar.
+  const { handleFieldChange, saveAndNext, isSaving } = useStudyStepPersistence({
+    stepKey: "nonStructuralRisks",
+    sections,
+    filter: filterForBackend,
+    getValues,
+    setValue,
+    listado,
+    onNext,
+    computeIsDone: (data) => checkIfSectionIsDone(data, ["riskLevel"]),
+  });
 
-      setValue(sectionKey, updatedArray);
-
-      const newNonStructuralRisks = {
-        ...nonStructuralRisksCtx,
-        [sectionKey]: updatedArray,
-      };
-
-      const isDoneNonStructural = checkIfSectionIsDone(newNonStructuralRisks, ["riskLevel"]);
-
-      llenarListadoFormCtx.dispatch({
-        type: "SET_FORM_DATA",
-        payload: {
-          nonStructuralRisks: {
-            ...newNonStructuralRisks,
-            isDone: isDoneNonStructural,
-          },
-        },
-      });
-
-      const merged = {
-        ...backendData,
-        ...newNonStructuralRisks,
-      };
-
-      const structuredNonRisks = Object.fromEntries(
-        Object.entries(merged).map(([key, arr]) => [
-          key,
-          Array.isArray(arr) ? arr.map(filterForBackend) : arr,
-        ])
-      );
-
-      await updateListado({
-        requestBody: {
-          listado_id: listado?._id,
-          studyData: {
-            nonStructuralRisks: {
-              ...structuredNonRisks,
-              isDone: isDoneNonStructural,
-            },
-          },
-        },
-      });
-    } catch (err) {
-      console.error("Error al actualizar campo de estudio:", err);
-    }
-  };
-
-
-  const onSubmit = async () => {
-    try {
-      onNext();
-    } catch (error) {
-      console.error("Error al enviar estudio paso 1:", error);
-    }
-  };
+  const onSubmit = () => saveAndNext();
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex grow flex-col space-y-8">
@@ -254,7 +206,7 @@ const EstudioStep1 = ({ onNext, listado }) => {
       })}
 
       <div className="flex justify-end pt-4">
-        <Button type="submit" color="primary" className="min-w-[7rem]">
+        <Button type="submit" color="primary" className="min-w-[7rem]" disabled={isSaving}>
           Siguiente
         </Button>
       </div>

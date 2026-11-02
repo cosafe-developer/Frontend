@@ -24,7 +24,7 @@ import {
   gasInstallationElements,
   hydraulicInstallationElements,
 } from "./utils/elementsTask";
-import updateListado from "api/listados/updateListado";
+import { useStudyStepPersistence } from "../../utils/useStudyStepPersistence";
 import uploadImageWithFirma from "api/upload/uploadImageWithFirma.service";
 import { PencilSquareIcon } from "@heroicons/react/24/outline";
 import { ObservationModal } from "../../modals/ObservacionesModal";
@@ -110,7 +110,7 @@ const EstudioStep3 = ({ onNext, onPrev, listado }) => {
         : buildDefaultSection(section.elements);
   });
 
-  const { control, handleSubmit, watch, reset, setValue } = useForm({ defaultValues });
+  const { control, handleSubmit, watch, reset, setValue, getValues } = useForm({ defaultValues });
 
   useEffect(() => {
     if (listado && serviceInstallationsCtx) {
@@ -131,67 +131,20 @@ const EstudioStep3 = ({ onNext, onPrev, listado }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reset, listado]);
 
-  const handleFieldChange = async (sectionKey, rowIndex, changedFields) => {
-    try {
-      const backendData = listado?.studyData?.serviceInstallations ?? {};
-      const currentArray = watch(sectionKey) || [];
-      const updatedArray = [...currentArray];
-      updatedArray[rowIndex] = { ...updatedArray[rowIndex], ...changedFields };
+  // Guarda el paso completo (todas las sub-secciones) con los valores actuales
+  // del formulario; "Siguiente" guarda con isDone:true antes de avanzar.
+  const { handleFieldChange, saveAndNext, isSaving } = useStudyStepPersistence({
+    stepKey: "serviceInstallations",
+    sections,
+    filter: filterForBackend,
+    getValues,
+    setValue,
+    listado,
+    onNext,
+    computeIsDone: (data) => checkIfSectionIsDone(data, ["observations", "applies", "no_aplica", "approxDistance"], "some"),
+  });
 
-      setValue(sectionKey, updatedArray);
-
-      const newServiceInstallations = {
-        ...serviceInstallationsCtx,
-        [sectionKey]: updatedArray,
-      };
-
-
-      const isDoneServiceInstallations = checkIfSectionIsDone(newServiceInstallations, ["observations", "applies", "no_aplica", "approxDistance",], "some");
-      llenarListadoFormCtx.dispatch({
-        type: "SET_FORM_DATA",
-        payload: {
-          serviceInstallations: {
-            ...newServiceInstallations,
-            isDone: isDoneServiceInstallations,
-          },
-        },
-      });
-
-      const merged = {
-        ...backendData,
-        ...newServiceInstallations,
-      };
-
-      const serviceInstallations = Object.fromEntries(
-        Object.entries(merged).map(([key, arr]) => [
-          key,
-          Array.isArray(arr) ? arr.map(filterForBackend) : arr,
-        ])
-      );
-
-      await updateListado({
-        requestBody: {
-          listado_id: listado?._id,
-          studyData: {
-            serviceInstallations: {
-              ...serviceInstallations,
-              isDone: isDoneServiceInstallations,
-            },
-          },
-        },
-      });
-    } catch (err) {
-      console.error("Error al actualizar campo de estudio:", err);
-    }
-  };
-
-  const onSubmit = async () => {
-    try {
-      onNext();
-    } catch (error) {
-      console.error("Error al enviar estudio paso 3:", error);
-    }
-  };
+  const onSubmit = () => saveAndNext();
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex grow flex-col space-y-8">
@@ -368,7 +321,7 @@ const EstudioStep3 = ({ onNext, onPrev, listado }) => {
           Atrás
         </Button>
 
-        <Button type="submit" color="primary" className="min-w-[7rem]">
+        <Button type="submit" color="primary" className="min-w-[7rem]" disabled={isSaving}>
           Siguiente
         </Button>
       </div>

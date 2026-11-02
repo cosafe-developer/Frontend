@@ -10,7 +10,7 @@ import { resetDataEstudioStep8 } from "./utils/resetDataEstudioStep8";
 import { deepMergeDefaults } from "../../utils/deepMergeDefaultsInfo";
 import { externalRiskElements } from "./utils/elementsTask";
 
-import updateListado from "api/listados/updateListado";
+import { useStudyStepPersistence } from "../../utils/useStudyStepPersistence";
 import uploadImageWithFirma from "api/upload/uploadImageWithFirma.service";
 
 const sections = [
@@ -86,7 +86,7 @@ const EstudioStep8 = ({ onNext, onPrev, listado }) => {
         : buildDefaultSection(section.elements);
   });
 
-  const { control, handleSubmit, watch, reset, setValue } = useForm({
+  const { control, handleSubmit, watch, reset, setValue, getValues } = useForm({
     defaultValues,
   });
 
@@ -100,67 +100,20 @@ const EstudioStep8 = ({ onNext, onPrev, listado }) => {
   }, [reset, listado]);
 
 
-  const handleFieldChange = async (sectionKey, rowIndex, changedFields) => {
-    try {
-      const backendData = listado?.studyData?.surroundingRisks ?? {};
-      const currentArray = watch(sectionKey) || [];
-      const updatedArray = [...currentArray];
-      updatedArray[rowIndex] = { ...updatedArray[rowIndex], ...changedFields };
+  // Guarda el paso completo (todas las sub-secciones) con los valores actuales
+  // del formulario; "Siguiente" guarda con isDone:true antes de avanzar.
+  const { handleFieldChange, saveAndNext, isSaving } = useStudyStepPersistence({
+    stepKey: "surroundingRisks",
+    sections,
+    filter: filterForBackend,
+    getValues,
+    setValue,
+    listado,
+    onNext,
+    computeIsDone: (data) => checkIfSectionIsDone(data, ["observations", "applies", "notApplicable"], "some"),
+  });
 
-      setValue(sectionKey, updatedArray);
-
-      const newSurroundingRisksCtx = {
-        ...surroundingRisksCtx,
-        [sectionKey]: updatedArray,
-      };
-
-
-      const isDoneSurroundingRisks = checkIfSectionIsDone(newSurroundingRisksCtx, ["observations", "applies", "notApplicable",], "some");
-      llenarListadoFormCtx.dispatch({
-        type: "SET_FORM_DATA",
-        payload: {
-          surroundingRisks: {
-            ...newSurroundingRisksCtx,
-            isDone: isDoneSurroundingRisks,
-          },
-        },
-      });
-
-      const merged = {
-        ...backendData,
-        ...newSurroundingRisksCtx,
-      };
-
-      const surroundingRisks = Object.fromEntries(
-        Object.entries(merged).map(([key, arr]) => [
-          key,
-          Array.isArray(arr) ? arr.map(filterForBackend) : arr,
-        ])
-      );
-
-      await updateListado({
-        requestBody: {
-          listado_id: listado?._id,
-          studyData: {
-            surroundingRisks: {
-              ...surroundingRisks,
-              isDone: isDoneSurroundingRisks,
-            },
-          },
-        },
-      });
-    } catch (err) {
-      console.error("Error al actualizar campo de estudio:", err);
-    }
-  };
-
-  const onSubmit = async () => {
-    try {
-      onNext();
-    } catch (error) {
-      console.error("Error al enviar estudio paso 1:", error);
-    }
-  };
+  const onSubmit = () => saveAndNext();
 
 
   return (
@@ -269,7 +222,7 @@ const EstudioStep8 = ({ onNext, onPrev, listado }) => {
           Atrás
         </Button>
 
-        <Button type="submit" color="primary" className="min-w-[7rem]">
+        <Button type="submit" color="primary" className="min-w-[7rem]" disabled={isSaving}>
           Siguiente
         </Button>
       </div>

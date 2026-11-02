@@ -9,7 +9,7 @@ import { resetDataEstudioStep7 } from "./utils/resetDataEstudioStep7";
 import { deepMergeDefaults } from "../../utils/deepMergeDefaultsInfo";
 import { epidemicElements, plagueElements, agentElements } from "./utils/elementsTask";
 
-import updateListado from "api/listados/updateListado";
+import { useStudyStepPersistence } from "../../utils/useStudyStepPersistence";
 import uploadImageWithFirma from "api/upload/uploadImageWithFirma.service";
 
 const sections = [
@@ -80,11 +80,12 @@ const EstudioStep7 = ({ onNext, onPrev, listado }) => {
           element: it.element ?? section.elements[i] ?? `Elemento ${i + 1}`,
           evidenceUrl: it.evidenceUrl ?? null,
           applies: typeof it.applies === "boolean" ? it.applies : false,
+          observations: it.observations ?? "",
         }))
         : buildDefaultSection(section.elements);
   });
 
-  const { control, handleSubmit, watch, reset, setValue } = useForm({
+  const { control, handleSubmit, watch, reset, setValue, getValues } = useForm({
     defaultValues,
   });
 
@@ -98,68 +99,19 @@ const EstudioStep7 = ({ onNext, onPrev, listado }) => {
   }, [reset, listado]);
 
 
-  const handleFieldChange = async (sectionKey, rowIndex, changedFields) => {
-    try {
-      const backendData = listado?.studyData?.sanitaryAgent ?? {};
-      const currentArray = watch(sectionKey) || [];
-      const updatedArray = [...currentArray];
-      updatedArray[rowIndex] = { ...updatedArray[rowIndex], ...changedFields };
+  // Guarda el paso completo (todas las sub-secciones) con los valores actuales
+  // del formulario; "Siguiente" guarda con isDone:true antes de avanzar.
+  const { handleFieldChange, saveAndNext, isSaving } = useStudyStepPersistence({
+    stepKey: "sanitaryAgent",
+    sections,
+    filter: filterForBackend,
+    getValues,
+    setValue,
+    listado,
+    onNext,
+  });
 
-      setValue(sectionKey, updatedArray);
-
-      const newSanitaryAgent = {
-        ...sanitaryAgentCtx,
-        [sectionKey]: updatedArray,
-      };
-
-
-      llenarListadoFormCtx.dispatch({
-        type: "SET_FORM_DATA",
-        payload: {
-          sanitaryAgent: {
-            ...newSanitaryAgent,
-            isDone: true,
-          },
-        },
-      });
-
-      const merged = {
-        ...backendData,
-        ...newSanitaryAgent,
-      };
-
-      const sanitaryAgent = Object.fromEntries(
-        Object.entries(merged).map(([key, arr]) => [
-          key,
-          Array.isArray(arr) ? arr.map(filterForBackend) : arr,
-        ])
-      );
-
-      await updateListado({
-        requestBody: {
-          listado_id: listado?._id,
-          studyData: {
-            sanitaryAgent: {
-              ...sanitaryAgent,
-              isDone: true,
-            },
-          },
-        },
-      });
-    } catch (err) {
-      console.error("Error al actualizar campo de estudio:", err);
-    }
-  };
-
-  const onSubmit = async () => {
-    try {
-
-
-      onNext();
-    } catch (error) {
-      console.error("Error al enviar estudio paso 1:", error);
-    }
-  };
+  const onSubmit = () => saveAndNext();
 
 
   return (
@@ -249,7 +201,7 @@ const EstudioStep7 = ({ onNext, onPrev, listado }) => {
           Atrás
         </Button>
 
-        <Button type="submit" color="primary" className="min-w-[7rem]">
+        <Button type="submit" color="primary" className="min-w-[7rem]" disabled={isSaving}>
           Siguiente
         </Button>
       </div>

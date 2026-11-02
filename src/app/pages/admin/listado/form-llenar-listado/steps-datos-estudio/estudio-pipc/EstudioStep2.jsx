@@ -24,7 +24,7 @@ import {
   nonStructuralElements,
 } from "./utils/elementsTask";
 
-import updateListado from "api/listados/updateListado";
+import { useStudyStepPersistence } from "../../utils/useStudyStepPersistence";
 
 
 function ObservationCell({ sectionKey, rowIndex, currentValue, handleFieldChange }) {
@@ -118,7 +118,7 @@ const EstudioStep2 = ({ onNext, onPrev, listado }) => {
         : buildDefaultSection(section.elements);
   });
 
-  const { control, handleSubmit, watch, reset, setValue } = useForm({
+  const { control, handleSubmit, watch, reset, setValue, getValues } = useForm({
     defaultValues,
   });
 
@@ -133,67 +133,20 @@ const EstudioStep2 = ({ onNext, onPrev, listado }) => {
   }, [reset, listado]);
 
 
-  const handleFieldChange = async (sectionKey, rowIndex, changedFields) => {
-    try {
-      const backendData = listado?.studyData?.structuralRisks ?? {};
-      const currentArray = watch(sectionKey) || [];
-      const updatedArray = [...currentArray];
-      updatedArray[rowIndex] = { ...updatedArray[rowIndex], ...changedFields };
+  // Guarda el paso completo (todas las sub-secciones) con los valores actuales
+  // del formulario; "Siguiente" guarda con isDone:true antes de avanzar.
+  const { handleFieldChange, saveAndNext, isSaving } = useStudyStepPersistence({
+    stepKey: "structuralRisks",
+    sections,
+    filter: filterForBackend,
+    getValues,
+    setValue,
+    listado,
+    onNext,
+    computeIsDone: (data) => checkIfSectionIsDone(data, ["observations", "applies", "existsInPlace", "notApplicable"], "some"),
+  });
 
-      setValue(sectionKey, updatedArray);
-
-      const newStructuralRisks = {
-        ...structuralRisksCtx,
-        [sectionKey]: updatedArray,
-      };
-
-      const isDoneNonStructural = checkIfSectionIsDone(newStructuralRisks, ["observations", "applies", "existsInPlace", "notApplicable"], "some");
-
-      llenarListadoFormCtx.dispatch({
-        type: "SET_FORM_DATA",
-        payload: {
-          structuralRisks: {
-            ...newStructuralRisks,
-            isDone: isDoneNonStructural,
-          },
-        },
-      });
-
-      const merged = {
-        ...backendData,
-        ...newStructuralRisks,
-      };
-
-      const structuredNonRisks = Object.fromEntries(
-        Object.entries(merged).map(([key, arr]) => [
-          key,
-          Array.isArray(arr) ? arr.map(filterForBackend) : arr,
-        ])
-      );
-
-      await updateListado({
-        requestBody: {
-          listado_id: listado?._id,
-          studyData: {
-            structuralRisks: {
-              ...structuredNonRisks,
-              isDone: isDoneNonStructural,
-            },
-          },
-        },
-      });
-    } catch (err) {
-      console.error("Error al actualizar campo de estudio:", err);
-    }
-  };
-
-  const onSubmit = async () => {
-    try {
-      onNext();
-    } catch (error) {
-      console.error("Error al enviar estudio paso 2:", error);
-    }
-  };
+  const onSubmit = () => saveAndNext();
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex grow flex-col space-y-8">
@@ -308,7 +261,7 @@ const EstudioStep2 = ({ onNext, onPrev, listado }) => {
           Atrás
         </Button>
 
-        <Button type="submit" color="primary" className="min-w-[7rem]">
+        <Button type="submit" color="primary" className="min-w-[7rem]" disabled={isSaving}>
           Siguiente
         </Button>
       </div>
