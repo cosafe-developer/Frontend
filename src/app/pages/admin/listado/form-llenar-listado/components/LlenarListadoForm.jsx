@@ -419,7 +419,7 @@ const LlenarListadoForm = ({ listado, empresa }) => {
       >
         {finished ? (
           <div className="col-span-12 place-self-center">
-            <UnderReview />
+            <UnderReview listadoId={listado?._id} />
           </div>
         ) : (
           stepsNode
