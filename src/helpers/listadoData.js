@@ -90,6 +90,8 @@ export function normalizeBoundaries(addressInfo) {
   const pb = addressInfo.propertyBoundaries;
   const nested = isPlainObject(pb) ? pb : {};
   const legacy = parseBoundaryString(pb);
+  // Texto libre sin "Norte:/Sur:/...": se conserva completo en Norte para no perderlo
+  if (typeof pb === "string" && pb.trim() && Object.keys(legacy).length === 0) legacy.north = pb.trim();
   const text = (v) => (typeof v === "string" ? v.trim() : "");
   const url = (v) => (isUsableUrl(v) ? v : "");
   const out = { ...addressInfo, propertyBoundaries: {} };
@@ -203,6 +205,44 @@ export function buildAutosavePayload({ stepStatus = {}, formData = {}, listadoId
   if (Object.keys(studyData).length > 0) payload.studyData = studyData;
 
   return payload;
+}
+
+const sameJson = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+
+/**
+ * Deja en el payload de auto-guardado sólo las secciones distintas a `baseline`
+ * (lo que ya está en la BD). Devuelve null si no hay nada que guardar.
+ * Sin baseline (listado aún no cargado) no se guarda nada.
+ */
+export function diffAgainstBaseline(payload, baseline) {
+  if (!baseline) return null;
+  const out = { listado_id: payload.listado_id };
+  let changed = false;
+  for (const section of ["companyInfo", "addressInfo", "riskInfo"]) {
+    if (payload[section] && !sameJson(payload[section], baseline[section])) {
+      out[section] = payload[section];
+      changed = true;
+    }
+  }
+  const studyData = {};
+  for (const [key, value] of Object.entries(payload.studyData || {})) {
+    if (!sameJson(value, baseline.studyData?.[key])) studyData[key] = value;
+  }
+  if (Object.keys(studyData).length > 0) {
+    out.studyData = studyData;
+    changed = true;
+  }
+  return changed ? out : null;
+}
+
+/** Baseline después de guardar `changes` con éxito. */
+export function mergeBaseline(baseline, changes) {
+  const next = { ...(baseline || {}) };
+  for (const section of ["companyInfo", "addressInfo", "riskInfo"]) {
+    if (changes[section]) next[section] = changes[section];
+  }
+  if (changes.studyData) next.studyData = { ...(next.studyData || {}), ...changes.studyData };
+  return next;
 }
 
 /** Convierte un dataURL (p.ej. la firma del SignaturePad) en File. */

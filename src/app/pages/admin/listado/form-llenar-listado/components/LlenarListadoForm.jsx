@@ -15,7 +15,7 @@ import { DatosGenerales } from "../steps-global/DatosGenerales";
 import { estudioSteps } from "../steps-datos-estudio/estudio-pipc/EstudioSteps";
 import { empresaSteps } from "../steps-datos-empresa/EmpresaSteps";
 import { useLlenarListadoFormContext } from "../contexts/LlenarListadoFormContext";
-import { buildAutosavePayload, toSingleDate } from "helpers/listadoData";
+import { buildAutosavePayload, diffAgainstBaseline, mergeBaseline, toSingleDate } from "helpers/listadoData";
 
 // ----------------------------------------------------------------------
 
@@ -168,6 +168,8 @@ const LlenarListadoForm = ({ listado, empresa }) => {
   const prevEmpresaStep = useRef(currentEmpresaStep);
   const prevEstudioStep = useRef(currentEstudioStep);
   const prevMainStep = useRef(currentStep);
+  // Lo que ya está en la BD (como payload de auto-guardado); se fija al cargar el listado
+  const autosaveBaseline = useRef(null);
 
   useEffect(() => {
     const changed =
@@ -186,10 +188,16 @@ const LlenarListadoForm = ({ listado, empresa }) => {
         listadoId: listado?._id,
       });
 
-      if (listado?._id) {
-        updateListado({ requestBody: payload }).catch((err) =>
-          console.warn("Auto-save falló:", err)
-        );
+      // Sólo lo que cambió desde que se abrió el listado (o desde el último
+      // auto-guardado): abrir un listado y moverse entre pasos sin editar no
+      // debe reescribir nada en la BD.
+      const changes = diffAgainstBaseline(payload, autosaveBaseline.current);
+      if (listado?._id && changes) {
+        updateListado({ requestBody: changes })
+          .then(() => {
+            autosaveBaseline.current = mergeBaseline(autosaveBaseline.current, changes);
+          })
+          .catch((err) => console.warn("Auto-save falló:", err));
       }
     }
 
@@ -225,29 +233,39 @@ const LlenarListadoForm = ({ listado, empresa }) => {
       }
     });
 
+    const loadedStepStatus = {
+      companyInfo: {
+        ...listado.companyInfo,
+        isDone: listado?.companyInfo?.isDone ?? false,
+      },
+      addressInfo: {
+        ...listado.addressInfo,
+        isDone: listado?.addressInfo?.isDone ?? false,
+      },
+      riskInfo: {
+        ...listado.riskInfo,
+        // Fecha única: listados viejos guardaron un array (DatePicker "multiple")
+        ...(listado?.riskInfo && "preventionCalendarDate" in listado.riskInfo
+          ? { preventionCalendarDate: toSingleDate(listado.riskInfo.preventionCalendarDate) }
+          : {}),
+        isDone: listado?.riskInfo?.isDone ?? false,
+      },
+    };
+
     llenarListadoFormCtx.dispatch({
       type: "SET_STEP_STATUS",
       payload: {
-        companyInfo: {
-          ...listado.companyInfo,
-          isDone: listado?.companyInfo?.isDone ?? false,
-        },
-        addressInfo: {
-          ...listado.addressInfo,
-          isDone: listado?.addressInfo?.isDone ?? false,
-        },
-        riskInfo: {
-          ...listado.riskInfo,
-          // Fecha única: listados viejos guardaron un array (DatePicker "multiple")
-          ...(listado?.riskInfo && "preventionCalendarDate" in listado.riskInfo
-            ? { preventionCalendarDate: toSingleDate(listado.riskInfo.preventionCalendarDate) }
-            : {}),
-          isDone: listado?.riskInfo?.isDone ?? false,
-        },
+        ...loadedStepStatus,
         datos_generales: {
           isDone: isDatosGeneralesEmpresaCompleted,
         },
       },
+    });
+
+    autosaveBaseline.current = buildAutosavePayload({
+      stepStatus: loadedStepStatus,
+      formData: estudioStepStatus,
+      listadoId: listado?._id,
     });
 
     llenarListadoFormCtx.dispatch({
