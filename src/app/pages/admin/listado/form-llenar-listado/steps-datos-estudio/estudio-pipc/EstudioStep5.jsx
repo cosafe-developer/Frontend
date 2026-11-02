@@ -34,10 +34,6 @@ const filterForBackend = (item) => {
 
 const EstudioStep5 = ({ onNext, onPrev, listado }) => {
   const llenarListadoFormCtx = useLlenarListadoFormContext();
-  const nonStructuralRisksCtx = llenarListadoFormCtx?.state?.formData?.nonStructuralRisks ?? {};
-  const structuralRisksCtx = llenarListadoFormCtx?.state?.formData?.structuralRisks ?? {};
-  const serviceInstallationsCtx = llenarListadoFormCtx?.state?.formData?.serviceInstallations ?? {};
-  const socioOrganizationalAgentCtx = llenarListadoFormCtx?.state?.formData?.socioOrganizationalAgent ?? {};
   const geologicalAgentCtx = llenarListadoFormCtx?.state?.formData?.geologicalAgent ?? {};
 
   useEffect(() => {
@@ -203,36 +199,7 @@ const EstudioStep5 = ({ onNext, onPrev, listado }) => {
           type="button"
           className="min-w-[7rem]"
           onClick={() => {
-            llenarListadoFormCtx.dispatch({
-              type: "SET_STEP_STATUS",
-              payload: {
-                //? Step 1
-                nonStructuralRisks: {
-                  ...nonStructuralRisksCtx,
-                  isDone: listado?.studyData?.nonStructuralRisks?.isDone ?? false,
-                },
-                //? Step 2
-                structuralRisks: {
-                  ...structuralRisksCtx,
-                  isDone: listado?.studyData?.structuralRisks?.isDone ?? false,
-                },
-                //? Step 3
-                serviceInstallations: {
-                  ...serviceInstallationsCtx,
-                  isDone: listado?.studyData?.serviceInstallations?.isDone ?? false,
-                },
-                //? Step 4
-                socioOrganizationalAgent: {
-                  ...socioOrganizationalAgentCtx,
-                  isDone: listado?.studyData?.socioOrganizationalAgent?.isDone ?? false,
-                },
-                //? Step 5
-                geologicalAgent: {
-                  ...geologicalAgentCtx,
-                  isDone: listado?.studyData?.geologicalAgent?.isDone ?? false,
-                },
-              },
-            });
+            // Atrás sólo navega: antes metía claves de formData en stepStatus
 
             onPrev()
           }}

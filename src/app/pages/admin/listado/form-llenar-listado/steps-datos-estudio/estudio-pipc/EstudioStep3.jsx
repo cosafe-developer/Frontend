@@ -28,6 +28,7 @@ import updateListado from "api/listados/updateListado";
 import uploadImageWithFirma from "api/upload/uploadImageWithFirma.service";
 import { PencilSquareIcon } from "@heroicons/react/24/outline";
 import { ObservationModal } from "../../modals/ObservacionesModal";
+import { toNumberOrNull } from "helpers/listadoData";
 
 const sections = [
   { key: "hydraulicInstallation", label: "Instalación Hidráulica", elements: hydraulicInstallationElements },
@@ -53,7 +54,9 @@ const filterForBackend = (item) => {
   if (typeof item.applies !== "undefined") out.applies = item.applies;
   if (item.evidenceUrl) out.evidenceUrl = item.evidenceUrl;
   if (typeof item.no_aplica !== "undefined") out.no_aplica = item.no_aplica;
-  if (item.approxDistance) out.approxDistance = item.approxDistance;
+  // Siempre número (0 es válido); antes se mandaba string y 0 se descartaba
+  const distance = toNumberOrNull(item.approxDistance);
+  if (distance !== null) out.approxDistance = distance;
   if (item.observations) out.observations = item.observations;
   return out;
 };
@@ -84,8 +87,6 @@ function ObservationCell({ sectionKey, rowIndex, currentValue, handleFieldChange
 
 const EstudioStep3 = ({ onNext, onPrev, listado }) => {
   const llenarListadoFormCtx = useLlenarListadoFormContext();
-  const nonStructuralRisksCtx = llenarListadoFormCtx?.state?.formData?.nonStructuralRisks ?? {};
-  const structuralRisksCtx = llenarListadoFormCtx?.state?.formData?.structuralRisks ?? {};
   const serviceInstallationsCtx = llenarListadoFormCtx?.state?.formData?.serviceInstallations ?? {};
   const [focusedInput, setFocusedInput] = useState({ section: null, row: null });
 
@@ -103,7 +104,7 @@ const EstudioStep3 = ({ onNext, onPrev, listado }) => {
           evidenceUrl: item.evidenceUrl ?? null,
           applies: typeof item.applies === "boolean" ? item.applies : false,
           no_aplica: typeof item.no_aplica === "boolean" ? item.no_aplica : false,
-          approxDistance: item.approxDistance ?? null,
+          approxDistance: toNumberOrNull(item.approxDistance),
           observations: item.observations ?? "",
         }))
         : buildDefaultSection(section.elements);
@@ -115,7 +116,17 @@ const EstudioStep3 = ({ onNext, onPrev, listado }) => {
     if (listado && serviceInstallationsCtx) {
       const newData = resetDataEstudioStep3({ listado, serviceInstallationsCtx });
       const merged = deepMergeDefaults(defaultValues, newData);
-      reset(merged);
+      // Datos guardados con approxDistance string => número
+      reset(
+        Object.fromEntries(
+          Object.entries(merged).map(([key, rows]) => [
+            key,
+            Array.isArray(rows)
+              ? rows.map((row) => ({ ...row, approxDistance: toNumberOrNull(row?.approxDistance) }))
+              : rows,
+          ]),
+        ),
+      );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reset, listado]);
@@ -271,6 +282,19 @@ const EstudioStep3 = ({ onNext, onPrev, listado }) => {
                                 focusedInput.section === section.key && focusedInput.row === rowIndex;
 
 
+                              // Guarda como número (o null) al salir del campo o con ✓;
+                              // antes sólo se guardaba con ✓ y como string.
+                              const saveDistance = () => {
+                                const value = toNumberOrNull(field.value);
+                                // Último valor guardado (contexto), no el del input
+                                const saved = toNumberOrNull(
+                                  serviceInstallationsCtx?.[section.key]?.[rowIndex]?.approxDistance,
+                                );
+                                if (value !== saved) {
+                                  handleFieldChange(section.key, rowIndex, { approxDistance: value });
+                                }
+                              };
+
                               return (
                                 <div className="flex items-center text-center justify-center space-x-1">
                                   <input
@@ -280,7 +304,16 @@ const EstudioStep3 = ({ onNext, onPrev, listado }) => {
                                     value={field.value ?? ""}
                                     onChange={(e) => field.onChange(e.target.value)}
                                     onFocus={() => setFocusedInput({ section: section.key, row: rowIndex })}
-                                    onBlur={() => setFocusedInput({ section: null, row: null })}
+                                    onBlur={() => {
+                                      setFocusedInput({ section: null, row: null });
+                                      saveDistance();
+                                    }}
+                                    onKeyDown={(e) => {
+                                      if (e.key === "Enter") {
+                                        e.preventDefault();
+                                        e.currentTarget.blur();
+                                      }
+                                    }}
                                   />
                                   <div className="space-x-2 items-center flex justify-center ml-1">
                                     <span className="text-sm text-gray-400">metros</span>
@@ -288,8 +321,11 @@ const EstudioStep3 = ({ onNext, onPrev, listado }) => {
                                     {isFocused && (
                                       <button
                                         type="button"
-                                        onMouseDown={() => {
-                                          handleFieldChange(section.key, rowIndex, { approxDistance: field.value });
+                                        onMouseDown={(e) => {
+                                          // preventDefault: el input conserva el foco y su
+                                          // blur posterior no vuelve a guardar el mismo valor
+                                          e.preventDefault();
+                                          saveDistance();
                                         }}
                                         className="text-green-500 hover:text-green-600 cursor-pointer"
                                       >
@@ -325,23 +361,7 @@ const EstudioStep3 = ({ onNext, onPrev, listado }) => {
           type="button"
           className="min-w-[7rem]"
           onClick={() => {
-            llenarListadoFormCtx.dispatch({
-              type: "SET_STEP_STATUS",
-              payload: {
-                nonStructuralRisks: {
-                  ...nonStructuralRisksCtx,
-                  isDone: listado?.studyData?.nonStructuralRisks?.isDone ?? false,
-                },
-                structuralRisks: {
-                  ...structuralRisksCtx,
-                  isDone: listado?.studyData?.structuralRisks?.isDone ?? false,
-                },
-                serviceInstallations: {
-                  ...serviceInstallationsCtx,
-                  isDone: listado?.studyData?.serviceInstallations?.isDone ?? false,
-                },
-              },
-            });
+            // Atrás sólo navega: antes metía claves de formData en stepStatus
             onPrev();
           }}
         >

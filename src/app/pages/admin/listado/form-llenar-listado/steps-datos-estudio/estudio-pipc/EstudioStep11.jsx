@@ -31,26 +31,6 @@ const filterForBackend = (item) => {
 // onNext
 const EstudioStep11 = ({ onNext, onPrev, listado }) => {
   const llenarListadoFormCtx = useLlenarListadoFormContext();
-  //? Step 1
-  const nonStructuralRisksCtx = llenarListadoFormCtx?.state?.formData?.nonStructuralRisks ?? {};
-  // Step 2
-  const structuralRisksCtx = llenarListadoFormCtx?.state?.formData?.structuralRisks ?? {};
-  //? Step 3
-  const serviceInstallationsCtx = llenarListadoFormCtx?.state?.formData?.serviceInstallations ?? {};
-  //? Step 4
-  const socioOrganizationalAgentCtx = llenarListadoFormCtx?.state?.formData?.socioOrganizationalAgent ?? {};
-  //? Step 5
-  const geologicalAgentCtx = llenarListadoFormCtx?.state?.formData?.geologicalAgent ?? {};
-  //? Step 6
-  const physicochemicalAgentCtx = llenarListadoFormCtx?.state?.formData?.physicochemicalAgent ?? {};
-  //? Step 7
-  const sanitaryAgentCtx = llenarListadoFormCtx?.state?.formData?.sanitaryAgent ?? {};
-  //? Step 8
-  const surroundingRisksCtx = llenarListadoFormCtx?.state?.formData?.surroundingRisks ?? {};
-  //? Step 9
-  const securityMeasuresCtx = llenarListadoFormCtx?.state?.formData?.securityMeasures ?? {};
-  //? Step 10
-  const damageEvaluationCtx = llenarListadoFormCtx?.state?.formData?.damageEvaluation ?? {};
   //? Step 11 -> Actual
   const attachmentsCtx = llenarListadoFormCtx?.state?.formData?.attachments ?? {};
 
@@ -218,66 +198,7 @@ const EstudioStep11 = ({ onNext, onPrev, listado }) => {
           type="button"
           className="min-w-[7rem]"
           onClick={() => {
-            llenarListadoFormCtx.dispatch({
-              type: "SET_STEP_STATUS",
-              payload: {
-                //? Step 1
-                nonStructuralRisks: {
-                  ...nonStructuralRisksCtx,
-                  isDone: listado?.studyData?.nonStructuralRisks?.isDone ?? false,
-                },
-                //? Step 2
-                structuralRisks: {
-                  ...structuralRisksCtx,
-                  isDone: listado?.studyData?.structuralRisks?.isDone ?? false,
-                },
-                //? Step 3
-                serviceInstallations: {
-                  ...serviceInstallationsCtx,
-                  isDone: listado?.studyData?.serviceInstallations?.isDone ?? false,
-                },
-                //? Step 4
-                socioOrganizationalAgent: {
-                  ...socioOrganizationalAgentCtx,
-                  isDone: listado?.studyData?.socioOrganizationalAgent?.isDone ?? false,
-                },
-                //? Step 5
-                geologicalAgent: {
-                  ...geologicalAgentCtx,
-                  isDone: listado?.studyData?.geologicalAgent?.isDone ?? false,
-                },
-                //? Step 6
-                physicochemicalAgent: {
-                  ...physicochemicalAgentCtx,
-                  isDone: listado?.studyData?.physicochemicalAgent?.isDone ?? false,
-                },
-                //? Step 7
-                sanitaryAgent: {
-                  ...sanitaryAgentCtx,
-                  isDone: listado?.studyData?.sanitaryAgent?.isDone ?? false,
-                },
-                //? Step 8
-                surroundingRisks: {
-                  ...surroundingRisksCtx,
-                  isDone: listado?.studyData?.surroundingRisks?.isDone ?? false,
-                },
-                //? Step 9
-                securityMeasures: {
-                  ...securityMeasuresCtx,
-                  isDone: listado?.studyData?.securityMeasures?.isDone ?? false,
-                },
-                //? Step 10
-                damageEvaluation: {
-                  ...damageEvaluationCtx,
-                  isDone: listado?.studyData?.damageEvaluation?.isDone ?? false,
-                },
-                //? Step 11
-                attachments: {
-                  ...attachmentsCtx,
-                  isDone: listado?.studyData?.attachments?.isDone ?? false,
-                },
-              },
-            });
+            // Atrás sólo navega: antes metía claves de formData en stepStatus
 
             onPrev()
           }}

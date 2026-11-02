@@ -92,8 +92,6 @@ const filterForBackend = (item) => {
 
 const EstudioStep2 = ({ onNext, onPrev, listado }) => {
   const llenarListadoFormCtx = useLlenarListadoFormContext();
-  //? Step 1
-  const nonStructuralRisksCtx = llenarListadoFormCtx?.state?.formData?.nonStructuralRisks ?? {};
   // Step 2 -> Actual
   const structuralRisksCtx = llenarListadoFormCtx?.state?.formData?.structuralRisks ?? {};
 
@@ -302,21 +300,7 @@ const EstudioStep2 = ({ onNext, onPrev, listado }) => {
           type="button"
           className="min-w-[7rem]"
           onClick={() => {
-            llenarListadoFormCtx.dispatch({
-              type: "SET_STEP_STATUS",
-              payload: {
-                //? Step 1
-                nonStructuralRisks: {
-                  ...nonStructuralRisksCtx,
-                  isDone: listado?.studyData?.nonStructuralRisks?.isDone ?? false,
-                },
-                //? Step 2
-                structuralRisks: {
-                  ...structuralRisksCtx,
-                  isDone: listado?.studyData?.structuralRisks?.isDone ?? false,
-                },
-              },
-            });
+            // Atrás sólo navega: antes metía claves de formData en stepStatus
 
             onPrev();
           }}

@@ -97,15 +97,7 @@ const EstudioStep9 = ({ onNext, onPrev, listado }) => {
   const onSubmit = async () => { onNext(); };
 
   const handlePrev = () => {
-    llenarListadoFormCtx.dispatch({
-      type: "SET_STEP_STATUS",
-      payload: {
-        securityMeasures: {
-          ...securityMeasuresCtx,
-          isDone: listado?.studyData?.securityMeasures?.isDone ?? false,
-        },
-      },
-    });
+    // Atrás sólo navega: antes metía claves de formData en stepStatus
     onPrev();
   };
 

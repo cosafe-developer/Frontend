@@ -61,12 +61,6 @@ function ObservationCell({ sectionKey, rowIndex, currentValue, handleFieldChange
 
 const EstudioStep7 = ({ onNext, onPrev, listado }) => {
   const llenarListadoFormCtx = useLlenarListadoFormContext();
-  const nonStructuralRisksCtx = llenarListadoFormCtx?.state?.formData?.nonStructuralRisks ?? {};
-  const structuralRisksCtx = llenarListadoFormCtx?.state?.formData?.structuralRisks ?? {};
-  const serviceInstallationsCtx = llenarListadoFormCtx?.state?.formData?.serviceInstallations ?? {};
-  const socioOrganizationalAgentCtx = llenarListadoFormCtx?.state?.formData?.socioOrganizationalAgent ?? {};
-  const geologicalAgentCtx = llenarListadoFormCtx?.state?.formData?.geologicalAgent ?? {};
-  const physicochemicalAgentCtx = llenarListadoFormCtx?.state?.formData?.physicochemicalAgent ?? {};
   const sanitaryAgentCtx = llenarListadoFormCtx?.state?.formData?.sanitaryAgent ?? {};
 
   useEffect(() => {
@@ -247,46 +241,7 @@ const EstudioStep7 = ({ onNext, onPrev, listado }) => {
           type="button"
           className="min-w-[7rem]"
           onClick={() => {
-            llenarListadoFormCtx.dispatch({
-              type: "SET_STEP_STATUS",
-              payload: {
-                //? Step 1
-                nonStructuralRisks: {
-                  ...nonStructuralRisksCtx,
-                  isDone: listado?.studyData?.nonStructuralRisks?.isDone ?? false,
-                },
-                //? Step 2
-                structuralRisks: {
-                  ...structuralRisksCtx,
-                  isDone: listado?.studyData?.structuralRisks?.isDone ?? false,
-                },
-                //? Step 3
-                serviceInstallations: {
-                  ...serviceInstallationsCtx,
-                  isDone: listado?.studyData?.serviceInstallations?.isDone ?? false,
-                },
-                //? Step 4
-                socioOrganizationalAgent: {
-                  ...socioOrganizationalAgentCtx,
-                  isDone: listado?.studyData?.socioOrganizationalAgent?.isDone ?? false,
-                },
-                //? Step 5
-                geologicalAgent: {
-                  ...geologicalAgentCtx,
-                  isDone: listado?.studyData?.geologicalAgent?.isDone ?? false,
-                },
-                //? Step 6
-                physicochemicalAgent: {
-                  ...physicochemicalAgentCtx,
-                  isDone: listado?.studyData?.physicochemicalAgent?.isDone ?? false,
-                },
-                //? Step 7
-                sanitaryAgent: {
-                  ...sanitaryAgentCtx,
-                  isDone: listado?.studyData?.sanitaryAgent?.isDone ?? false,
-                },
-              },
-            });
+            // Atrás sólo navega: antes metía claves de formData en stepStatus
 
             onPrev()
           }}
