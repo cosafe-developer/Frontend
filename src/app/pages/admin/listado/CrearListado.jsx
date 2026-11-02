@@ -107,14 +107,17 @@ const CrearListado = () => {
         });
         navigate("/admin/listado");
       } else {
-        setEstado(serverStatesFetching.error);
+        // Se queda en el formulario con lo capturado y muestra el motivo del servidor
+        // (p.ej. "Ya existe un requerimiento activo para esta empresa y estudio...")
+        setEstado(serverStatesFetching.success);
         showToast({
-          message: "Error al crear el proyecto",
+          message: response?.message || "Error al crear el proyecto",
           type: "error",
         });
       }
     } catch (error) {
       console.error("Error al enviar:", error);
+      setEstado(serverStatesFetching.success);
       showToast({
         message: "Error en la comunicación con el servidor",
         type: "error",

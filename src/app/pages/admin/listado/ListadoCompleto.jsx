@@ -2,6 +2,8 @@ import getEmpresaById from "api/empresa/getEmpresaById";
 import getListadoById from "api/listados/getListadoById";
 import downloadDocument from "api/listados/downloadDocument";
 import approveListado from "api/listados/approveListado";
+import reopenListado from "api/listados/reopenListado";
+import deleteListado from "api/listados/deleteListado";
 import { useToastContext } from "app/contexts/toast-provider/context";
 import LoadingErrorComponent from "components/custom-ui/loadings/LoadingError.component";
 import { Page } from "components/shared/Page";
@@ -10,7 +12,7 @@ import { ArrowDownTrayIcon } from "@heroicons/react/24/outline";
 import { Avatar, Button, Card } from "components/ui";
 import { useCallback, useEffect, useState } from "react";
 import { FiCheck } from "react-icons/fi";
-import { useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import serverStatesFetching from "types/fetch/serverStatesFetching.type";
 import { calculateProgressGeneralListado } from "./helpers/calculateProgressGeneralListado";
 import { estudioSectionLabel } from "./form-llenar-listado/steps-datos-estudio/estudio-pipc/EstudioSteps";
@@ -21,8 +23,11 @@ const ListadoCompleto = () => {
   const [empresa, setEmpresa] = useState(null);
   const [estado, setEstado] = useState(serverStatesFetching.fetching);
   const [approving, setApproving] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const { showToast } = useToastContext();
   const { listado_id } = useParams();
+  const navigate = useNavigate();
 
   const fetchData = useCallback(async () => {
     setEstado(serverStatesFetching.fetching);
@@ -149,6 +154,71 @@ const ListadoCompleto = () => {
                 >
                   {listado?.isApproved ? "Aprobado" : "Aprobar"}
                 </Button>
+                {listado?.isApproved && (
+                  <Button
+                    type="button"
+                    disabled={busy}
+                    onClick={async () => {
+                      setBusy(true);
+                      try {
+                        await reopenListado(listado?._id);
+                        setListado((prev) => ({ ...prev, isApproved: false, status: "pendiente" }));
+                        showToast({ message: "Listado reabierto", type: "success" });
+                      } catch (err) {
+                        showToast({ message: err.message || "Error al reabrir", type: "error" });
+                      } finally {
+                        setBusy(false);
+                      }
+                    }}
+                    color="warning"
+                    className="h-10 text-base font-light"
+                  >
+                    Reabrir
+                  </Button>
+                )}
+                {/* Eliminar pide confirmación en la misma pantalla (sin diálogo del navegador) */}
+                {confirmDelete ? (
+                  <>
+                    <Button
+                      type="button"
+                      disabled={busy}
+                      onClick={async () => {
+                        setBusy(true);
+                        try {
+                          await deleteListado(listado?._id);
+                          showToast({ message: "Listado eliminado", type: "success" });
+                          navigate("/admin/listado");
+                        } catch (err) {
+                          showToast({ message: err.message || "Error al eliminar", type: "error" });
+                          setBusy(false);
+                          setConfirmDelete(false);
+                        }
+                      }}
+                      color="error"
+                      className="h-10 text-base font-light"
+                    >
+                      Confirmar eliminación
+                    </Button>
+                    <Button
+                      type="button"
+                      disabled={busy}
+                      onClick={() => setConfirmDelete(false)}
+                      className="h-10 text-base font-light"
+                    >
+                      No eliminar
+                    </Button>
+                  </>
+                ) : (
+                  <Button
+                    type="button"
+                    onClick={() => setConfirmDelete(true)}
+                    color="error"
+                    variant="outlined"
+                    className="h-10 text-base font-light"
+                  >
+                    Eliminar
+                  </Button>
+                )}
               </div>
             </Card>
           </div>
