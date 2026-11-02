@@ -188,6 +188,18 @@ const reducer = (state, action) => {
           ...action.payload,
         },
       };
+    // Merge de un nivel: { companyInfo: { phone } } conserva el resto de
+    // companyInfo (SET_STEP_STATUS reemplaza la sección completa).
+    case "MERGE_STEP_STATUS": {
+      const next = { ...state.stepStatus };
+      for (const [key, value] of Object.entries(action.payload)) {
+        next[key] =
+          value && typeof value === "object" && !Array.isArray(value)
+            ? { ...(state.stepStatus[key] ?? {}), ...value }
+            : value;
+      }
+      return { ...state, stepStatus: next };
+    }
     case "SET_STEP_APPLICABILITY":
       return {
         ...state,

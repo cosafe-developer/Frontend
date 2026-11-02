@@ -2,7 +2,7 @@
 import { CloudArrowUpIcon } from "@heroicons/react/20/solid";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
-import { forwardRef, useCallback } from "react";
+import { forwardRef, useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import PropTypes from "prop-types";
 
@@ -10,28 +10,51 @@ import PropTypes from "prop-types";
 import { PreviewImg } from "components/shared/PreviewImg";
 import { Button, InputErrorMsg, Upload } from "components/ui";
 import { useId } from "hooks";
+import { normalizeUploadValue } from "helpers/listadoData";
 
 // ----------------------------------------------------------------------
 
 const CoverImageUpload = forwardRef(
-  ({ classNames, value, label, onChange, error }, ref) => {
+  ({ classNames, value, label, onChange, error, upload }, ref) => {
     const id = useId();
+    const [uploading, setUploading] = useState(false);
+    const [uploadError, setUploadError] = useState("");
+
+    // Valores inválidos ({} de un File serializado, placeholders) => vacío
+    const safeValue = normalizeUploadValue(value);
 
     // Convierte URL a "File-like" para previsualizar
     const displayFile =
-      typeof value === "string"
-        ? { name: value.split("/").pop(), preview: value }
-        : value;
+      typeof safeValue === "string"
+        ? { name: safeValue.split("/").pop(), preview: safeValue }
+        : safeValue;
 
 
     const { getRootProps, getInputProps, isDragReject, isDragAccept } =
       useDropzone({
-        onDrop: useCallback((acceptedFiles) => {
+        onDrop: useCallback(async (acceptedFiles) => {
           const file = acceptedFiles[0];
-          if (file) {
+          if (!file) return;
+          // Sin `upload` se conserva el comportamiento anterior (entrega el File)
+          if (!upload) {
             onChange(file);
+            return;
           }
-        }, [onChange]),
+          // Con `upload` el archivo se sube ANTES de llegar al formulario:
+          // el valor del campo siempre es la URL pública (string).
+          setUploadError("");
+          setUploading(true);
+          try {
+            const url = await upload(file);
+            onChange(url);
+          } catch (err) {
+            console.error("Error al subir archivo:", err);
+            setUploadError("No se pudo subir el archivo. Intenta de nuevo.");
+          } finally {
+            setUploading(false);
+          }
+        }, [onChange, upload]),
+        disabled: uploading,
         accept: {
           "image/jpeg": [".jpeg", ".jpg"],
           "image/png": [".png"],
@@ -78,7 +101,12 @@ const CoverImageUpload = forwardRef(
             {...getRootProps()}
           >
             {({ ...props }) =>
-              displayFile ? (
+              uploading ? (
+                <div className="flex h-full w-full flex-col items-center justify-center text-gray-600 dark:text-dark-200">
+                  <CloudArrowUpIcon className="size-12 animate-pulse text-primary-500" />
+                  <span className="mt-2 text-sm">Subiendo archivo...</span>
+                </div>
+              ) : displayFile ? (
                 <div
                   title={displayFile.name}
                   {...props}
@@ -147,10 +175,10 @@ const CoverImageUpload = forwardRef(
           </Upload>
         </div>
         <InputErrorMsg
-          when={error && typeof error !== "boolean"}
+          when={(error && typeof error !== "boolean") || !!uploadError}
           className={classNames?.error}
         >
-          {error}
+          {uploadError || error}
         </InputErrorMsg>
       </div>
     );
@@ -166,6 +194,9 @@ CoverImageUpload.propTypes = {
   error: PropTypes.oneOfType([PropTypes.bool, PropTypes.node]),
   classNames: PropTypes.object,
   label: PropTypes.node,
+  // async (file) => url. Si se pasa, el archivo se sube al soltarlo y
+  // onChange recibe la URL pública en lugar del File.
+  upload: PropTypes.func,
 };
 
 export { CoverImageUpload };
