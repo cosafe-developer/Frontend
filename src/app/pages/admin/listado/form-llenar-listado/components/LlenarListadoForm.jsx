@@ -15,7 +15,7 @@ import { DatosGenerales } from "../steps-global/DatosGenerales";
 import { estudioSteps } from "../steps-datos-estudio/estudio-pipc/EstudioSteps";
 import { empresaSteps } from "../steps-datos-empresa/EmpresaSteps";
 import { useLlenarListadoFormContext } from "../contexts/LlenarListadoFormContext";
-import { buildAutosavePayload } from "helpers/listadoData";
+import { buildAutosavePayload, toSingleDate } from "helpers/listadoData";
 
 // ----------------------------------------------------------------------
 
@@ -238,6 +238,10 @@ const LlenarListadoForm = ({ listado, empresa }) => {
         },
         riskInfo: {
           ...listado.riskInfo,
+          // Fecha única: listados viejos guardaron un array (DatePicker "multiple")
+          ...(listado?.riskInfo && "preventionCalendarDate" in listado.riskInfo
+            ? { preventionCalendarDate: toSingleDate(listado.riskInfo.preventionCalendarDate) }
+            : {}),
           isDone: listado?.riskInfo?.isDone ?? false,
         },
         datos_generales: {
