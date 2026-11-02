@@ -1,10 +1,10 @@
-// EstudioStep1.jsx
+// EstudioStep10.jsx — Evaluación de daños (Leve / Mayor / Severo / Irrecuperable, como el documento PIPC)
 import { useForm, Controller } from "react-hook-form";
 import { Button, Table, THead, TBody, Th, Tr, Td, Checkbox } from "components/ui";
 import EvidenceUpload from "components/custom-ui/upload-button/EvidenceUpload.component";
 import { useLlenarListadoFormContext } from "../../contexts/LlenarListadoFormContext";
 import { Listbox } from "components/shared/form/Listbox";
-import { tiposRiesgosEstudios } from "../../utils/types";
+import { DAMAGE_LEVELS, normalizeDamageLevel, normalizeDamageRow } from "../../../helpers/studyStepRules.js";
 import { useEffect } from "react";
 import { deepMergeDefaults } from "../../utils/deepMergeDefaultsInfo";
 import { resetDataEstudioStep10 } from "./utils/resetDataEstudioStep10";
@@ -54,10 +54,9 @@ const EstudioStep10 = ({ onNext, onPrev, listado }) => {
           _uid: i,
           element: item.element ?? section.elements[i] ?? `Elemento ${i + 1}`,
           evidenceUrl: item.evidenceUrl ?? null,
-          applies: typeof item.applies === "boolean" ? item.applies : false,
+          // Grado viejo (bajo/medio/alto) => leve/mayor/severo
+          riskLevel: normalizeDamageRow(item).riskLevel,
           no_aplica: typeof item.no_aplica === "boolean" ? item.no_aplica : false,
-          distancia_aproximada: item.distancia_aproximada ?? null,
-          observations: item.observations ?? "",
         }))
         : buildDefaultSection(section.elements);
   });
@@ -71,7 +70,10 @@ const EstudioStep10 = ({ onNext, onPrev, listado }) => {
     if (listado && damageEvaluationCtx) {
       const newData = resetDataEstudioStep10({ listado, damageEvaluationCtx });
       const merged = deepMergeDefaults(defaultValues, newData);
-      reset(merged);
+      reset({
+        ...merged,
+        damageElements: (merged.damageElements ?? []).map(normalizeDamageRow),
+      });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reset, listado]);
@@ -100,14 +102,14 @@ const EstudioStep10 = ({ onNext, onPrev, listado }) => {
           <div key={section.key} className="space-y-3">
             <h3 className="text-lg font-medium text-white">{section.label}</h3>
             <div className="overflow-x-auto">
-              <Table className="w-full text-left rtl:text-right">
+              <Table dense className="w-full text-left rtl:text-right [&_td]:whitespace-normal [&_th]:whitespace-normal">
                 <THead>
                   <Tr className="border-b border-gray-200 dark:border-dark-500">
-                    <Th className="w-[5%] text-center">#</Th>
-                    <Th className="w-[45%] min-w-[250px] break-words">Elemento a Evaluar</Th>
-                    <Th className="w-[20%] text-center">Evidencia</Th>
-                    <Th className="w-[10%] text-center">N/A</Th>
-                    <Th className="w-[20%] text-center">Grado de Riesgo</Th>
+                    <Th className="w-10 text-center">#</Th>
+                    <Th className="w-full min-w-[10rem]">Elemento a Evaluar</Th>
+                    <Th className="w-px text-center">Evidencia</Th>
+                    <Th className="w-px text-center">N/A</Th>
+                    <Th className="w-px text-center">Grado de daño</Th>
                   </Tr>
                 </THead>
 
@@ -115,11 +117,12 @@ const EstudioStep10 = ({ onNext, onPrev, listado }) => {
                   {rows.map((row, rowIndex) => (
                     <Tr key={row._uid ?? rowIndex} className="border-b border-gray-200 dark:border-dark-500">
                       <Td>{rowIndex + 1}</Td>
-                      <Td className="break-words  text-[15px]">{row.element}</Td>
+                      <Td className="break-words text-[15px]">{row.element}</Td>
 
                       {/* EVIDENCIA */}
                       <Td className="text-center">
                         <EvidenceUpload
+                          size="sm"
                           value={row.evidenceUrl}
                           onChange={async (file) => {
                             const url = await uploadImageWithFirma(file, `listado-${listado?._id}`);
@@ -155,10 +158,11 @@ const EstudioStep10 = ({ onNext, onPrev, listado }) => {
                           control={control}
                           render={({ field }) => (
                             <Listbox
-                              placeholder="Seleccione tipo de riesgo..."
-                              data={tiposRiesgosEstudios}
+                              placeholder="Seleccione..."
+                              classNames={{ root: "mx-auto w-36" }}
+                              data={DAMAGE_LEVELS}
                               displayField="label"
-                              value={tiposRiesgosEstudios?.find((r) => r.id === field.value) || null}
+                              value={DAMAGE_LEVELS.find((r) => r.id === normalizeDamageLevel(field.value)) || null}
                               onChange={(val) => {
                                 field.onChange(val?.id ?? null);
                                 handleFieldChange(section.key, rowIndex, { riskLevel: val?.id ?? null });

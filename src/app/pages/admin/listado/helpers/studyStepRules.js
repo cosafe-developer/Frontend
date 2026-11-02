@@ -40,6 +40,16 @@ export function normalizeDamageLevel(value) {
   return LEGACY_DAMAGE_LEVELS[key] ?? null;
 }
 
+/**
+ * Fila de evaluación de daños para el formulario: los grados viejos se pasan
+ * al grado nuevo (bajo→leve, medio→mayor, alto→severo) para que el select no
+ * aparezca vacío al reabrir un listado viejo. Un valor desconocido se conserva.
+ */
+export function normalizeDamageRow(row) {
+  if (!row || typeof row !== "object") return row;
+  return { ...row, riskLevel: normalizeDamageLevel(row.riskLevel) ?? row.riskLevel ?? null };
+}
+
 const INTERNAL_KEYS = new Set(["element", "_uid", "localPreview"]);
 
 /** Valor "lleno": true, texto no vacío, número finito, array con elementos. */
