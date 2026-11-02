@@ -23,3 +23,13 @@ export const estudioSteps = [
   { key: "damageEvaluation", component: EstudioStep10, label: "Evaluación de Daños" },
   { key: "attachments", component: EstudioStep11, label: "Anexos" },
 ];
+
+// Secciones de studyData que no son un paso propio pero sí cuentan en el progreso
+const EXTRA_SECTION_LABELS = {
+  resourceInventory: "Inventario de Recursos Materiales",
+  evidencePhotos: "Evidencias Fotográficas",
+};
+
+/** Nombre legible de una sección del estudio (checklist de progreso). */
+export const estudioSectionLabel = (key) =>
+  estudioSteps.find((estudio) => estudio.key === key)?.label ?? EXTRA_SECTION_LABELS[key] ?? key;

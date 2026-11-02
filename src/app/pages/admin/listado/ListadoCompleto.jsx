@@ -13,7 +13,7 @@ import { FiCheck } from "react-icons/fi";
 import { useParams } from "react-router";
 import serverStatesFetching from "types/fetch/serverStatesFetching.type";
 import { calculateProgressGeneralListado } from "./helpers/calculateProgressGeneralListado";
-import { estudioSteps } from "./form-llenar-listado/steps-datos-estudio/estudio-pipc/EstudioSteps";
+import { estudioSectionLabel } from "./form-llenar-listado/steps-datos-estudio/estudio-pipc/EstudioSteps";
 
 const ListadoCompleto = () => {
 
@@ -81,10 +81,9 @@ const ListadoCompleto = () => {
   }
 
   const taskScores = Object.entries(listado?.progressSections).map(([key, value]) => {
-    const labelObj = estudioSteps.find((estudio) => estudio.key === key);
     return {
       key: key,
-      label: labelObj ? labelObj.label : key,
+      label: estudioSectionLabel(key),
       progress: Math.round(value)
     };
   });

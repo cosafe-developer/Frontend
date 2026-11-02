@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Navigate } from "react-router";
 import { Table, THead, TBody, Th, Tr, Td, Button } from "components/ui";
 import { truncateText } from "helpers/truncateText.helper";
-import { estudioSteps } from "app/pages/admin/listado/form-llenar-listado/steps-datos-estudio/estudio-pipc/EstudioSteps";
+import { estudioSectionLabel } from "app/pages/admin/listado/form-llenar-listado/steps-datos-estudio/estudio-pipc/EstudioSteps";
 
 const cols = ["CHECKLIST", "PROGRESO"];
 
@@ -11,10 +11,9 @@ export function ContentPreviewEmpresa({ close, data }) {
   const [redirect, setRedirect] = useState(false);
 
   const taskScores = Object.entries(data?.progressSections).map(([key, value]) => {
-    const labelObj = estudioSteps.find((estudio) => estudio.key === key);
     return {
       key: key,
-      label: labelObj ? labelObj.label : key,
+      label: estudioSectionLabel(key),
       progress: Math.round(value)
     };
   });
