@@ -197,7 +197,7 @@ const EstudioStep11 = ({ onNext, onPrev, listado }) => {
                         <EvidenceUpload
                           value={row.fileUrl}
                           onChange={async (file) => {
-                            const url = await uploadImageWithFirma(file);
+                            const url = await uploadImageWithFirma(file, `listado-${listado?._id}`);
                             await handleFieldChange(section.key, rowIndex, { fileUrl: url });
                           }}
                           onRemove={() => handleFieldChange(section.key, rowIndex, { fileUrl: null })}

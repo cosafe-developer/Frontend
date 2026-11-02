@@ -8,7 +8,7 @@ import { resetDataEstudioStep1 } from "./utils/resetDataEstudioStep1";
 import { deepMergeDefaults } from "../../utils/deepMergeDefaultsInfo";
 import { evacuationBlockingObjects, fallingObjects, flammableObjects, overturningObjects, slidingObjects } from "./utils/elementsTask";
 import { checkIfSectionIsDone } from "../utils/checkIfSectionIsDone";
-import { replaceImage } from "helpers/updateImageUpload";
+import { uploadListadoFile } from "helpers/updateImageUpload";
 
 import updateListado from "api/listados/updateListado";
 import EvidenceUpload from "components/custom-ui/upload-button/EvidenceUpload.component";
@@ -186,17 +186,19 @@ const EstudioStep1 = ({ onNext, listado }) => {
                         <EvidenceUpload
                           value={row.evidenceUrl}
                           onChange={async (file) => {
-                            await handleFieldChange(section.key, rowIndex, { evidenceUrl: file });
-
-                            const url = await replaceImage({
-                              previousUrl: row?.evidenceUrl,
-                              newFile: file,
-                              folder: `listado-formulario-${listado?._id}`,
-                            });
-
-                            await handleFieldChange(section.key, rowIndex, {
-                              evidenceUrl: url,
-                            });
+                            // Subir PRIMERO y guardar sólo la URL: antes se
+                            // guardaba el File (serializa a {}) antes de subir.
+                            // La evidencia anterior no se borra aquí porque
+                            // handleFieldChange no confirma que se guardó.
+                            try {
+                              const url = await uploadListadoFile(file, {
+                                listadoId: listado?._id,
+                                fileName: "evidencia",
+                              });
+                              await handleFieldChange(section.key, rowIndex, { evidenceUrl: url });
+                            } catch (err) {
+                              console.error("Error al subir evidencia:", err);
+                            }
                           }}
                           onRemove={() =>
                             handleFieldChange(section.key, rowIndex, { evidenceUrl: null })
