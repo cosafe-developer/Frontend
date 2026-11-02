@@ -176,7 +176,10 @@ export const geologicalDisruptionsElements = [
   "Erosión del suelo productivo",
   "Sobre explotación de fuentes de agua",
   "Sobre explotación del manto freático",
-  "Deslizamiento de talud"
+  // "Deslizamiento de talud" venía duplicado como 10.º elemento (la plantilla
+  // PIPC_NEW_Template_2026.docx también lo repite en la fila 10, sin otra
+  // etiqueta que indique cuál debía ser). Se elimina el duplicado; los listados
+  // ya guardados conservan sus 10 filas.
 ]
 
 export const seismicEventsElements = [
