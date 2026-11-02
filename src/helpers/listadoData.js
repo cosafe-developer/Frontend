@@ -271,6 +271,23 @@ export function storageKeyFromUrl(url) {
   }
 }
 
+/**
+ * Nombre legible de un archivo subido a partir de su URL (o nombre): último
+ * segmento, sin query, decodificado y sin el prefijo de timestamp que agrega
+ * el servidor ("1793608170003-extintor.jpg" => "extintor.jpg").
+ */
+export function displayFileName(value) {
+  if (typeof value !== "string" || value.trim() === "" || isDataUrl(value)) return "";
+  let name = value.split(/[?#]/)[0].split("/").pop() || "";
+  try {
+    name = decodeURIComponent(name);
+  } catch {
+    // nombre con % inválido: se deja tal cual
+  }
+  const stripped = name.replace(/^\d{10,}[-_]/, "");
+  return stripped || name;
+}
+
 /** Carpeta de Spaces donde se guardan los archivos propios de un listado. */
 export const listadoFolder = (listadoId) => `listado-${listadoId}`;
 

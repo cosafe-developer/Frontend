@@ -3,6 +3,7 @@ import { Button, Upload } from "components/ui";
 import { ConfirmModal } from "components/shared/ConfirmModal";
 import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
+import { displayFileName } from "helpers/listadoData";
 import {
   Dialog,
   DialogPanel,
@@ -70,7 +71,7 @@ ImagePreviewModal.propTypes = {
 };
 
 // ── Componente principal ──
-const EvidenceUpload = ({ value, onChange, onRemove, compact = false }) => {
+const EvidenceUpload = ({ value, onChange, onRemove, compact = false, size = "md" }) => {
   const [internalValue, setInternalValue] = useState(null);
   const [showPreview, setShowPreview] = useState(false);
   const [showConfirmRemove, setShowConfirmRemove] = useState(false);
@@ -80,7 +81,7 @@ const EvidenceUpload = ({ value, onChange, onRemove, compact = false }) => {
       setInternalValue({
         type: "url",
         url: value,
-        name: value.split("/").pop(),
+        name: displayFileName(value),
       });
     }
 
@@ -135,6 +136,17 @@ const EvidenceUpload = ({ value, onChange, onRemove, compact = false }) => {
                 <PlusIcon className="size-5" />
                 Foto
               </button>
+            ) : size === "sm" ? (
+              // Botón angosto para tablas del estudio (caben sin scroll horizontal)
+              <Button
+                color="primary"
+                {...props}
+                className="h-8 gap-1 whitespace-nowrap px-2.5 text-xs"
+                title="Subir evidencia"
+              >
+                <PlusIcon className="size-4" />
+                Evidencia
+              </Button>
             ) : (
               <Button color="primary" {...props}>
                 <PlusIcon className="size-5" />
@@ -225,6 +237,8 @@ EvidenceUpload.propTypes = {
   onChange: PropTypes.func,
   onRemove: PropTypes.func,
   compact: PropTypes.bool,
+  // "sm": botón "Evidencia" angosto (tablas del estudio)
+  size: PropTypes.oneOf(["sm", "md"]),
 };
 
 export default EvidenceUpload;

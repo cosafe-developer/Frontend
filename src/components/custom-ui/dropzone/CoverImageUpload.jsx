@@ -10,7 +10,7 @@ import PropTypes from "prop-types";
 import { PreviewImg } from "components/shared/PreviewImg";
 import { Button, InputErrorMsg, Upload } from "components/ui";
 import { useId } from "hooks";
-import { normalizeUploadValue } from "helpers/listadoData";
+import { displayFileName, normalizeUploadValue } from "helpers/listadoData";
 
 // ----------------------------------------------------------------------
 
@@ -26,7 +26,7 @@ const CoverImageUpload = forwardRef(
     // Convierte URL a "File-like" para previsualizar
     const displayFile =
       typeof safeValue === "string"
-        ? { name: safeValue.split("/").pop(), preview: safeValue }
+        ? { name: displayFileName(safeValue), preview: safeValue }
         : safeValue;
 
 
