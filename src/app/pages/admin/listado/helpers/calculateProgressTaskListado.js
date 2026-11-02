@@ -14,13 +14,13 @@ function isItemComplete(item, sectionKey, strictRiskLevel = false) {
     /*    "observations", "applies", "exists", "no_aplica" */
     case "structuralRisks":
       // Contamos como completado si observations tiene texto o no_aplica es true
-      if ((item.observations && item.observations.trim() !== "") || item.no_aplica || item.applies || item.exists) return true;
+      if ((item.observations && item.observations.trim() !== "") || item.no_aplica || item.notApplicable || item.applies || item.exists || item.existsInPlace) return true;
       return false;
 
 
     /*   "observations", "applies", "no_aplica", "distancia_aproximada" */
     case "serviceInstallations":
-      if ((item.observations && item.observations.trim() !== "") || item.no_aplica || item.applies || item?.distancia_aproximada > 0) return true;
+      if ((item.observations && item.observations.trim() !== "") || item.no_aplica || item.notApplicable || item.applies || Number(item?.approxDistance ?? item?.distancia_aproximada) > 0) return true;
       return false;
 
     case "socioOrganizationalAgent":
@@ -37,7 +37,7 @@ function isItemComplete(item, sectionKey, strictRiskLevel = false) {
 
     /*   "observations", "has_riesgo", "no_aplica", */
     case "surroundingRisks":
-      if ((item.observations && item.observations.trim() !== "") || item.no_aplica || item.has_riesgo) return true;
+      if ((item.observations && item.observations.trim() !== "") || item.no_aplica || item.notApplicable || item.has_riesgo) return true;
       return false;
 
     /*   "observations", "has_riesgo", "no_aplica", */

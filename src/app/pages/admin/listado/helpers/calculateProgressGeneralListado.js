@@ -8,9 +8,16 @@ export function calculateProgressGeneralListado(studyData, strictRiskLevel = fal
   const sectionPercents = {};
   const stepApplicability = studyData.stepApplicability ?? {};
 
-  // Excluir stepApplicability de la lista de secciones a evaluar
+  // Excluir stepApplicability y claves internas de la UI que el auto-guardado
+  // viejo persistía (studyData.estudio = { isDone }), además de valores que no
+  // son secciones (null, strings).
+  const IGNORED_KEYS = ["stepApplicability", "estudio"];
   const sectionsList = Object.keys(studyData).filter(
-    (key) => key !== "stepApplicability"
+    (key) =>
+      !IGNORED_KEYS.includes(key) &&
+      studyData[key] !== null &&
+      typeof studyData[key] === "object" &&
+      !Array.isArray(studyData[key])
   );
 
   let totalItemsGlobal = 0;
