@@ -16,6 +16,10 @@ import { useNavigate, useParams } from "react-router";
 import serverStatesFetching from "types/fetch/serverStatesFetching.type";
 import { calculateProgressGeneralListado } from "./helpers/calculateProgressGeneralListado";
 import { estudioSectionLabel } from "./form-llenar-listado/steps-datos-estudio/estudio-pipc/EstudioSteps";
+import { LabelHelp } from "components/shared/HelpTip";
+import { HELP } from "./helpers/helpTexts";
+import { ChangeHistory } from "./components/ChangeHistory";
+import { changeLogFromResponse } from "helpers/changeLog";
 
 const ListadoCompleto = () => {
 
@@ -72,6 +76,17 @@ const ListadoCompleto = () => {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  // Tras aprobar/reabrir: vuelve a leer sólo el historial (sin pantalla de carga)
+  const refreshChangeLog = useCallback(async () => {
+    try {
+      const response = await getListadoById({ requestBody: { listado_id } });
+      const changeLog = changeLogFromResponse(response);
+      if (changeLog) setListado((prev) => (prev ? { ...prev, changeLog } : prev));
+    } catch (err) {
+      console.warn("No se pudo actualizar el historial de cambios:", err);
+    }
+  }, [listado_id]);
 
   if (estado === serverStatesFetching.fetching) {
     return (
@@ -130,6 +145,7 @@ const ListadoCompleto = () => {
                   }}
                   color="info"
                   className="h-10 text-base font-light"
+                  title={HELP.detail.download}
                 >
                   <ArrowDownTrayIcon className="size-5 mr-1.5" />
                   Descargar PIPC
@@ -143,6 +159,7 @@ const ListadoCompleto = () => {
                       await approveListado(listado?._id);
                       setListado((prev) => ({ ...prev, isApproved: true, status: "completado" }));
                       showToast({ message: "Listado aprobado", type: "success" });
+                      refreshChangeLog();
                     } catch (err) {
                       showToast({ message: err.message || "Error al aprobar", type: "error" });
                     } finally {
@@ -151,6 +168,7 @@ const ListadoCompleto = () => {
                   }}
                   color="success"
                   className="h-10 text-base font-light"
+                  title={listado?.isApproved ? HELP.detail.approved : HELP.detail.approve}
                 >
                   {listado?.isApproved ? "Aprobado" : "Aprobar"}
                 </Button>
@@ -164,6 +182,7 @@ const ListadoCompleto = () => {
                         await reopenListado(listado?._id);
                         setListado((prev) => ({ ...prev, isApproved: false, status: "pendiente" }));
                         showToast({ message: "Listado reabierto", type: "success" });
+                        refreshChangeLog();
                       } catch (err) {
                         showToast({ message: err.message || "Error al reabrir", type: "error" });
                       } finally {
@@ -172,6 +191,7 @@ const ListadoCompleto = () => {
                     }}
                     color="warning"
                     className="h-10 text-base font-light"
+                    title={HELP.detail.reopen}
                   >
                     Reabrir
                   </Button>
@@ -196,6 +216,7 @@ const ListadoCompleto = () => {
                       }}
                       color="error"
                       className="h-10 text-base font-light"
+                      title={HELP.detail.confirmDelete}
                     >
                       Confirmar eliminación
                     </Button>
@@ -204,6 +225,7 @@ const ListadoCompleto = () => {
                       disabled={busy}
                       onClick={() => setConfirmDelete(false)}
                       className="h-10 text-base font-light"
+                      title={HELP.detail.cancelDelete}
                     >
                       No eliminar
                     </Button>
@@ -215,17 +237,24 @@ const ListadoCompleto = () => {
                     color="error"
                     variant="outlined"
                     className="h-10 text-base font-light"
+                    title={HELP.detail.delete}
                   >
                     Eliminar
                   </Button>
                 )}
               </div>
             </Card>
+
+            <div className="mt-6">
+              <ChangeHistory listado={listado} />
+            </div>
           </div>
 
 
           <div className="w-[35%]">
-            <h1 className="text-lg text-white mb-[2rem]">Total de procesos completados</h1>
+            <h1 className="text-lg text-white mb-[2rem]">
+              <LabelHelp label="Total de procesos completados" help={HELP.detail.progress} />
+            </h1>
             <ol className="steps is-vertical" style={{ borderColor: '#2a2c32' }}>
               {taskScores.map((step, index) => (
                 <li

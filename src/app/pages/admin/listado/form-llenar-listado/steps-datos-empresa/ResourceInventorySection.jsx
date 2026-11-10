@@ -8,10 +8,13 @@ import {
   conditionOptions,
 } from "../steps-datos-estudio/estudio-pipc/utils/elementsTask";
 import EvidenceUpload from "components/custom-ui/upload-button/EvidenceUpload.component";
+import MultiFileUpload from "components/custom-ui/upload-button/MultiFileUpload";
+import { HelpTip, LabelHelp } from "components/shared/HelpTip";
 import uploadImageWithFirma from "api/upload/uploadImageWithFirma.service";
 import updateListado from "api/listados/updateListado";
-
-const emptyEntry = () => ({ imageUrl: "", location: "", condition: "" });
+import { addEntriesWithPhotos, emptyEntry } from "./utils/inventoryEntries";
+import { HELP } from "../../helpers/helpTexts";
+import { LastChangeNotice } from "../../components/LastChangeNotice";
 
 // Acepta shape nueva {element, entries[]} y vieja {element, location, condition}
 const normalizeItems = (rawItems) =>
@@ -115,6 +118,14 @@ const ResourceInventorySection = ({ listado }) => {
     commit(next);
   };
 
+  // "Agregar con fotos": un registro por foto, todos en un solo guardado y
+  // sobre la última versión (itemsRef) para no pisar otros cambios.
+  const addEntriesFromPhotos = (elIdx, urls) => {
+    commit(addEntriesWithPhotos(itemsRef.current, elIdx, urls));
+  };
+
+  const uploadPhoto = (file) => uploadImageWithFirma(file, `listado-${listado?._id}`);
+
   const removeEntry = (elIdx, entryIdx) => {
     const next = itemsRef.current.map((it, i) =>
       i !== elIdx ? it : { ...it, entries: it.entries.filter((_, j) => j !== entryIdx) },
@@ -133,16 +144,20 @@ const ResourceInventorySection = ({ listado }) => {
 
   return (
     <div className="space-y-4">
-      <p className="text-sm text-gray-400">
-        Agrega un registro por cada unidad (ej. cada extintor) con su foto, ubicación y estado.
-      </p>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <p className="flex items-center gap-1 text-sm text-gray-400">
+          Agrega un registro por cada unidad (ej. cada extintor) con su foto, ubicación y estado.
+          <HelpTip text={HELP.resourceInventory.section} label="Qué es: inventario" />
+        </p>
+        <LastChangeNotice listado={listado} section="resourceInventory" />
+      </div>
 
       {items.map((item, elIdx) => (
         <div
           key={item.element}
           className="rounded-lg border border-gray-200 p-4 dark:border-dark-500"
         >
-          <div className="mb-3 flex items-center justify-between">
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
             <h4 className="text-[15px] font-medium text-gray-800 dark:text-dark-100">
               {item.element}
               {item.entries.length > 0 && (
@@ -151,15 +166,28 @@ const ResourceInventorySection = ({ listado }) => {
                 </span>
               )}
             </h4>
-            <Button
-              type="button"
-              variant="outlined"
-              className="h-8 gap-1 px-2 text-xs"
-              onClick={() => addEntry(elIdx)}
-            >
-              <PlusIcon className="size-4" />
-              Agregar registro
-            </Button>
+            <div className="flex flex-wrap items-start justify-end gap-2">
+              <MultiFileUpload
+                variant="button"
+                size="sm"
+                accept="image/*"
+                upload={uploadPhoto}
+                onUploaded={(urls) => addEntriesFromPhotos(elIdx, urls)}
+                label="Agregar con fotos"
+                title={HELP.resourceInventory.addWithPhotos}
+                className="max-w-64 items-end"
+              />
+              <Button
+                type="button"
+                variant="outlined"
+                className="h-8 gap-1 px-2 text-xs"
+                title={HELP.resourceInventory.addRecord}
+                onClick={() => addEntry(elIdx)}
+              >
+                <PlusIcon className="size-4" />
+                Agregar registro
+              </Button>
+            </div>
           </div>
 
           {item.entries.length === 0 ? (
@@ -171,7 +199,7 @@ const ResourceInventorySection = ({ listado }) => {
                   key={entryIdx}
                   className="flex flex-wrap items-start gap-3 rounded-lg bg-gray-50 p-3 dark:bg-dark-600"
                 >
-                  <div className="w-24 shrink-0">
+                  <div className="w-24 shrink-0" title={HELP.resourceInventory.photo}>
                     <EvidenceUpload
                       key={`${item.element}-${entryIdx}-${entry.imageUrl}`}
                       value={entry.imageUrl || null}
@@ -183,7 +211,7 @@ const ResourceInventorySection = ({ listado }) => {
                   <div className="min-w-40 flex-1">
                     <Input
                       value={entry.location}
-                      label="Ubicación"
+                      label={<LabelHelp label="Ubicación" help={HELP.resourceInventory.location} small />}
                       placeholder="Ej. Data Center, Nivel -1..."
                       className="h-9 text-sm"
                       onChange={(e) =>
@@ -193,8 +221,12 @@ const ResourceInventorySection = ({ listado }) => {
                     />
                   </div>
                   <div className="w-44">
-                    <label className="input-label mb-1 block text-xs">Estado de Condición</label>
+                    <label className="input-label mb-1 block text-xs">
+                      <LabelHelp label="Estado de Condición" help={HELP.resourceInventory.condition} small />
+                    </label>
                     <select
+                      aria-label="Estado de Condición"
+                      title={HELP.resourceInventory.condition}
                       value={entry.condition}
                       onChange={(e) => updateEntry(elIdx, entryIdx, { condition: e.target.value })}
                       className="h-9 w-full rounded-lg border border-gray-300 bg-white px-2 text-sm text-gray-800 dark:border-dark-450 dark:bg-dark-700 dark:text-dark-100"
@@ -216,6 +248,7 @@ const ResourceInventorySection = ({ listado }) => {
                   <button
                     type="button"
                     aria-label="Eliminar registro"
+                    title={HELP.resourceInventory.removeRecord}
                     onClick={() => removeEntry(elIdx, entryIdx)}
                     className="mt-6 text-error hover:text-red-400"
                   >

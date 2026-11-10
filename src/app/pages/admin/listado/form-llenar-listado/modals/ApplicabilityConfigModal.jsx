@@ -10,6 +10,9 @@ import PropTypes from "prop-types";
 import { useLlenarListadoFormContext } from "../contexts/LlenarListadoFormContext";
 import { estudioSteps } from "../steps-datos-estudio/estudio-pipc/EstudioSteps";
 import updateListado from "api/listados/updateListado";
+import { LabelHelp } from "components/shared/HelpTip";
+import { HELP } from "../../helpers/helpTexts";
+import { LastChangeNotice } from "../../components/LastChangeNotice";
 
 export function ApplicabilityConfigModal({ show, onClose, listado }) {
   const llenarListadoFormCtx = useLlenarListadoFormContext();
@@ -93,10 +96,12 @@ export function ApplicabilityConfigModal({ show, onClose, listado }) {
       >
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-medium text-gray-800 dark:text-dark-100">
-            Configurar aplicabilidad de pasos
+            <LabelHelp label="Configurar aplicabilidad de pasos" help={HELP.study.configure} />
           </h3>
           <button
             type="button"
+            aria-label="Cerrar"
+            title="Cierra la ventana; los cambios ya quedaron guardados"
             onClick={onClose}
             className="rounded-full p-1 hover:bg-gray-100 dark:hover:bg-dark-600 cursor-pointer"
           >
@@ -108,6 +113,8 @@ export function ApplicabilityConfigModal({ show, onClose, listado }) {
           Activa o desactiva los pasos del estudio que aplican para esta empresa.
           Los pasos desactivados se marcarán como &quot;No aplica&quot; y no se incluirán en el estudio.
         </p>
+
+        <LastChangeNotice listado={listado} section="stepApplicability" className="mb-4" />
 
         <div className="space-y-3">
           {estudioSteps
@@ -128,6 +135,8 @@ export function ApplicabilityConfigModal({ show, onClose, listado }) {
                 </div>
                 <Switch
                   checked={applies}
+                  title={HELP.study.stepApplies}
+                  aria-label={`${step.label}: aplica`}
                   onChange={(e) => handleToggle(step.key, e.target.checked)}
                 />
               </div>
@@ -136,7 +145,12 @@ export function ApplicabilityConfigModal({ show, onClose, listado }) {
         </div>
 
         <div className="mt-6 flex justify-end">
-          <Button onClick={onClose} color="primary" className="h-9 min-w-[7rem]">
+          <Button
+            onClick={onClose}
+            color="primary"
+            className="h-9 min-w-[7rem]"
+            title="Cierra la ventana; cada cambio se guarda al momento de moverlo"
+          >
             Listo
           </Button>
         </div>

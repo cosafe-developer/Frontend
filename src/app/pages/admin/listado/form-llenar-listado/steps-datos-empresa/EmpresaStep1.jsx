@@ -10,6 +10,9 @@ import { useEffect } from "react";
 import { CoverImageUpload } from "components/custom-ui/dropzone/CoverImageUpload";
 import { normalizeUploadValue } from "helpers/listadoData";
 import { uploadListadoFile } from "helpers/updateImageUpload";
+import { LabelHelp } from "components/shared/HelpTip";
+import { HELP } from "../../helpers/helpTexts";
+import { LastChangeNotice } from "../../components/LastChangeNotice";
 
 const EmpresaStep1 = ({
   setCurrentEmpresaStep,
@@ -70,11 +73,11 @@ const EmpresaStep1 = ({
       className="flex grow flex-col"
     >
       <div className="grow space-y-4">
+        <LastChangeNotice listado={listado} section="companyInfo" />
         <div className="flex flex-col gap-y-1.5">
-          <label className="input-label">
-            <span>Logotipo Oficial</span>
-            <span className="ml-2 text-error">*</span>
-          </label>
+          <span className="input-label">
+            <LabelHelp label="Logotipo Oficial" help={HELP.companyInfo.logo} required />
+          </span>
 
           <Controller
             name="logoUrl"
@@ -106,7 +109,7 @@ const EmpresaStep1 = ({
           render={({ field }) => (
             <Input
               {...field}
-              label="Nombre Comercial, Denominación o Razón Social"
+              label={<LabelHelp label="Nombre Comercial, Denominación o Razón Social" help={HELP.companyInfo.businessName} />}
               required
               placeholder="Escribir Nombre Comercial de la Empresa..."
               error={errors?.businessName?.message}
@@ -133,7 +136,7 @@ const EmpresaStep1 = ({
           render={({ field }) => (
             <Input
               {...field}
-              label="RFC"
+              label={<LabelHelp label="RFC" help={HELP.companyInfo.rfc} />}
               required
               placeholder="RFC de la empresa..."
               error={errors?.rfc?.message}
@@ -160,7 +163,7 @@ const EmpresaStep1 = ({
             render={({ field }) => (
               <Input
                 {...field}
-                label="Email"
+                label={<LabelHelp label="Email" help={HELP.companyInfo.email} />}
                 type="email"
                 required
                 placeholder="Escribir Email..."
@@ -186,7 +189,7 @@ const EmpresaStep1 = ({
             render={({ field }) => (
               <Input
                 {...field}
-                label="Teléfono"
+                label={<LabelHelp label="Teléfono" help={HELP.companyInfo.phone} />}
                 placeholder="Escribir Teléfono"
                 error={errors?.phone?.message}
                 onChange={(e) => {
@@ -212,7 +215,7 @@ const EmpresaStep1 = ({
           render={({ field }) => (
             <Input
               {...field}
-              label="Domicilio Fisico"
+              label={<LabelHelp label="Domicilio Fisico" help={HELP.companyInfo.address} />}
               required
               placeholder="Ingresar Domicilio..."
               error={errors?.address?.message}
@@ -239,7 +242,7 @@ const EmpresaStep1 = ({
             render={({ field }) => (
               <Input
                 {...field}
-                label="Ciudad"
+                label={<LabelHelp label="Ciudad" help={HELP.companyInfo.city} />}
                 required
                 placeholder="Ej: Monterrey"
                 error={errors?.city?.message}
@@ -261,7 +264,7 @@ const EmpresaStep1 = ({
             render={({ field }) => (
               <Input
                 {...field}
-                label="Estado"
+                label={<LabelHelp label="Estado" help={HELP.companyInfo.state} />}
                 required
                 placeholder="Ej: Nuevo León"
                 error={errors?.state?.message}
@@ -281,7 +284,7 @@ const EmpresaStep1 = ({
 
       </div>
       <div className="mt-4 flex justify-end space-x-3 pb-4">
-        <Button type="submit" className="min-w-[7rem]" color="primary">
+        <Button type="submit" className="min-w-[7rem]" color="primary" title={HELP.companyInfo.next}>
           Siguiente
         </Button>
       </div>

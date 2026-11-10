@@ -31,6 +31,9 @@ import { tiposRiesgosEstudios } from "../utils/types";
 import ResourceInventorySection from "./ResourceInventorySection";
 import EvidencePhotosSection from "./EvidencePhotosSection";
 import { progressPercentageOf } from "../../helpers/calculateProgressGeneralListado.js";
+import { LabelHelp } from "components/shared/HelpTip";
+import { HELP } from "../../helpers/helpTexts";
+import { LastChangeNotice } from "../../components/LastChangeNotice";
 
 
 const EmpresaStep3 = ({
@@ -210,13 +213,17 @@ const EmpresaStep3 = ({
         className="flex grow flex-col"
       >
         <div className="grow space-y-8">
+          <LastChangeNotice listado={listado} section="riskInfo" />
 
           {/* 📄 Inventario de recursos materiales */}
           <div className="flex flex-col gap-y-3">
             <div className="flex items-center gap-x-3">
-              <label className="input-label">
-                <span>Inventario de Recursos Materiales (Ubicación y Condición)</span>
-              </label>
+              <span className="input-label">
+                <LabelHelp
+                  label="Inventario de Recursos Materiales (Ubicación y Condición)"
+                  help={HELP.riskInfo.inventoryApplies}
+                />
+              </span>
               <Controller
                 name="materialsInventoryApplies"
                 control={control}
@@ -227,6 +234,8 @@ const EmpresaStep3 = ({
                     </span>
                     <Switch
                       checked={field.value || false}
+                      title={HELP.riskInfo.inventoryApplies}
+                      aria-label="Inventario de recursos materiales aplica"
                       onChange={(e) => {
                         const checked = e.target.checked;
                         field.onChange(checked);
@@ -263,7 +272,7 @@ const EmpresaStep3 = ({
                 render={({ field }) => (
                   <Input
                     {...field}
-                    label="Descripción de la Empresa"
+                    label={<LabelHelp label="Descripción de la Empresa" help={HELP.riskInfo.companyDescription} />}
                     error={errors?.companyDescription?.message}
                     required
                     placeholder="Escribir Descripción de la Empresa..."
@@ -290,7 +299,7 @@ const EmpresaStep3 = ({
                 control={control}
                 render={({ field }) => (
                   <Listbox
-                    label="Tipo de Riesgo Interno *"
+                    label={<LabelHelp label="Tipo de Riesgo Interno *" help={HELP.riskInfo.internalRiskType} />}
                     placeholder="Seleccione tipo de riesgo..."
                     data={tiposRiesgos}
                     displayField="label"
@@ -317,7 +326,7 @@ const EmpresaStep3 = ({
                 control={control}
                 render={({ field }) => (
                   <Listbox
-                    label="Tipo de Riesgo por Entorno *"
+                    label={<LabelHelp label="Tipo de Riesgo por Entorno *" help={HELP.riskInfo.surroundingRiskType} />}
                     placeholder="Seleccione tipo de riesgo..."
                     data={tiposRiesgos}
                     displayField="label"
@@ -347,7 +356,7 @@ const EmpresaStep3 = ({
               render={({ field }) => (
                 <Textarea
                   {...field}
-                  label="Antecedentes"
+                  label={<LabelHelp label="Antecedentes" help={HELP.riskInfo.antecedents} />}
                   rows={5}
                   error={errors?.antecedentsRaw?.message}
                   required
@@ -371,10 +380,13 @@ const EmpresaStep3 = ({
 
           {/* 📅 Calendario */}
           <div className="flex flex-col gap-y-2">
-            <label className="input-label">
-              <span>Calendario de fechas destinadas al subprograma de prevención de riesgos</span>
-              <span className="ml-2 text-error">*</span>
-            </label>
+            <span className="input-label">
+              <LabelHelp
+                label="Calendario de fechas destinadas al subprograma de prevención de riesgos"
+                help={HELP.riskInfo.preventionCalendar}
+                required
+              />
+            </span>
 
             <Controller
               name="preventionCalendarDate"
@@ -410,16 +422,22 @@ const EmpresaStep3 = ({
           {/* ⚠️ Riesgos generales internos - Checklist */}
           <div className="space-y-3">
             <h4 className="text-lg font-medium text-gray-800 dark:text-dark-100">
-              Riesgos Generales Internos
+              <LabelHelp label="Riesgos Generales Internos" help={HELP.riskInfo.internalGeneralRisks} />
             </h4>
             <div className="overflow-x-auto">
               <Table className="w-full text-left rtl:text-right">
                 <THead>
                   <Tr className="border-b border-gray-200 dark:border-dark-500">
                     <Th className="w-[5%] text-center">#</Th>
-                    <Th className="w-[55%] min-w-[250px] break-words">Elemento a Evaluar</Th>
-                    <Th className="w-[10%] text-center">Sí / No</Th>
-                    <Th className="w-[30%] text-center">Grado de Riesgo</Th>
+                    <Th className="w-[55%] min-w-[250px] break-words">
+                      <LabelHelp label="Elemento a Evaluar" help={HELP.riskInfo.internalGeneralRisks} small />
+                    </Th>
+                    <Th className="w-[10%] text-center">
+                      <LabelHelp label="Sí / No" help={HELP.riskInfo.internalRiskApplies} small />
+                    </Th>
+                    <Th className="w-[30%] text-center">
+                      <LabelHelp label="Grado de Riesgo" help={HELP.riskInfo.internalRiskLevel} small />
+                    </Th>
                   </Tr>
                 </THead>
                 <TBody>
@@ -433,6 +451,7 @@ const EmpresaStep3 = ({
                         <Td className="text-center">
                           <Checkbox
                             color="success"
+                            title={HELP.riskInfo.internalRiskApplies}
                             checked={currentItem.applies || false}
                             onChange={(e) => {
                               const checked = e.target.checked;
@@ -485,7 +504,7 @@ const EmpresaStep3 = ({
         </div>
 
         <div className="mt-4 flex justify-end space-x-3 pb-4">
-          <Button type="button" className="min-w-[7rem]" onClick={() => {
+          <Button type="button" className="min-w-[7rem]" title={HELP.riskInfo.back} onClick={() => {
             setCurrentEmpresaStep(1);
             llenarListadoFormCtx.dispatch({
               type: "SET_STEP_STATUS",
@@ -507,6 +526,7 @@ const EmpresaStep3 = ({
             type="submit"
             color="primary"
             className="min-w-[7rem]"
+            title={HELP.riskInfo.save}
           >
             Guardar
           </Button>

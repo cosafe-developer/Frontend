@@ -6,6 +6,7 @@ import {
   TransitionChild,
 } from "@headlessui/react";
 import { Button } from "components/ui";
+import { HELP } from "../../helpers/helpTexts";
 import { Fragment, useEffect, useState } from "react";
 
 
@@ -57,16 +58,19 @@ export function ObservationModal({ isOpen, onClose, initialValue = "", onSave })
               rows={4}
               className="w-full rounded-md border border-gray-300 dark:border-dark-400 bg-transparent px-3 py-2 text-sm text-gray-800 dark:text-dark-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
               placeholder="Escribe tus observaciones..."
+              aria-label="Observaciones"
+              title={HELP.common.observations}
               value={value}
               onChange={(e) => setValue(e.target.value)}
             />
 
             <div className="flex justify-end space-x-2 mt-4">
-              <Button onClick={onClose} variant="outlined">
+              <Button onClick={onClose} variant="outlined" title={HELP.observationsModal.cancel}>
                 Cancelar
               </Button>
               <Button
                 color="primary"
+                title={HELP.observationsModal.save}
                 onClick={() => {
                   onSave(value);
                   onClose();

@@ -3,9 +3,13 @@ import PropTypes from "prop-types";
 import { Checkbox } from "components/ui";
 import { useLlenarListadoFormContext } from "../contexts/LlenarListadoFormContext";
 import { evidencePhotoCategories } from "../steps-datos-estudio/estudio-pipc/utils/elementsTask";
-import EvidenceUpload from "components/custom-ui/upload-button/EvidenceUpload.component";
+import MultiFileUpload from "components/custom-ui/upload-button/MultiFileUpload";
+import { HelpTip, LabelHelp } from "components/shared/HelpTip";
 import uploadImageWithFirma from "api/upload/uploadImageWithFirma.service";
 import updateListado from "api/listados/updateListado";
+import { appendCategoryImages } from "./utils/inventoryEntries";
+import { HELP } from "../../helpers/helpTexts";
+import { LastChangeNotice } from "../../components/LastChangeNotice";
 
 const onlyUrls = (images) =>
   (Array.isArray(images) ? images : []).filter((u) => typeof u === "string");
@@ -80,21 +84,12 @@ const EvidencePhotosSection = ({ listado }) => {
     commit({ ...cur, [catKey]: { ...cur[catKey], applies } });
   };
 
-  const handleUpload = async (catKey, file) => {
-    try {
-      const url = await uploadImageWithFirma(file, `listado-${listado?._id}`);
-      if (typeof url !== "string" || !url) return;
-      const cur = photosRef.current;
-      commit({
-        ...cur,
-        [catKey]: {
-          ...cur[catKey],
-          images: [...onlyUrls(cur[catKey]?.images), url],
-        },
-      });
-    } catch (err) {
-      console.error("Error al subir evidencia:", err);
-    }
+  const uploadPhoto = (file) => uploadImageWithFirma(file, `listado-${listado?._id}`);
+
+  // Varias fotos a la vez: se agregan todas juntas al terminar, partiendo
+  // de la última versión (photosRef) para no pisar otros cambios.
+  const handleUploaded = (catKey, urls) => {
+    commit(appendCategoryImages(photosRef.current, catKey, urls));
   };
 
   const handleRemove = (catKey, idx) => {
@@ -106,9 +101,12 @@ const EvidencePhotosSection = ({ listado }) => {
 
   return (
     <div className="flex flex-col gap-y-3">
-      <h4 className="text-[15px] font-medium text-gray-800 dark:text-dark-100">
-        Evidencias Fotográficas
-      </h4>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h4 className="text-[15px] font-medium text-gray-800 dark:text-dark-100">
+          <LabelHelp label="Evidencias Fotográficas" help={HELP.evidencePhotos.section} />
+        </h4>
+        <LastChangeNotice listado={listado} section="evidencePhotos" />
+      </div>
       <p className="text-sm text-gray-400">
         Las fotos de extintores, botiquines, lámparas y detectores se agregan en cada
         registro del inventario. Aquí solo se suben las señalizaciones.
@@ -126,14 +124,18 @@ const EvidencePhotosSection = ({ listado }) => {
                   <h4 className="text-[15px] font-medium text-gray-800 dark:text-dark-100">
                     {cat.label}
                   </h4>
-                  <label className="flex items-center gap-2 text-sm text-gray-400">
-                    <Checkbox
-                      color="primary"
-                      checked={data.applies}
-                      onChange={(e) => handleToggle(cat.key, e.target.checked)}
-                    />
-                    Aplica
-                  </label>
+                  <div className="flex items-center gap-1">
+                    <label className="flex items-center gap-2 text-sm text-gray-400">
+                      <Checkbox
+                        color="primary"
+                        checked={data.applies}
+                        title={HELP.evidencePhotos.applies}
+                        onChange={(e) => handleToggle(cat.key, e.target.checked)}
+                      />
+                      Aplica
+                    </label>
+                    <HelpTip text={HELP.evidencePhotos.applies} label="Qué es: Aplica" />
+                  </div>
                 </div>
 
                 {data.applies ? (
@@ -151,6 +153,7 @@ const EvidencePhotosSection = ({ listado }) => {
                               type="button"
                               onClick={() => handleRemove(cat.key, idx)}
                               aria-label="Eliminar imagen"
+                              title={HELP.evidencePhotos.remove}
                               className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full w-5 h-5 text-xs flex items-center justify-center shadow"
                             >
                               ×
@@ -160,11 +163,13 @@ const EvidencePhotosSection = ({ listado }) => {
                       </div>
                     )}
 
-                    <EvidenceUpload
-                      key={`${cat.key}-${data.images.length}`}
-                      value={null}
-                      onChange={(file) => handleUpload(cat.key, file)}
-                      onRemove={() => {}}
+                    <MultiFileUpload
+                      accept="image/*"
+                      upload={uploadPhoto}
+                      onUploaded={(urls) => handleUploaded(cat.key, urls)}
+                      label="Seleccionar fotos"
+                      hint="o arrastra varias aquí (se suben de 3 en 3)"
+                      title={HELP.evidencePhotos.upload}
                     />
                   </div>
                 ) : (

@@ -16,6 +16,7 @@ import { estudioSteps } from "../steps-datos-estudio/estudio-pipc/EstudioSteps";
 import { empresaSteps } from "../steps-datos-empresa/EmpresaSteps";
 import { useLlenarListadoFormContext } from "../contexts/LlenarListadoFormContext";
 import { buildAutosavePayload, diffAgainstBaseline, mergeBaseline, toSingleDate } from "helpers/listadoData";
+import { HELP } from "../../helpers/helpTexts";
 
 // ----------------------------------------------------------------------
 
@@ -77,6 +78,7 @@ const EstudioSteps = ({ currentEstudioStep, setCurrentEstudioStep, listado }) =>
         <Button
           variant="outlined"
           className="h-7 px-2 text-xs"
+          title={HELP.study.configure}
           onClick={() => setShowConfig(true)}
         >
           <AdjustmentsHorizontalIcon className="size-4 mr-1" />

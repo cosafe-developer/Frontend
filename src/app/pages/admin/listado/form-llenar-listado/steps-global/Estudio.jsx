@@ -4,6 +4,7 @@ import { estudioSteps } from "../steps-datos-estudio/estudio-pipc/EstudioSteps";
 import { useLlenarListadoFormContext } from "../contexts/LlenarListadoFormContext";
 import { ApplicabilityModal } from "../modals/ApplicabilityModal";
 import updateListado from "api/listados/updateListado";
+import { LastChangeNotice } from "../../components/LastChangeNotice";
 
 export function Estudio({
   currentEstudioStep,
@@ -148,6 +149,9 @@ export function Estudio({
       />
 
       {/* Solo renderizar el step si ya se decidió que aplica */}
+      {stepApplicability[currentStepKey] === true && (
+        <LastChangeNotice listado={listado} section={currentStepKey} className="mb-4" />
+      )}
       {stepApplicability[currentStepKey] === true && (
         <StepComponent
           onNext={handleNext}

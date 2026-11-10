@@ -15,6 +15,9 @@ import { isDataUrl } from "helpers/listadoData";
 import updateListado from "api/listados/updateListado";
 import { useToastContext } from "app/contexts/toast-provider/context";
 import { progressPercentageOf } from "../../helpers/calculateProgressGeneralListado.js";
+import { LabelHelp } from "components/shared/HelpTip";
+import { HELP } from "../../helpers/helpTexts";
+import { LastChangeNotice } from "../../components/LastChangeNotice";
 
 const FLAT_BOUNDARY_KEYS = [
   "propertyBoundariesNorth",
@@ -162,11 +165,11 @@ const EmpresaStep2 = ({
       className="flex grow flex-col"
     >
       <div className="grow space-y-8">
+        <LastChangeNotice listado={listado} section="addressInfo" />
         <div className="flex flex-col gap-y-1.5">
-          <label className="input-label">
-            <span>Constancia Situación Fiscal</span>
-            <span className="ml-2 text-error">*</span>
-          </label>
+          <span className="input-label">
+            <LabelHelp label="Constancia Situación Fiscal" help={HELP.addressInfo.taxCertificate} required />
+          </span>
 
           <Controller
             name="taxCertificateUrl"
@@ -190,7 +193,7 @@ const EmpresaStep2 = ({
         {/* DATOS DE LA EMPRESA */}
         <div>
           <h4 className="text-lg font-medium text-gray-800 dark:text-dark-100">
-            Datos de la Empresa
+            <LabelHelp label="Datos de la Empresa" help={HELP.addressInfo.companyData} />
           </h4>
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
             <Controller
@@ -199,7 +202,7 @@ const EmpresaStep2 = ({
               render={({ field }) => (
                 <Input
                   {...field}
-                  label="Actividades de la Empresa"
+                  label={<LabelHelp label="Actividades de la Empresa" help={HELP.addressInfo.activities} />}
                   error={errors?.activities?.message}
                   required
                   placeholder="Escribir Actividades de la Empresa..."
@@ -225,7 +228,7 @@ const EmpresaStep2 = ({
               render={({ field }) => (
                 <Input
                   {...field}
-                  label="Giro Empresarial"
+                  label={<LabelHelp label="Giro Empresarial" help={HELP.addressInfo.businessTurn} />}
                   error={errors?.businessTurn?.message}
                   required
                   placeholder="Escribir Giro Empresarial..."
@@ -251,7 +254,7 @@ const EmpresaStep2 = ({
               render={({ field }) => (
                 <Input
                   {...field}
-                  label="Nombre del Responsable del Inmueble"
+                  label={<LabelHelp label="Nombre del Responsable del Inmueble" help={HELP.addressInfo.propertyResponsibleName} />}
                   error={errors?.propertyResponsibleName?.message}
                   required
                   placeholder="Escribir Responsable del Inmueble..."
@@ -277,7 +280,7 @@ const EmpresaStep2 = ({
               render={({ field }) => (
                 <Input
                   {...field}
-                  label="Cargo del Responsable del Inmueble"
+                  label={<LabelHelp label="Cargo del Responsable del Inmueble" help={HELP.addressInfo.propertyResponsiblePosition} />}
                   error={errors?.propertyResponsiblePosition?.message}
                   required
                   placeholder="Escribir Cargo del Responsable..."
@@ -302,7 +305,7 @@ const EmpresaStep2 = ({
         {/* DATOS DEL REPRESENTANTE LEGAL */}
         <div>
           <h4 className="text-lg font-medium text-gray-800 dark:text-dark-100">
-            Datos del Representante Legal
+            <LabelHelp label="Datos del Representante Legal" help={HELP.addressInfo.legalRepresentative} />
           </h4>
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
             <Controller
@@ -311,7 +314,7 @@ const EmpresaStep2 = ({
               render={({ field }) => (
                 <Input
                   {...field}
-                  label="Nombre del Representante Legal"
+                  label={<LabelHelp label="Nombre del Representante Legal" help={HELP.addressInfo.legalRepresentativeName} />}
                   error={errors?.legalRepresentativeName?.message}
                   required
                   placeholder="Escribir el Representante Legal..."
@@ -337,7 +340,7 @@ const EmpresaStep2 = ({
               render={({ field }) => (
                 <Input
                   {...field}
-                  label="Cargo del Representante Legal"
+                  label={<LabelHelp label="Cargo del Representante Legal" help={HELP.addressInfo.legalRepresentativePosition} />}
                   error={errors?.legalRepresentativePosition?.message}
                   required
                   placeholder="Escribir el Cargo del Representante..."
@@ -358,9 +361,9 @@ const EmpresaStep2 = ({
             />
 
             <div className="flex flex-col gap-y-1.5">
-              <label className="input-label">
-                <span>Firma del Representante legal (opcional)</span>
-              </label>
+              <span className="input-label">
+                <LabelHelp label="Firma del Representante legal (opcional)" help={HELP.addressInfo.signature} />
+              </span>
 
               <Controller
                 name="legalRepresentativeSignatureUrl"
@@ -387,10 +390,9 @@ const EmpresaStep2 = ({
             </div>
 
             <div className="flex flex-col gap-y-1.5">
-              <label className="input-label">
-                <span>Ine del Representante legal</span>
-                <span className="ml-2 text-error">*</span>
-              </label>
+              <span className="input-label">
+                <LabelHelp label="INE del Representante legal" help={HELP.addressInfo.ine} required />
+              </span>
 
               <Controller
                 name="legalRepresentativeIneUrl"
@@ -416,7 +418,7 @@ const EmpresaStep2 = ({
         {/* DATOS DEL DOMICILIO */}
         <div>
           <h4 className="text-lg font-medium text-gray-800 dark:text-dark-100">
-            Datos del Domicilio
+            <LabelHelp label="Datos del Domicilio" help={HELP.addressInfo.domicile} />
           </h4>
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
             <Controller
@@ -425,7 +427,7 @@ const EmpresaStep2 = ({
               render={({ field }) => (
                 <Input
                   {...field}
-                  label="Superficie del Terreno (m²)"
+                  label={<LabelHelp label="Superficie del Terreno (m²)" help={HELP.addressInfo.landArea} />}
                   type="number"
                   error={errors?.landAreaM2?.message}
                   required
@@ -452,7 +454,7 @@ const EmpresaStep2 = ({
               render={({ field }) => (
                 <Input
                   {...field}
-                  label="Superficie Construida (m²)"
+                  label={<LabelHelp label="Superficie Construida (m²)" help={HELP.addressInfo.builtArea} />}
                   type="number"
                   error={errors?.builtAreaM2?.message}
                   required
@@ -479,7 +481,7 @@ const EmpresaStep2 = ({
               render={({ field }) => (
                 <Input
                   {...field}
-                  label="Población Fija"
+                  label={<LabelHelp label="Población Fija" help={HELP.addressInfo.fixedPopulation} />}
                   type="number"
                   error={errors?.fixedPopulation?.message}
                   required
@@ -506,7 +508,7 @@ const EmpresaStep2 = ({
               render={({ field }) => (
                 <Input
                   {...field}
-                  label="Población Flotante"
+                  label={<LabelHelp label="Población Flotante" help={HELP.addressInfo.floatingPopulation} />}
                   type="number"
                   error={errors?.floatingPopulation?.message}
                   required
@@ -533,7 +535,7 @@ const EmpresaStep2 = ({
               render={({ field }) => (
                 <Input
                   {...field}
-                  label="Niveles del Inmueble"
+                  label={<LabelHelp label="Niveles del Inmueble" help={HELP.addressInfo.levels} />}
                   placeholder="Ej: 3 niveles"
                   error={errors?.levels?.message}
                   onChange={(e) => {
@@ -558,7 +560,7 @@ const EmpresaStep2 = ({
               render={({ field }) => (
                 <Input
                   {...field}
-                  label="Antigüedad del Inmueble"
+                  label={<LabelHelp label="Antigüedad del Inmueble" help={HELP.addressInfo.buildingAge} />}
                   placeholder="Ej: 26 años"
                   error={errors?.buildingAge?.message}
                   onChange={(e) => {
@@ -578,9 +580,9 @@ const EmpresaStep2 = ({
             />
 
             <div className="sm:col-span-2">
-              <label className="block mb-2 text-sm font-medium text-[#A7AAB4]">
-                Colindancias del Inmueble <span className="text-error">*</span>
-              </label>
+              <span className="block mb-2 text-sm font-medium text-[#A7AAB4]">
+                <LabelHelp label="Colindancias del Inmueble" help={HELP.addressInfo.boundaries} required />
+              </span>
               <div className="grid gap-3 sm:grid-cols-2">
                 <Controller
                   name="propertyBoundariesNorth"
@@ -588,7 +590,7 @@ const EmpresaStep2 = ({
                   render={({ field }) => (
                     <Input
                       {...field}
-                      label="Norte"
+                      label={<LabelHelp label="Norte" help={HELP.addressInfo.boundaryNorth} />}
                       error={errors?.propertyBoundariesNorth?.message}
                       required
                       placeholder="Colindancia al Norte..."
@@ -620,7 +622,7 @@ const EmpresaStep2 = ({
                   render={({ field }) => (
                     <Input
                       {...field}
-                      label="Sur"
+                      label={<LabelHelp label="Sur" help={HELP.addressInfo.boundarySouth} />}
                       error={errors?.propertyBoundariesSouth?.message}
                       required
                       placeholder="Colindancia al Sur..."
@@ -652,7 +654,7 @@ const EmpresaStep2 = ({
                   render={({ field }) => (
                     <Input
                       {...field}
-                      label="Este"
+                      label={<LabelHelp label="Este" help={HELP.addressInfo.boundaryEast} />}
                       error={errors?.propertyBoundariesEast?.message}
                       required
                       placeholder="Colindancia al Este..."
@@ -684,7 +686,7 @@ const EmpresaStep2 = ({
                   render={({ field }) => (
                     <Input
                       {...field}
-                      label="Oeste"
+                      label={<LabelHelp label="Oeste" help={HELP.addressInfo.boundaryWest} />}
                       error={errors?.propertyBoundariesWest?.message}
                       required
                       placeholder="Colindancia al Oeste..."
@@ -713,16 +715,20 @@ const EmpresaStep2 = ({
               </div>
 
               <div className="mt-3">
-                <label className="block mb-2 text-sm font-medium text-[#A7AAB4]">
-                  Imagen de referencia de colindancias <span className="text-error">*</span>
-                </label>
+                <span className="block mb-2 text-sm font-medium text-[#A7AAB4]">
+                  <LabelHelp label="Imagen de referencia de colindancias" help={HELP.addressInfo.boundaryImages} required />
+                </span>
                 <div className="overflow-x-auto">
                   <Table className="w-full text-left rtl:text-right">
                     <THead>
                       <Tr className="border-b border-gray-200 dark:border-dark-500">
                         <Th className="w-[5%] text-center">#</Th>
-                        <Th className="w-[40%]">Elementos a evaluar</Th>
-                        <Th className="w-[55%] text-center">Evidencia</Th>
+                        <Th className="w-[40%]">
+                          <LabelHelp label="Elementos a evaluar" help={HELP.addressInfo.boundaries} small />
+                        </Th>
+                        <Th className="w-[55%] text-center">
+                          <LabelHelp label="Evidencia" help={HELP.addressInfo.boundaryImage} small />
+                        </Th>
                       </Tr>
                     </THead>
                     <TBody>
@@ -819,9 +825,9 @@ const EmpresaStep2 = ({
 
                 return (
                   <div>
-                    <label className="block mb-2 text-sm font-medium text-[#A7AAB4]">
-                      Áreas que se encuentran dentro del Inmueble
-                    </label>
+                    <span className="block mb-2 text-sm font-medium text-[#A7AAB4]">
+                      <LabelHelp label="Áreas que se encuentran dentro del Inmueble" help={HELP.addressInfo.internalAreas} />
+                    </span>
 
                     <div className="flex items-center gap-2 mb-3">
                       <input
@@ -830,6 +836,8 @@ const EmpresaStep2 = ({
                         onChange={(e) => setInputValue(e.target.value)}
                         onKeyDown={handleKeyDown}
                         placeholder="Escribir área interna y presionar Enter..."
+                        aria-label="Área interna"
+                        title={HELP.addressInfo.internalAreas}
                         className="flex-1 rounded-lg border border-gray-600 bg-transparent px-3 py-2 text-sm text-white placeholder-[#989BA3] focus:outline-none focus:ring-2 focus:ring-primary-500"
                       />
                       <Button
@@ -838,6 +846,7 @@ const EmpresaStep2 = ({
                         color="success"
                         size="sm"
                         className="min-w-[80px]"
+                        title={HELP.addressInfo.addArea}
                       >
                         Agregar
                       </Button>
@@ -856,6 +865,8 @@ const EmpresaStep2 = ({
                             <button
                               type="button"
                               onClick={() => handleRemoveArea(area)}
+                              aria-label={`Quitar ${area}`}
+                              title={HELP.addressInfo.removeArea}
                               className="text-xs text-red-400 hover:text-red-600"
                             >
                               ✕
@@ -877,7 +888,7 @@ const EmpresaStep2 = ({
       </div>
 
       <div className="mt-4 flex justify-end space-x-3 pb-4">
-        <Button type="button" className="min-w-[7rem]" onClick={() => {
+        <Button type="button" className="min-w-[7rem]" title={HELP.addressInfo.back} onClick={() => {
           setCurrentEmpresaStep(0);
           llenarListadoFormCtx.dispatch({
             type: "MERGE_STEP_STATUS",
@@ -891,7 +902,7 @@ const EmpresaStep2 = ({
         }}>
           Atrás
         </Button>
-        <Button type="submit" className="min-w-[7rem]" color="primary" disabled={isSaving}>
+        <Button type="submit" className="min-w-[7rem]" color="primary" disabled={isSaving} title={HELP.addressInfo.next}>
           {isSaving ? "Guardando..." : "Siguiente"}
         </Button>
       </div>

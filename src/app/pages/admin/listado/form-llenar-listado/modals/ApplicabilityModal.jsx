@@ -8,6 +8,7 @@ import { QuestionMarkCircleIcon } from "@heroicons/react/24/outline";
 import { Button } from "components/ui";
 import PropTypes from "prop-types";
 import { useRef } from "react";
+import { HELP } from "../../helpers/helpTexts";
 
 export function ApplicabilityModal({ show, onClose, stepLabel, onApplies, onNotApplies }) {
   const focusRef = useRef();
@@ -57,6 +58,7 @@ export function ApplicabilityModal({ show, onClose, stepLabel, onApplies, onNotA
         <div className="mt-8 flex justify-center space-x-3">
           <Button
             onClick={onNotApplies}
+            title={HELP.study.appliesNo}
             variant="outlined"
             className="h-10 min-w-[8rem]"
           >
@@ -66,6 +68,7 @@ export function ApplicabilityModal({ show, onClose, stepLabel, onApplies, onNotA
           <Button
             ref={focusRef}
             onClick={onApplies}
+            title={HELP.study.appliesYes}
             color="primary"
             className="h-10 min-w-[8rem]"
           >

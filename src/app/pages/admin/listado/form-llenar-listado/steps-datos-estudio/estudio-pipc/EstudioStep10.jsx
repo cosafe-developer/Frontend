@@ -11,6 +11,8 @@ import { resetDataEstudioStep10 } from "./utils/resetDataEstudioStep10";
 import { damageElements } from "./utils/elementsTask";
 
 import { useStudyStepPersistence } from "../../utils/useStudyStepPersistence";
+import { LabelHelp } from "components/shared/HelpTip";
+import { HELP } from "../../../helpers/helpTexts";
 import uploadImageWithFirma from "api/upload/uploadImageWithFirma.service";
 
 const sections = [
@@ -100,16 +102,26 @@ const EstudioStep10 = ({ onNext, onPrev, listado }) => {
         const rows = watch(section.key) || [];
         return (
           <div key={section.key} className="space-y-3">
-            <h3 className="text-lg font-medium text-white">{section.label}</h3>
+            <h3 className="text-lg font-medium text-white">
+              <LabelHelp label={section.label} help={HELP.common.sectionTable} />
+            </h3>
             <div className="overflow-x-auto">
               <Table dense className="w-full text-left rtl:text-right [&_td]:whitespace-normal [&_th]:whitespace-normal">
                 <THead>
                   <Tr className="border-b border-gray-200 dark:border-dark-500">
-                    <Th className="w-10 text-center">#</Th>
-                    <Th className="w-full min-w-[10rem]">Elemento a Evaluar</Th>
-                    <Th className="w-px text-center">Evidencia</Th>
-                    <Th className="w-px text-center">N/A</Th>
-                    <Th className="w-px text-center">Grado de daño</Th>
+                    <Th className="w-10 text-center" title={HELP.common.index}>#</Th>
+                    <Th className="w-full min-w-[10rem]">
+                      <LabelHelp label="Elemento a Evaluar" help={HELP.common.element} small />
+                    </Th>
+                    <Th className="w-px text-center">
+                      <LabelHelp label="Evidencia" help={HELP.common.evidenceNoColumn} small />
+                    </Th>
+                    <Th className="w-px text-center">
+                      <LabelHelp label="N/A" help={HELP.study.damage.notApplicable} small />
+                    </Th>
+                    <Th className="w-px text-center">
+                      <LabelHelp label="Grado de daño" help={HELP.study.damage.level} small />
+                    </Th>
                   </Tr>
                 </THead>
 
@@ -139,6 +151,7 @@ const EstudioStep10 = ({ onNext, onPrev, listado }) => {
                           control={control}
                           render={({ field }) => (
                             <Checkbox
+                              title={HELP.study.damage.notApplicable}
                               color="warning"
                               checked={field.value || false}
                               onChange={(e) => {
@@ -184,6 +197,7 @@ const EstudioStep10 = ({ onNext, onPrev, listado }) => {
         <Button
           type="button"
           className="min-w-[7rem]"
+          title={HELP.common.back}
           onClick={() => {
             // Atrás sólo navega: antes metía claves de formData en stepStatus
 
@@ -193,7 +207,7 @@ const EstudioStep10 = ({ onNext, onPrev, listado }) => {
           Atrás
         </Button>
 
-        <Button type="submit" color="primary" className="min-w-[7rem]" disabled={isSaving}>
+        <Button type="submit" color="primary" className="min-w-[7rem]" disabled={isSaving} title={HELP.common.next}>
           Siguiente
         </Button>
       </div>
