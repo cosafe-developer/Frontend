@@ -1,6 +1,7 @@
 // Import Dependencies
 import * as Yup from 'yup'
-import { hasUploadValue, toSingleDate } from 'helpers/listadoData'
+import { hasUploadValue } from 'helpers/listadoData'
+import { CALENDAR_ACTIVITIES } from '../utils/calendarActivities'
 
 // Archivo obligatorio: sólo cuenta un File, dataURL o URL real. `{}` (File
 // serializado guardado por el bug), "" y placeholders NO cumplen.
@@ -118,12 +119,17 @@ export const informacionRiesgoSchema = Yup.object().shape({
     .trim()
     .required("Los antecedentes son obligatorios"),
 
-  // La plantilla tiene un solo [{preventionCalendarDate}] => fecha única
-  preventionCalendarDate: Yup.mixed().test(
-    "fecha-calendario",
-    "La fecha del calendario de prevención es obligatoria",
-    (value) => toSingleDate(value) !== null,
-  ),
+  // Calendario: una o más fechas, cada una con su tipo de actividad
+  preventionCalendarEvents: Yup.array()
+    .of(
+      Yup.object({
+        date: Yup.string().trim().required("Elige la fecha"),
+        activity: Yup.string()
+          .oneOf(CALENDAR_ACTIVITIES.map((a) => a.id), "Elige el tipo de actividad")
+          .required("Elige el tipo de actividad"),
+      }),
+    )
+    .min(1, "Agrega al menos una fecha al calendario de prevención"),
 
   internalGeneralRisks: Yup.mixed().nullable(),
 });

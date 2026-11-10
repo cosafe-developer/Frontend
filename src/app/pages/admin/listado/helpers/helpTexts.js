@@ -105,7 +105,12 @@ const riskInfo = {
   antecedents:
     "Historia del inmueble y emergencias previas. Cada salto de línea (Enter) inicia un párrafo nuevo en la sección Antecedentes del PIPC; las líneas vacías se ignoran.",
   preventionCalendar:
-    "Fecha programada para las actividades del subprograma de prevención (simulacros, capacitación). Aparece en el calendario del PIPC.",
+    "Fechas de las actividades del subprograma de prevención. Cada fecha lleva su tipo de actividad y se pinta con su color en el \"Calendario de Capacitación y Actividades\" del PIPC (rojo: Primeros Auxilios, verde: Búsqueda y Rescate, naranja: Simulacro Mayor). Debajo del calendario sale la lista Fecha | Actividad.",
+  preventionCalendarAdd: "Agrega otra fecha al calendario. Puedes repetir una fecha si ese día hay más de una actividad.",
+  preventionCalendarDate: "Día de la actividad. Se marca en el mes correspondiente del calendario del PIPC.",
+  preventionCalendarActivity:
+    "Tipo de actividad de esa fecha: define el color con que se pinta el día en el calendario del PIPC (Primeros Auxilios rojo, Búsqueda y Rescate verde, Simulacro Mayor naranja).",
+  preventionCalendarRemove: "Quita esta fecha del calendario del PIPC.",
   internalGeneralRisks:
     "Lista de riesgos generales dentro del inmueble. Se guarda en la Información de Riesgo del listado.",
   internalRiskApplies: "Marca la casilla si este riesgo existe en el inmueble.",

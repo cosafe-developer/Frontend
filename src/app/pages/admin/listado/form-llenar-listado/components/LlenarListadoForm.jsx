@@ -15,7 +15,8 @@ import { DatosGenerales } from "../steps-global/DatosGenerales";
 import { estudioSteps } from "../steps-datos-estudio/estudio-pipc/EstudioSteps";
 import { empresaSteps } from "../steps-datos-empresa/EmpresaSteps";
 import { useLlenarListadoFormContext } from "../contexts/LlenarListadoFormContext";
-import { buildAutosavePayload, diffAgainstBaseline, mergeBaseline, toSingleDate } from "helpers/listadoData";
+import { buildAutosavePayload, diffAgainstBaseline, mergeBaseline } from "helpers/listadoData";
+import { calendarEventsFrom } from "../utils/calendarActivities";
 import { HELP } from "../../helpers/helpTexts";
 
 // ----------------------------------------------------------------------
@@ -246,10 +247,8 @@ const LlenarListadoForm = ({ listado, empresa }) => {
       },
       riskInfo: {
         ...listado.riskInfo,
-        // Fecha única: listados viejos guardaron un array (DatePicker "multiple")
-        ...(listado?.riskInfo && "preventionCalendarDate" in listado.riskInfo
-          ? { preventionCalendarDate: toSingleDate(listado.riskInfo.preventionCalendarDate) }
-          : {}),
+        // [{ date, activity }]; los listados viejos sólo traen preventionCalendarDate
+        preventionCalendarEvents: calendarEventsFrom(listado?.riskInfo),
         isDone: listado?.riskInfo?.isDone ?? false,
       },
     };

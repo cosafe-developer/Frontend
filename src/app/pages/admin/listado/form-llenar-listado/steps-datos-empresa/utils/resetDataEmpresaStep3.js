@@ -1,4 +1,5 @@
-import { normalizeUploadValue, toSingleDate } from "helpers/listadoData";
+import { normalizeUploadValue } from "helpers/listadoData";
+import { calendarEventsFrom } from "../../utils/calendarActivities";
 
 // Listados guardados antes de existir el switch: si ya hay inventario o
 // evidencias capturadas, el inventario "aplica".
@@ -48,9 +49,9 @@ export function resetDataEmpresaStep3({ listado, riskInfoCtx }) {
       riskInfo?.antecedents ?? // legacy
       "",
 
-    // Fecha única (los guardados viejos en modo "multiple" eran array: se toma la primera)
-    preventionCalendarDate: toSingleDate(
-      riskInfoCtx?.preventionCalendarDate ?? riskInfo?.preventionCalendarDate,
+    // [{ date, activity }]; listados viejos traen preventionCalendarDate (sin actividad)
+    preventionCalendarEvents: calendarEventsFrom(
+      Array.isArray(riskInfoCtx?.preventionCalendarEvents) ? riskInfoCtx : riskInfo,
     ),
     internalGeneralRisks: riskInfoCtx?.internalGeneralRisks ?? riskInfo?.internalGeneralRisks ?? "",
   };

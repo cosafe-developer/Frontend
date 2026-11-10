@@ -9,9 +9,6 @@ import {
 } from "@headlessui/react";
 import { Spinner } from "components/ui";
 
-// Local Imports
-import { DatePicker } from "components/shared/form/Datepicker";
-
 import { Button, Input, Switch, Textarea, Table, THead, TBody, Th, Tr, Td, Checkbox } from "components/ui";
 import { informacionRiesgoSchema } from "../contexts/schema";
 import { useLlenarListadoFormContext } from "../contexts/LlenarListadoFormContext";
@@ -21,7 +18,7 @@ import { useDisclosure } from "hooks";
 import { useState, useEffect } from "react";
 import { CheckCircleIcon, XCircleIcon } from "@heroicons/react/24/outline";
 import { resetDataEmpresaStep3 } from "./utils/resetDataEmpresaStep3";
-import { isUsableUrl, sanitizeForBackend, toSingleDate } from "helpers/listadoData";
+import { isUsableUrl, sanitizeForBackend } from "helpers/listadoData";
 
 import updateListado from "api/listados/updateListado";
 import { Listbox } from "components/shared/form/Listbox";
@@ -34,6 +31,8 @@ import { progressPercentageOf } from "../../helpers/calculateProgressGeneralList
 import { LabelHelp } from "components/shared/HelpTip";
 import { HELP } from "../../helpers/helpTexts";
 import { LastChangeNotice } from "../../components/LastChangeNotice";
+import PreventionCalendarField from "./PreventionCalendarField";
+import { cleanCalendarEvents } from "../utils/calendarActivities";
 
 
 const EmpresaStep3 = ({
@@ -76,8 +75,9 @@ const EmpresaStep3 = ({
         };
         const riskInfo = {
           ...riskInfoCtx,
-          preventionCalendarDate: toSingleDate(riskInfoCtx?.preventionCalendarDate),
+          preventionCalendarEvents: cleanCalendarEvents(riskInfoCtx?.preventionCalendarEvents),
         };
+        delete riskInfo.preventionCalendarDate; // dato viejo: no se reescribe
 
         // Los archivos reemplazados se borran DESPUÉS de guardar con éxito
         const replacedUrls = [];
@@ -154,7 +154,7 @@ const EmpresaStep3 = ({
               legalRepresentativeIneUrl: addressInfo.legalRepresentativeIneUrl,
               propertyBoundaries: addressInfo.propertyBoundaries,
             },
-            riskInfo: { preventionCalendarDate: riskInfo.preventionCalendarDate },
+            riskInfo: { preventionCalendarEvents: riskInfo.preventionCalendarEvents },
           },
         });
 
@@ -378,46 +378,24 @@ const EmpresaStep3 = ({
             />
           </div>
 
-          {/* 📅 Calendario */}
-          <div className="flex flex-col gap-y-2">
-            <span className="input-label">
-              <LabelHelp
-                label="Calendario de fechas destinadas al subprograma de prevención de riesgos"
-                help={HELP.riskInfo.preventionCalendar}
-                required
+          {/* 📅 Calendario: fechas + tipo de actividad (cada una con su color en el PIPC) */}
+          <Controller
+            name="preventionCalendarEvents"
+            control={control}
+            render={({ field }) => (
+              <PreventionCalendarField
+                value={field.value}
+                error={errors?.preventionCalendarEvents}
+                onChange={(events) => {
+                  field.onChange(events);
+                  llenarListadoFormCtx.dispatch({
+                    type: "MERGE_STEP_STATUS",
+                    payload: { riskInfo: { preventionCalendarEvents: events } },
+                  });
+                }}
               />
-            </span>
-
-            <Controller
-              name="preventionCalendarDate"
-              control={control}
-              render={({ field }) => (
-                // La plantilla tiene un solo [{preventionCalendarDate}]:
-                // fecha única (antes mode "multiple" mandaba un array).
-                <DatePicker
-                  {...field}
-                  value={toSingleDate(field.value) ?? ""}
-                  options={{
-                    dateFormat: "Y-m-d",
-                  }}
-                  error={errors?.preventionCalendarDate?.message}
-                  placeholder="Seleccionar fecha..."
-                  onChange={(dates) => {
-                    const date = toSingleDate(dates);
-                    field.onChange(date);
-                    llenarListadoFormCtx.dispatch({
-                      type: "MERGE_STEP_STATUS",
-                      payload: {
-                        riskInfo: {
-                          preventionCalendarDate: date,
-                        },
-                      },
-                    });
-                  }}
-                />
-              )}
-            />
-          </div>
+            )}
+          />
 
           {/* ⚠️ Riesgos generales internos - Checklist */}
           <div className="space-y-3">

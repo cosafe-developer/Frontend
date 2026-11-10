@@ -62,6 +62,7 @@ const FIELD_LABELS = {
   antecedentsRaw: "antecedentes",
   antecedentsParagraphs: "antecedentes",
   preventionCalendarDate: "calendario",
+  preventionCalendarEvents: "calendario",
   internalGeneralRisks: "riesgos generales internos",
   items: "registros",
   documents: "documentos",

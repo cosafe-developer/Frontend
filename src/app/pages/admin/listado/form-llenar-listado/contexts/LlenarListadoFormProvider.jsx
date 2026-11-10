@@ -158,7 +158,7 @@ const initialState = {
       internalRiskType: "ordinario",
       surroundingRiskType: "ordinario",
       antecedentsRaw: null,
-      preventionCalendarDate: null,
+      preventionCalendarEvents: [],
       internalGeneralRisks: null,
       isDone: false,
     },
