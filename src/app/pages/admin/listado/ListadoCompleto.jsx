@@ -27,6 +27,7 @@ const ListadoCompleto = () => {
   const [empresa, setEmpresa] = useState(null);
   const [estado, setEstado] = useState(serverStatesFetching.fetching);
   const [approving, setApproving] = useState(false);
+  const [downloading, setDownloading] = useState(false);
   const [busy, setBusy] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const { showToast } = useToastContext();
@@ -136,11 +137,15 @@ const ListadoCompleto = () => {
 
               <div className="mt-6 flex justify-end space-x-3 px-3 pt-4">
                 <Button
+                  disabled={downloading}
                   onClick={async () => {
+                    setDownloading(true);
                     try {
                       await downloadDocument(listado?._id, empresa?.tradeName);
                     } catch (err) {
                       showToast({ message: err.message || "Error al generar documento", type: "error" });
+                    } finally {
+                      setDownloading(false);
                     }
                   }}
                   color="info"
@@ -148,7 +153,7 @@ const ListadoCompleto = () => {
                   title={HELP.detail.download}
                 >
                   <ArrowDownTrayIcon className="size-5 mr-1.5" />
-                  Descargar PIPC
+                  {downloading ? "Generando..." : "Descargar PIPC"}
                 </Button>
                 <Button
                   type="button"
