@@ -92,7 +92,7 @@ export function ApplicabilityConfigModal({ show, onClose, listado }) {
         leave="ease-in duration-200"
         leaveFrom="opacity-100 scale-100"
         leaveTo="opacity-0 scale-95"
-        className="scrollbar-sm relative flex w-full max-w-lg flex-col overflow-y-auto rounded-lg bg-white px-6 py-6 transition-all dark:bg-dark-700 max-h-[85vh]"
+        className="scrollbar-sm relative flex w-full max-w-lg flex-col overflow-y-auto rounded-lg bg-white px-4 py-5 sm:px-6 sm:py-6 transition-all dark:bg-dark-700 max-h-[85vh]"
       >
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-medium text-gray-800 dark:text-dark-100">

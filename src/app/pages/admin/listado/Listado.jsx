@@ -67,8 +67,8 @@ const Listado = () => {
 
   return (
     <Page title="Listado de Requerimientos">
-      <div className="flex-1 p-6  min-w-0">
-        <div className="px-10">
+      <div className="flex-1 min-w-0 py-6 px-(--margin-x) lg:px-16">
+        <div>
           <ListadoHeader
             onClick={() => navigate("/admin/listado/crear")}
           />

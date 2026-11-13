@@ -24,6 +24,11 @@ import { columns } from "./columns";
 import { PaginationSection } from "components/shared/table/PaginationSection";
 import { SelectedRowsActions } from "./SelectedRowsActions";
 import { ListView } from "./ListView";
+import { TableCardList } from "components/shared/table/TableCardList";
+import { useBreakpointsContext } from "app/contexts/breakpoint/context";
+import { useRightSidebarContext } from "app/contexts/sidebar-right/context";
+import { HeaderPreviewEmpresa } from "components/template/RightSidebar/previewEmpresa/HeaderPreviewEmpresa";
+import { ContentPreviewEmpresa } from "components/template/RightSidebar/previewEmpresa/ContentPreviewEmpresa";
 
 
 
@@ -132,11 +137,14 @@ export default function ListadoTabla({ listados }) {
 
   const rows = table.getRowModel().rows;
 
+  // en teléfono la tabla se muestra como tarjetas
+  const { smAndUp } = useBreakpointsContext();
+  const { openSidebar } = useRightSidebarContext();
   const WrapComponent = viewType === "list" ? Card : Box;
 
   return (
     <Page title="Listado de Requerimientos">
-      <div className="transition-content w-full pb-[3rem] px-10">
+      <div className="transition-content w-full pb-[3rem]">
         <div
           className={clsx(
             "flex h-full w-full flex-col",
@@ -159,9 +167,17 @@ export default function ListadoTabla({ listados }) {
                 tableSettings.enableFullScreen && "overflow-hidden",
               )}
             >
-              {viewType === "list" && (
+              {viewType === "list" && (smAndUp ? (
                 <ListView table={table} flexRender={flexRender} rows={rows} />
-              )}
+              ) : (
+                <TableCardList
+                  rows={rows}
+                  flexRender={flexRender}
+                  titleColumn="empresa"
+                  emptyText="No se encontraron listados"
+                  onOpen={(row) => openSidebar({ header: HeaderPreviewEmpresa, body: ContentPreviewEmpresa, data: row.original })}
+                />
+              ))}
 
               {table.getCoreRowModel().rows.length && (
                 <div

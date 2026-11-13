@@ -23,6 +23,8 @@ import { columns } from "./columns";
 import { PaginationSection } from "components/shared/table/PaginationSection";
 import { SelectedRowsActions } from "./SelectedRowsActions";
 import { ListView } from "./ListView";
+import { TableCardList } from "components/shared/table/TableCardList";
+import { useBreakpointsContext } from "app/contexts/breakpoint/context";
 
 
 // ----------------------------------------------------------------------
@@ -133,11 +135,13 @@ export default function AgentesTabla({
 
   const rows = table.getRowModel().rows;
 
+  // en teléfono la tabla se muestra como tarjetas
+  const { smAndUp } = useBreakpointsContext();
   const WrapComponent = viewType === "list" ? Card : Box;
 
   return (
     <Page title="Agentes">
-      <div className="transition-content w-full pb-5 px-10">
+      <div className="transition-content w-full pb-5">
         <div
           className={clsx(
             "flex h-full w-full flex-col",
@@ -160,13 +164,20 @@ export default function AgentesTabla({
                 tableSettings.enableFullScreen && "overflow-hidden",
               )}
             >
-              {viewType === "list" && (
+              {viewType === "list" && (smAndUp ? (
                 <ListView
                   table={table}
                   flexRender={flexRender}
                   rows={rows}
                 />
-              )}
+              ) : (
+                <TableCardList
+                  rows={rows}
+                  flexRender={flexRender}
+                  titleColumn="name"
+                  emptyText="No se encontraron agentes"
+                />
+              ))}
 
               {table.getCoreRowModel().rows.length && (
                 <div

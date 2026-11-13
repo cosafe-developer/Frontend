@@ -67,7 +67,7 @@ export default function Empresas() {
 
   return (
     <Page title="Empresas">
-      <div className="flex-1 p-6  min-w-0">
+      <div className="flex-1 min-w-0 py-6 px-(--margin-x) lg:px-16">
         <EmpresasHeader />
         <EmpresasTabla empresas={empresas} />
       </div>

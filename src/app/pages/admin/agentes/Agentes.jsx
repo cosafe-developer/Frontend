@@ -73,7 +73,7 @@ export default function Agentes() {
 
   return (
     <Page title="Agentes">
-      <div className="flex-1 p-6  min-w-0">
+      <div className="flex-1 min-w-0 py-6 px-(--margin-x) lg:px-16">
         <AgentesHeader />
         <AgenteTabla agentes={agentes} />
       </div>

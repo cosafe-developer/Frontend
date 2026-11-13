@@ -148,9 +148,9 @@ const CrearListado = () => {
           <h1 className="text-white text-2xl">Nuevo Listado de Requerimientos</h1>
         </div>
 
-        <div className="mt-8 flex gap-8">
-          <div className="w-full">
-            <Card className="flex flex-col p-5 space-y-6">
+        <div className="mt-6 flex gap-8 sm:mt-8">
+          <div className="w-full min-w-0">
+            <Card className="flex flex-col space-y-6 p-4 sm:p-5">
               <h2 className="text-xl">General</h2>
 
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">

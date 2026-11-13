@@ -20,6 +20,7 @@ import { LabelHelp } from "components/shared/HelpTip";
 import { HELP } from "./helpers/helpTexts";
 import { ChangeHistory } from "./components/ChangeHistory";
 import { changeLogFromResponse } from "helpers/changeLog";
+import { useBreakpointsContext } from "app/contexts/breakpoint/context";
 
 const ListadoCompleto = () => {
 
@@ -28,6 +29,7 @@ const ListadoCompleto = () => {
   const [estado, setEstado] = useState(serverStatesFetching.fetching);
   const [approving, setApproving] = useState(false);
   const [downloading, setDownloading] = useState(false);
+  const { smAndUp } = useBreakpointsContext();
   const [busy, setBusy] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const { showToast } = useToastContext();
@@ -112,30 +114,30 @@ const ListadoCompleto = () => {
   return (
     <Page title="Listado Detalle">
       <div className="transition-content w-full px-(--margin-x) pt-5 lg:pt-6">
-        <h2 className="text-white text-2xl">Listado Detalle</h2>
+        <h2 className="text-xl text-white sm:text-2xl">Listado Detalle</h2>
 
-        <div className="mt-8 flex gap-8">
+        <div className="mt-6 flex flex-col gap-6 lg:mt-8 lg:flex-row lg:gap-8">
 
-          <div className="w-full">
-            <Card className="flex flex-col p-5 pt-10 ">
-              <div className="px-3 text-lg font-semibold">
-                <div className="flex items-center space-x-10">
+          <div className="w-full min-w-0">
+            <Card className="flex flex-col p-4 pt-6 sm:p-5 sm:pt-10">
+              <div className="text-lg font-semibold sm:px-3">
+                <div className="flex items-center gap-4 sm:gap-10">
                   <Avatar
-                    size={30}
+                    size={smAndUp ? 30 : 16}
                     name={empresa?.tradeName}
                     classNames={{
                       display: "mask is-squircle rounded-none text-2xl",
                     }}
                   />
-                  <div className="flex flex-col space-y-1">
-                    <p className="font-normal text-xl text-white">{empresa?.tradeName}</p>
+                  <div className="flex min-w-0 flex-col space-y-1">
+                    <p className="break-words font-normal text-lg text-white sm:text-xl">{empresa?.tradeName}</p>
                     <p className="font-light text-primary-400">{listado?.studyId?.studyName}</p>
                     {/*  <p className="font-light text-green-400">• Completado 08.03.25</p> */}
                   </div>
                 </div>
               </div>
 
-              <div className="mt-6 flex justify-end space-x-3 px-3 pt-4">
+              <div className="mt-6 flex flex-wrap justify-end gap-3 pt-4 sm:px-3">
                 <Button
                   disabled={downloading}
                   onClick={async () => {
@@ -149,7 +151,7 @@ const ListadoCompleto = () => {
                     }
                   }}
                   color="info"
-                  className="h-10 text-base font-light"
+                  className="h-10 whitespace-nowrap text-base font-light max-sm:flex-1"
                   title={HELP.detail.download}
                 >
                   <ArrowDownTrayIcon className="size-5 mr-1.5" />
@@ -172,7 +174,7 @@ const ListadoCompleto = () => {
                     }
                   }}
                   color="success"
-                  className="h-10 text-base font-light"
+                  className="h-10 whitespace-nowrap text-base font-light max-sm:flex-1"
                   title={listado?.isApproved ? HELP.detail.approved : HELP.detail.approve}
                 >
                   {listado?.isApproved ? "Aprobado" : "Aprobar"}
@@ -195,7 +197,7 @@ const ListadoCompleto = () => {
                       }
                     }}
                     color="warning"
-                    className="h-10 text-base font-light"
+                    className="h-10 whitespace-nowrap text-base font-light max-sm:flex-1"
                     title={HELP.detail.reopen}
                   >
                     Reabrir
@@ -220,7 +222,7 @@ const ListadoCompleto = () => {
                         }
                       }}
                       color="error"
-                      className="h-10 text-base font-light"
+                      className="h-10 whitespace-nowrap text-base font-light max-sm:flex-1"
                       title={HELP.detail.confirmDelete}
                     >
                       Confirmar eliminación
@@ -229,7 +231,7 @@ const ListadoCompleto = () => {
                       type="button"
                       disabled={busy}
                       onClick={() => setConfirmDelete(false)}
-                      className="h-10 text-base font-light"
+                      className="h-10 whitespace-nowrap text-base font-light max-sm:flex-1"
                       title={HELP.detail.cancelDelete}
                     >
                       No eliminar
@@ -241,7 +243,7 @@ const ListadoCompleto = () => {
                     onClick={() => setConfirmDelete(true)}
                     color="error"
                     variant="outlined"
-                    className="h-10 text-base font-light"
+                    className="h-10 whitespace-nowrap text-base font-light max-sm:flex-1"
                     title={HELP.detail.delete}
                   >
                     Eliminar
@@ -256,8 +258,8 @@ const ListadoCompleto = () => {
           </div>
 
 
-          <div className="w-[35%]">
-            <h1 className="text-lg text-white mb-[2rem]">
+          <div className="w-full lg:w-[35%] lg:shrink-0">
+            <h1 className="mb-6 text-lg text-white lg:mb-[2rem]">
               <LabelHelp label="Total de procesos completados" help={HELP.detail.progress} />
             </h1>
             <ol className="steps is-vertical" style={{ borderColor: '#2a2c32' }}>

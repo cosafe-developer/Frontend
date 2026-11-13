@@ -5,7 +5,8 @@ import { FaLayerGroup, FaListUl } from "react-icons/fa";
 
 // Local Imports
 import { Avatar, Button, Card } from "components/ui";
-import { AdjustmentsHorizontalIcon } from "@heroicons/react/24/outline";
+import { AdjustmentsHorizontalIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
+import { useBreakpointsContext } from "app/contexts/breakpoint/context";
 import { ApplicabilityConfigModal } from "../modals/ApplicabilityConfigModal";
 import updateListado from "api/listados/updateListado";
 import { Stepper } from "./Stepper";
@@ -164,6 +165,12 @@ const LlenarListadoForm = ({ listado, empresa }) => {
   const [currentEstudioStep, setCurrentEstudioStep] = useState(0);
   const [finished, setFinished] = useState(false);
   const ActiveForm = steps[currentStep].component;
+  // en teléfono la lista de pasos va arriba y plegada; se cierra al cambiar de paso
+  const { smAndUp } = useBreakpointsContext();
+  const [stepsOpen, setStepsOpen] = useState(false);
+  useEffect(() => {
+    setStepsOpen(false);
+  }, [currentStep, currentEmpresaStep, currentEstudioStep]);
 
   const llenarListadoFormCtx = useLlenarListadoFormContext();
 
@@ -323,7 +330,7 @@ const LlenarListadoForm = ({ listado, empresa }) => {
   const stepsNode = (
     <>
       <div className="col-span-12 sm:col-span-8 lg:col-span-9 mb-28">
-        <div className="flex items-center  justify-between space-x-5 py-5 lg:py-6">
+        <div className="flex flex-col gap-3 py-5 sm:flex-row sm:items-center sm:justify-between sm:gap-5 lg:py-6">
 
           <h2 className="text-xl font-medium tracking-wide text-gray-800 dark:text-dark-50 lg:text-2xl">
             {currentStep === 0
@@ -332,7 +339,7 @@ const LlenarListadoForm = ({ listado, empresa }) => {
           </h2>
 
 
-          <div className="flex items-center space-x-2">
+          <div className="flex min-w-0 items-center space-x-2">
             <Avatar
               size={10}
               name={empresa?.tradeName}
@@ -341,7 +348,7 @@ const LlenarListadoForm = ({ listado, empresa }) => {
                 display: "mask is-squircle rounded-none text-sm",
               }}
             />
-            <span className="text-gray-700 dark:text-dark-100 text-[15px] font-medium">
+            <span className="truncate text-gray-700 dark:text-dark-100 text-[15px] font-medium">
               {empresa?.tradeName} /
             </span>
             <span className="text-blue-400 text-[15px] font-medium">
@@ -377,9 +384,31 @@ const LlenarListadoForm = ({ listado, empresa }) => {
           }
         </Card>
       </div>
-      <div className="col-span-12 sm:col-span-4 lg:col-span-3">
-        <div className="flex flex-col gap-y-6">
-          <div className="mt-20">
+      <div className="col-span-12 max-sm:order-first sm:col-span-4 lg:col-span-3">
+        {!smAndUp && (
+          <button
+            type="button"
+            onClick={() => setStepsOpen((v) => !v)}
+            aria-expanded={stepsOpen}
+            className="mt-5 flex w-full items-center justify-between gap-3 rounded-lg border border-gray-200 px-4 py-3 text-start dark:border-dark-500 dark:bg-dark-700"
+          >
+            <span className="min-w-0">
+              <span className="block text-xs opacity-80">
+                {currentStep === 0
+                  ? `Datos Generales · Paso ${currentEmpresaStep + 1} de ${empresaSteps.length}`
+                  : `Estudio · Paso ${currentEstudioStep + 1} de ${estudioSteps.length}`}
+              </span>
+              <span className="block truncate font-medium text-primary-600 dark:text-primary-400">
+                {currentStep === 0
+                  ? empresaSteps[currentEmpresaStep]?.label
+                  : estudioSteps[currentEstudioStep]?.label}
+              </span>
+            </span>
+            <ChevronDownIcon className={clsx("size-5 shrink-0 transition-transform", stepsOpen && "rotate-180")} />
+          </button>
+        )}
+        <div className={clsx("flex flex-col gap-y-6", !smAndUp && !stepsOpen && "hidden", !smAndUp && "mt-4 rounded-lg border border-gray-200 p-4 dark:border-dark-500")}>
+          <div className="sm:mt-20">
             <Stepper
               steps={steps}
               currentStep={currentStep}

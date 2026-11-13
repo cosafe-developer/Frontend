@@ -41,7 +41,7 @@ export function ApplicabilityModal({ show, onClose, stepLabel, onApplies, onNotA
         leave="ease-in duration-200"
         leaveFrom="opacity-100 scale-100"
         leaveTo="opacity-0 scale-95"
-        className="relative flex w-full max-w-md flex-col overflow-y-auto rounded-lg bg-white px-6 py-8 text-center transition-all dark:bg-dark-700"
+        className="relative flex w-full max-w-md flex-col overflow-y-auto rounded-lg bg-white px-4 py-6 sm:px-6 sm:py-8 text-center transition-all dark:bg-dark-700"
       >
         <QuestionMarkCircleIcon className="mx-auto size-20 shrink-0 text-primary-500" />
 

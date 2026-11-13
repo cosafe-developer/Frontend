@@ -46,7 +46,7 @@ export function ObservationModal({ isOpen, onClose, initialValue = "", onSave })
           leaveFrom="opacity-100 scale-100"
           leaveTo="opacity-0 scale-95"
         >
-          <DialogPanel className="relative w-full max-w-md rounded-xl bg-white dark:bg-dark-700 p-6 shadow-xl transition-all">
+          <DialogPanel className="relative w-full max-w-md rounded-xl bg-white dark:bg-dark-700 p-4 sm:p-6 shadow-xl transition-all">
             <DialogTitle
               as="h3"
               className="text-lg font-medium mb-3 text-gray-800 dark:text-dark-100"

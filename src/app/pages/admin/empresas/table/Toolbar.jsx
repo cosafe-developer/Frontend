@@ -59,7 +59,7 @@ export function Toolbar({ table }) {
       ) : (
         <div
           className={clsx(
-            "custom-scrollbar transition-content flex justify-between space-x-4 overflow-x-auto pb-1 pt-4 ",
+            "transition-content flex flex-wrap items-center justify-between gap-3 pb-1 pt-4",
             isFullScreenEnabled ? "px-4 sm:px-5" : "",
           )}
           style={{

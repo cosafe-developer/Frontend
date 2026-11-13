@@ -26,3 +26,33 @@
 .table-th {
   @apply uppercase;
 }
+
+/*
+ * .is-stacked-sm: en teléfono (< sm) cada fila de la tabla se muestra como
+ * tarjeta: "# | elemento" arriba y cada valor abajo con su encabezado como
+ * etiqueta (data-label, lo pone el componente StackTable).
+ */
+@media (width < 40rem) {
+  .table.is-stacked-sm thead {
+    @apply sr-only;
+  }
+  .table.is-stacked-sm tbody tr {
+    @apply grid grid-cols-[1.75rem_minmax(0,1fr)] gap-x-2 gap-y-2 py-3;
+  }
+  .table.is-stacked-sm tbody td {
+    @apply block w-auto p-0! text-start;
+  }
+  .table.is-stacked-sm tbody td:nth-child(1) {
+    @apply pt-0.5 text-gray-400 dark:text-dark-300;
+  }
+  .table.is-stacked-sm tbody td:nth-child(2) {
+    @apply font-medium;
+  }
+  .table.is-stacked-sm tbody td:nth-child(n + 3) {
+    @apply col-start-2 flex min-h-9 items-center justify-between gap-3;
+  }
+  .table.is-stacked-sm tbody td:nth-child(n + 3)::before {
+    content: attr(data-label);
+    @apply text-xs text-gray-500 dark:text-dark-300;
+  }
+}

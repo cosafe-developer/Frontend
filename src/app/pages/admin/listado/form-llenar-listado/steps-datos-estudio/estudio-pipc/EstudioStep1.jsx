@@ -1,5 +1,6 @@
 import { useForm, Controller } from "react-hook-form";
-import { Button, Switch, Table, THead, TBody, Th, Tr, Td } from "components/ui";
+import { Button, Switch, THead, TBody, Th, Tr, Td } from "components/ui";
+import { StackTable } from "components/shared/StackTable";
 import { useLlenarListadoFormContext } from "../../contexts/LlenarListadoFormContext";
 import { Listbox } from "components/shared/form/Listbox";
 import { tiposRiesgosEstudios } from "../../utils/types";
@@ -118,7 +119,7 @@ const EstudioStep1 = ({ onNext, listado }) => {
               <LabelHelp label={section.label} help={HELP.common.sectionTable} />
             </h3>
             <div className="overflow-x-auto">
-              <Table dense className="w-full text-left rtl:text-right [&_td]:whitespace-normal [&_th]:whitespace-normal">
+              <StackTable dense className="w-full text-left rtl:text-right [&_td]:whitespace-normal [&_th]:whitespace-normal">
                 <THead>
                   <Tr className="border-b border-gray-200 dark:border-dark-500">
                     <Th className="w-10 text-center" title={HELP.common.index}>#</Th>
@@ -212,7 +213,7 @@ const EstudioStep1 = ({ onNext, listado }) => {
                     </Tr>
                   ))}
                 </TBody>
-              </Table>
+              </StackTable>
             </div>
           </div>
         );
